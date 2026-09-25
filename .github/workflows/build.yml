@@ -26,14 +26,19 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
       - name: Get dependencies
         run: |
-          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            flutter pub get --verbose && break
+            echo "Attempt $i failed, waiting 15 seconds..."
+            sleep 15
+          done
       - name: Analyze
         run: dart analyze lib/models/ lib/services/ db/
 
@@ -51,14 +56,19 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
       - name: Get dependencies
         run: |
-          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            flutter pub get --verbose && break
+            echo "Attempt $i failed, waiting 15 seconds..."
+            sleep 15
+          done
       - name: Run tests
         run: flutter test test/
 
@@ -77,14 +87,19 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
       - name: Get dependencies
         run: |
-          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            flutter pub get --verbose && break
+            echo "Attempt $i failed, waiting 15 seconds..."
+            sleep 15
+          done
       - name: Build APK (release)
         run: flutter build apk --release --split-per-abi
       - name: Build App Bundle (release)
@@ -113,14 +128,19 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
       - name: Get dependencies
         run: |
-          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            flutter pub get --verbose && break
+            echo "Attempt $i failed, waiting 15 seconds..."
+            sleep 15
+          done
       - name: Build Web (release)
         run: flutter build web --release
       - name: Upload Web artifacts
