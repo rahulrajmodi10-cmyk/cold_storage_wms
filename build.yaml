@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      code_assets|extract_assets:
+        enabled: false
+      code_assets|generate_manifest:
+        enabled: false

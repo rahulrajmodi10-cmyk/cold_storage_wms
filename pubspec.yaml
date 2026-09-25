@@ -1,0 +1,111 @@
+name: cold_storage_wms
+description: Cold Storage Warehouse Management System with Accounts, Finance, Logistics, AI Camera, Gatepass & Barcode
+version: 1.0.0
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.3.3
+  sqflite_common_ffi: ^2.4.0
+  path: ^1.9.0
+  path_provider: ^2.1.4
+
+  # State Management
+  provider: ^6.1.2
+  # riverpod: ^2.5.1  # Alternative state management
+
+  # Camera & AI
+  camera: ^0.10.5+9
+  image: ^4.2.0
+  tflite_flutter: ^0.10.1
+  # tflite_flutter_helper: ^0.3.1  # Optional helper
+
+  # Barcode & QR Code
+  barcode_scan2: ^4.3.0
+  mobile_scanner: ^4.0.0
+  qr_flutter: ^4.1.0
+  zxing_lib: ^0.3.1  # For barcode generation
+
+  # PDF & Printing
+  pdf: ^3.10.7
+  printing: ^5.12.0
+  esc_pos_bluetooth: ^0.5.0  # For thermal label printers
+  esc_pos_usb: ^1.1.0
+
+  # Networking & Storage
+  http: ^1.2.2
+  dio: ^5.4.3+1
+  shared_preferences: ^2.2.3
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # Date/Time & Formatting
+  intl: ^0.19.0
+  timezone: ^0.9.3
+
+  # Charts & Visualization
+  fl_chart: ^0.68.0
+  syncfusion_flutter_charts: ^25.1.39
+
+  # Permissions & Device Info
+  permission_handler: ^11.3.1
+  device_info_plus: ^10.1.0
+  package_info_plus: ^8.0.0
+
+  # Utilities
+  uuid: ^4.4.0
+  crypto: ^3.0.3
+  json_annotation: ^4.9.0
+  freezed_annotation: ^2.4.4
+  equatable: ^2.0.5
+  get_it: ^7.7.0
+  injectable: ^2.4.2
+
+  # File Handling
+  file_picker: ^8.0.0+1
+  open_filex: ^4.4.0
+  share_plus: ^9.0.0
+
+  # Background Tasks
+  workmanager: ^0.5.2
+  flutter_local_notifications: ^17.2.2
+
+  # UI Components
+  flutter_slidable: ^3.1.0
+  pull_to_refresh: ^2.0.0
+  infinite_scroll_pagination: ^4.0.0
+  dropdown_search: ^5.0.6
+  flutter_typeahead: ^5.2.0
+
+  # Maps & Location
+  geolocator: ^11.1.0
+  google_maps_flutter: ^2.6.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.11
+  json_serializable: ^6.8.0
+  freezed: ^2.5.2
+  injectable_generator: ^2.6.2
+  mocktail: ^1.0.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/models/
+    - assets/labels/
+    - assets/fonts/
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
