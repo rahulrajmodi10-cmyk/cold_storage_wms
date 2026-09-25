@@ -26,12 +26,14 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            pubspec.lock
           key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
           restore-keys: |
             flutter-deps-
+      - name: Verify pubspec.lock exists
+        run: ls -la pubspec.lock
       - name: Get dependencies
-        run: flutter pub get --verbose
+        run: |
+          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
       - name: Analyze
         run: dart analyze lib/models/ lib/services/ db/
 
@@ -49,12 +51,14 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            pubspec.lock
           key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
           restore-keys: |
             flutter-deps-
+      - name: Verify pubspec.lock exists
+        run: ls -la pubspec.lock
       - name: Get dependencies
-        run: flutter pub get --verbose
+        run: |
+          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
       - name: Run tests
         run: flutter test test/
 
@@ -73,12 +77,14 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            pubspec.lock
           key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
           restore-keys: |
             flutter-deps-
+      - name: Verify pubspec.lock exists
+        run: ls -la pubspec.lock
       - name: Get dependencies
-        run: flutter pub get --verbose
+        run: |
+          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
       - name: Build APK (release)
         run: flutter build apk --release --split-per-abi
       - name: Build App Bundle (release)
@@ -107,12 +113,14 @@ jobs:
         with:
           path: |
             ~/.pub-cache
-            pubspec.lock
           key: flutter-deps-${{ hashFiles('pubspec.yaml') }}
           restore-keys: |
             flutter-deps-
+      - name: Verify pubspec.lock exists
+        run: ls -la pubspec.lock
       - name: Get dependencies
-        run: flutter pub get --verbose
+        run: |
+          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
       - name: Build Web (release)
         run: flutter build web --release
       - name: Upload Web artifacts
@@ -136,7 +144,8 @@ jobs:
           flutter-version: '3.24.3'
           channel: 'stable'
       - name: Get dependencies
-        run: flutter pub get --verbose
+        run: |
+          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         run: flutter build linux --release
