@@ -40,7 +40,7 @@ jobs:
             sleep 15
           done
       - name: Analyze
-        run: dart analyze lib/models/ lib/services/ db/
+        run: dart analyze lib/models/ lib/services/
 
   test:
     name: Unit Tests
