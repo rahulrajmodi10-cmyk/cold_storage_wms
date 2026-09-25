@@ -74,7 +74,7 @@ jobs:
             sleep 15
           done
       - name: Run tests
-        run: flutter test test/
+        run: dart test test/
 
   build-android:
     name: Build Android APK & App Bundle
