@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for sqflite_common_ffi
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
@@ -47,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for sqflite_common_ffi
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
@@ -78,6 +82,8 @@ jobs:
     needs: [analyze, test]
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for sqflite_common_ffi
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
@@ -119,6 +125,8 @@ jobs:
     needs: [analyze]
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for sqflite_common_ffi
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
@@ -159,10 +167,21 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies for sqflite_common_ffi (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
           channel: 'stable'
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-
       - name: Get dependencies
         run: |
           flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
