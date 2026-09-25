@@ -4,7 +4,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import '../lib/services/inventory_service.dart';
 import '../lib/models/inventory_item.dart';
-import 'package:path/path.dart';
 
 void main() {
   sqfliteFfiInit();

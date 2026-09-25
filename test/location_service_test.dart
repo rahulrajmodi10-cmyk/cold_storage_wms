@@ -4,7 +4,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import '../lib/services/location_service.dart';
 import '../lib/models/storage_location.dart';
-import 'package:path/path.dart';
 
 void main() {
   sqfliteFfiInit();
