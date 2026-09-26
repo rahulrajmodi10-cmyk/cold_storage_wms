@@ -131,11 +131,17 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build apk --release --split-per-abi ==="
-          flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt || true
+          flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt
       - name: Build App Bundle (release)
         run: |
           echo "=== Running flutter build appbundle --release ==="
-          flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt || true
+          flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
+      - name: Verify APK/AAB outputs
+        run: |
+          echo "=== Checking APK outputs ==="
+          ls -la build/app/outputs/flutter-apk/ || true
+          echo "=== Checking AAB outputs ==="
+          ls -la build/app/outputs/bundle/release/ || true
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -188,7 +194,11 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build web --release ==="
-          flutter build web --release --verbose 2>&1 | tee build_web_output.txt || true
+          flutter build web --release --verbose 2>&1 | tee build_web_output.txt
+      - name: Verify Web outputs
+        run: |
+          echo "=== Checking Web outputs ==="
+          ls -la build/web/ || true
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -240,21 +250,29 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build linux --release ==="
-          flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt || true
+          flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         run: |
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build macos --release ==="
-          flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt || true
+          flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: |
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build windows --release ==="
-          flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt || true
+          flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt
+      - name: Verify Desktop outputs
+        run: |
+          echo "=== Checking Linux outputs ==="
+          ls -la build/linux/ 2>/dev/null || true
+          echo "=== Checking macOS outputs ==="
+          ls -la build/macos/ 2>/dev/null || true
+          echo "=== Checking Windows outputs ==="
+          ls -la build/windows/ 2>/dev/null || true
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
