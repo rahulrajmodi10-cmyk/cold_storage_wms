@@ -42,7 +42,11 @@ jobs:
             sleep 15
           done
       - name: Analyze
-        run: dart analyze lib/models/ lib/services/
+        run: |
+          echo "=== Dart SDK version ==="
+          dart --version
+          echo "=== Running dart analyze on lib/models/ lib/services/ ==="
+          dart analyze lib/models/ lib/services/ --fatal-infos
 
   test:
     name: Unit Tests
@@ -74,7 +78,11 @@ jobs:
             sleep 15
           done
       - name: Run tests
-        run: flutter test test/
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter test test/ ==="
+          flutter test test/ --verbose
 
   build-android:
     name: Build Android APK & App Bundle
