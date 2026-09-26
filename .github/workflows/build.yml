@@ -46,7 +46,13 @@ jobs:
           echo "=== Dart SDK version ==="
           dart --version
           echo "=== Running dart analyze on lib/models/ lib/services/ ==="
-          dart analyze lib/models/ lib/services/ --fatal-infos
+          dart analyze lib/models/ lib/services/ --fatal-infos 2>&1 | tee analyze_output.txt || true
+      - name: Upload analyze output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analyze-output
+          path: analyze_output.txt
 
   test:
     name: Unit Tests
@@ -82,7 +88,13 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter test test/ ==="
-          flutter test test/ --verbose
+          flutter test test/ --verbose 2>&1 | tee test_output.txt || true
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test_output.txt
 
   build-android:
     name: Build Android APK & App Bundle
