@@ -170,6 +170,10 @@ jobs:
           ls -la build/app/outputs/bundle/release/*.aab 2>/dev/null || echo "No AABs found"
           echo "=== All files in build/app/outputs ==="
           find build/app/outputs -type f 2>/dev/null | head -30
+          echo "=== All APKs anywhere in build/ ==="
+          find build -name "*.apk" -type f 2>/dev/null | head -20
+          echo "=== All AABs anywhere in build/ ==="
+          find build -name "*.aab" -type f 2>/dev/null | head -20
       - name: Upload APK artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -179,6 +183,7 @@ jobs:
             build/app/outputs/flutter-apk/*.apk
             build/app/outputs/bundle/release/*.aab
           retention-days: 30
+          if-no-files-found: warn
 
   build-web:
     name: Build Web
@@ -237,6 +242,8 @@ jobs:
           ls -la build/web/ 2>/dev/null || echo "No web build found"
           echo "=== All files in build/web ==="
           find build/web -type f 2>/dev/null | head -30
+          echo "=== All files anywhere in build/ ==="
+          find build -type f 2>/dev/null | head -30
       - name: Upload Web artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -244,6 +251,7 @@ jobs:
           name: release-web
           path: build/web/
           retention-days: 30
+          if-no-files-found: warn
 
   build-desktop:
     name: Build Desktop (Linux/macOS/Windows)
@@ -341,6 +349,8 @@ jobs:
           ls -la build/windows/ 2>/dev/null || echo "No Windows build found"
           echo "=== All files in build/windows ==="
           find build/windows -type f 2>/dev/null | head -30
+          echo "=== All files anywhere in build/ ==="
+          find build -type f 2>/dev/null | head -30
       - name: Upload Desktop artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -351,6 +361,7 @@ jobs:
             build/macos/**/*
             build/windows/**/*
           retention-days: 30
+          if-no-files-found: warn
 
   release:
     name: Create GitHub Release
@@ -372,18 +383,22 @@ jobs:
           name: release-apks
           path: artifacts/apks
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: release-web
           path: artifacts/web
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: release-Linux
           path: artifacts/linux
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: release-macOS
           path: artifacts/macos
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: release-Windows
           path: artifacts/windows
