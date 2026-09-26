@@ -37,7 +37,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Attempt $i of 3..."
-            flutter pub get --verbose && break
+            dart pub get --verbose && break
             echo "Attempt $i failed, waiting 15 seconds..."
             sleep 15
           done
@@ -69,7 +69,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Attempt $i of 3..."
-            flutter pub get --verbose && break
+            dart pub get --verbose && break
             echo "Attempt $i failed, waiting 15 seconds..."
             sleep 15
           done
