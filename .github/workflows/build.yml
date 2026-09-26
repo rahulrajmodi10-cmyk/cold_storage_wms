@@ -127,9 +127,23 @@ jobs:
             sleep 15
           done
       - name: Build APK (release)
-        run: flutter build apk --release --split-per-abi
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter build apk --release --split-per-abi ==="
+          flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt || true
       - name: Build App Bundle (release)
-        run: flutter build appbundle --release
+        run: |
+          echo "=== Running flutter build appbundle --release ==="
+          flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt || true
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-android-logs
+          path: |
+            build_apk_output.txt
+            build_aab_output.txt
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -170,7 +184,17 @@ jobs:
             sleep 15
           done
       - name: Build Web (release)
-        run: flutter build web --release
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter build web --release ==="
+          flutter build web --release --verbose 2>&1 | tee build_web_output.txt || true
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-web-logs
+          path: build_web_output.txt
       - name: Upload Web artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -204,16 +228,42 @@ jobs:
             flutter-deps-
       - name: Get dependencies
         run: |
-          flutter pub get --verbose || (echo "First attempt failed, retrying..." && sleep 10 && flutter pub get --verbose)
+          for i in 1 2 3; do
+            echo "Attempt $i of 3..."
+            flutter pub get --verbose && break
+            echo "Attempt $i failed, waiting 15 seconds..."
+            sleep 15
+          done
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
-        run: flutter build linux --release
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter build linux --release ==="
+          flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt || true
       - name: Build macOS
         if: matrix.os == 'macos-latest'
-        run: flutter build macos --release
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter build macos --release ==="
+          flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt || true
       - name: Build Windows
         if: matrix.os == 'windows-latest'
-        run: flutter build windows --release
+        run: |
+          echo "=== Flutter version ==="
+          flutter --version
+          echo "=== Running flutter build windows --release ==="
+          flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt || true
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-desktop-logs-${{ runner.os }}
+          path: |
+            build_linux_output.txt
+            build_macos_output.txt
+            build_windows_output.txt
       - name: Upload Desktop artifacts
         uses: actions/upload-artifact@v4
         with:
