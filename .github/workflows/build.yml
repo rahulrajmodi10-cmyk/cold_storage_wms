@@ -132,10 +132,12 @@ jobs:
           flutter --version
           echo "=== Running flutter build apk --release --split-per-abi ==="
           flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt
+          echo "=== Build APK exit code: ${PIPESTATUS[0]} ==="
       - name: Build App Bundle (release)
         run: |
           echo "=== Running flutter build appbundle --release ==="
           flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
+          echo "=== Build AAB exit code: ${PIPESTATUS[0]} ==="
       - name: Verify APK/AAB outputs
         run: |
           echo "=== Checking APK outputs ==="
@@ -148,6 +150,10 @@ jobs:
           find build/app -name "*.apk" -type f | wc -l
           echo "=== Checking if any AABs exist ==="
           find build/app -name "*.aab" -type f | wc -l
+          echo "=== Build APK output tail ==="
+          tail -50 build_apk_output.txt
+          echo "=== Build AAB output tail ==="
+          tail -50 build_aab_output.txt
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -162,6 +168,8 @@ jobs:
           ls -la build/app/outputs/flutter-apk/*.apk 2>/dev/null || echo "No APKs found"
           echo "=== Files matching AAB pattern ==="
           ls -la build/app/outputs/bundle/release/*.aab 2>/dev/null || echo "No AABs found"
+          echo "=== All files in build/app/outputs ==="
+          find build/app/outputs -type f 2>/dev/null | head -30
       - name: Upload APK artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -208,12 +216,15 @@ jobs:
           flutter --version
           echo "=== Running flutter build web --release ==="
           flutter build web --release --verbose 2>&1 | tee build_web_output.txt
+          echo "=== Build Web exit code: ${PIPESTATUS[0]} ==="
       - name: Verify Web outputs
         run: |
           echo "=== Checking Web outputs ==="
           ls -la build/web/ || echo "build/web not found"
           echo "=== Full build/web tree ==="
           find build/web -type f 2>/dev/null | head -30
+          echo "=== Build Web output tail ==="
+          tail -50 build_web_output.txt
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -224,6 +235,8 @@ jobs:
         run: |
           echo "=== Files in build/web ==="
           ls -la build/web/ 2>/dev/null || echo "No web build found"
+          echo "=== All files in build/web ==="
+          find build/web -type f 2>/dev/null | head -30
       - name: Upload Web artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -271,6 +284,7 @@ jobs:
           flutter --version
           echo "=== Running flutter build linux --release ==="
           flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt
+          echo "=== Build Linux exit code: ${PIPESTATUS[0]} ==="
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         run: |
@@ -278,6 +292,7 @@ jobs:
           flutter --version
           echo "=== Running flutter build macos --release ==="
           flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt
+          echo "=== Build macOS exit code: ${PIPESTATUS[0]} ==="
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: |
@@ -285,6 +300,7 @@ jobs:
           flutter --version
           echo "=== Running flutter build windows --release ==="
           flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt
+          echo "=== Build Windows exit code: ${PIPESTATUS[0]} ==="
       - name: Verify Desktop outputs
         run: |
           echo "=== Checking Linux outputs ==="
@@ -296,6 +312,12 @@ jobs:
           echo "=== Checking Windows outputs ==="
           ls -la build/windows/ 2>/dev/null || echo "build/windows not found"
           find build/windows -type f 2>/dev/null | head -30
+          echo "=== Build Linux output tail ==="
+          tail -50 build_linux_output.txt 2>/dev/null || echo "No linux output"
+          echo "=== Build macOS output tail ==="
+          tail -50 build_macos_output.txt 2>/dev/null || echo "No macos output"
+          echo "=== Build Windows output tail ==="
+          tail -50 build_windows_output.txt 2>/dev/null || echo "No windows output"
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -309,10 +331,16 @@ jobs:
         run: |
           echo "=== Files in build/linux ==="
           ls -la build/linux/ 2>/dev/null || echo "No Linux build found"
+          echo "=== All files in build/linux ==="
+          find build/linux -type f 2>/dev/null | head -30
           echo "=== Files in build/macos ==="
           ls -la build/macos/ 2>/dev/null || echo "No macOS build found"
+          echo "=== All files in build/macos ==="
+          find build/macos -type f 2>/dev/null | head -30
           echo "=== Files in build/windows ==="
           ls -la build/windows/ 2>/dev/null || echo "No Windows build found"
+          echo "=== All files in build/windows ==="
+          find build/windows -type f 2>/dev/null | head -30
       - name: Upload Desktop artifacts
         if: always()
         uses: actions/upload-artifact@v4
