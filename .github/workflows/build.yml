@@ -21,7 +21,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.0'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -63,7 +63,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.0'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -106,7 +106,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.0'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -141,19 +141,25 @@ jobs:
       - name: Verify APK/AAB outputs
         run: |
           echo "=== Checking APK outputs ==="
-          ls -la build/app/outputs/flutter-apk/ || echo "flutter-apk dir not found"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "flutter-apk dir not found"
           echo "=== Checking AAB outputs ==="
-          ls -la build/app/outputs/bundle/release/ || echo "bundle/release dir not found"
+          ls -la build/app/outputs/bundle/release/ 2>/dev/null || echo "bundle/release dir not found"
           echo "=== Full build/app tree ==="
-          find build/app -type f \( -name "*.apk" -o -name "*.aab" \) | head -20
+          find build/app -type f \( -name "*.apk" -o -name "*.aab" \) 2>/dev/null | head -20
           echo "=== Checking if any APKs exist ==="
-          find build/app -name "*.apk" -type f | wc -l
+          find build/app -name "*.apk" -type f 2>/dev/null | wc -l
           echo "=== Checking if any AABs exist ==="
-          find build/app -name "*.aab" -type f | wc -l
+          find build/app -name "*.aab" -type f 2>/dev/null | wc -l
           echo "=== Build APK output tail ==="
           tail -50 build_apk_output.txt
           echo "=== Build AAB output tail ==="
           tail -50 build_aab_output.txt
+      - name: Debug - Check entire build directory structure
+        run: |
+          echo "=== Full build directory tree ==="
+          find build -type f 2>/dev/null | head -50
+          echo "=== All directories in build ==="
+          find build -type d 2>/dev/null | head -30
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -195,7 +201,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.0'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -225,11 +231,17 @@ jobs:
       - name: Verify Web outputs
         run: |
           echo "=== Checking Web outputs ==="
-          ls -la build/web/ || echo "build/web not found"
+          ls -la build/web/ 2>/dev/null || echo "build/web not found"
           echo "=== Full build/web tree ==="
           find build/web -type f 2>/dev/null | head -30
           echo "=== Build Web output tail ==="
           tail -50 build_web_output.txt
+      - name: Debug - Check entire build directory structure (Web)
+        run: |
+          echo "=== Full build directory tree (Web) ==="
+          find build -type f 2>/dev/null | head -50
+          echo "=== All directories in build (Web) ==="
+          find build -type d 2>/dev/null | head -30
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -267,7 +279,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.0'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -326,6 +338,12 @@ jobs:
           tail -50 build_macos_output.txt 2>/dev/null || echo "No macos output"
           echo "=== Build Windows output tail ==="
           tail -50 build_windows_output.txt 2>/dev/null || echo "No windows output"
+      - name: Debug - Check entire build directory structure (Desktop)
+        run: |
+          echo "=== Full build directory tree (Desktop) ==="
+          find build -type f 2>/dev/null | head -50
+          echo "=== All directories in build (Desktop) ==="
+          find build -type d 2>/dev/null | head -30
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -408,6 +426,16 @@ jobs:
           find artifacts -type f | head -50
           echo "=== Directory structure ==="
           ls -la artifacts/
+          echo "=== APK artifacts ==="
+          ls -la artifacts/apks/ 2>/dev/null || echo "No apks dir"
+          echo "=== Web artifacts ==="
+          ls -la artifacts/web/ 2>/dev/null || echo "No web dir"
+          echo "=== Linux artifacts ==="
+          ls -la artifacts/linux/ 2>/dev/null || echo "No linux dir"
+          echo "=== macOS artifacts ==="
+          ls -la artifacts/macos/ 2>/dev/null || echo "No macos dir"
+          echo "=== Windows artifacts ==="
+          ls -la artifacts/windows/ 2>/dev/null || echo "No windows dir"
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
