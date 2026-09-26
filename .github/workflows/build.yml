@@ -42,7 +42,7 @@ jobs:
             sleep 15
           done
       - name: Analyze
-        run: flutter analyze lib/models/ lib/services/
+        run: dart analyze lib/models/ lib/services/
 
   test:
     name: Unit Tests
@@ -74,7 +74,7 @@ jobs:
             sleep 15
           done
       - name: Run tests
-        run: flutter test test/
+        run: dart test test/
 
   build-android:
     name: Build Android APK & App Bundle
