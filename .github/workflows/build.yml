@@ -168,18 +168,12 @@ jobs:
           path: |
             build_apk_output.txt
             build_aab_output.txt
-      - name: List files to upload for APK artifacts
+      - name: Find all APK and AAB files
         run: |
-          echo "=== Files matching APK pattern ==="
-          ls -la build/app/outputs/flutter-apk/*.apk 2>/dev/null || echo "No APKs found"
-          echo "=== Files matching AAB pattern ==="
-          ls -la build/app/outputs/bundle/release/*.aab 2>/dev/null || echo "No AABs found"
-          echo "=== All files in build/app/outputs ==="
-          find build/app/outputs -type f 2>/dev/null | head -30
-          echo "=== All APKs anywhere in build/ ==="
-          find build -name "*.apk" -type f 2>/dev/null | head -20
-          echo "=== All AABs anywhere in build/ ==="
-          find build -name "*.aab" -type f 2>/dev/null | head -20
+          echo "=== Finding all APK files ==="
+          find . -name "*.apk" -type f 2>/dev/null
+          echo "=== Finding all AAB files ==="
+          find . -name "*.aab" -type f 2>/dev/null
       - name: Upload APK artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -188,6 +182,8 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/*.apk
             build/app/outputs/bundle/release/*.aab
+            **/*.apk
+            **/*.aab
           retention-days: 30
           if-no-files-found: warn
 
@@ -261,7 +257,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-web
-          path: build/web/
+          path: |
+            build/web/
+            **/build/web/**
           retention-days: 30
           if-no-files-found: warn
 
@@ -378,6 +376,9 @@ jobs:
             build/linux/**/*
             build/macos/**/*
             build/windows/**/*
+            **/build/linux/**/*
+            **/build/macos/**/*
+            **/build/windows/**/*
           retention-days: 30
           if-no-files-found: warn
 
