@@ -293,7 +293,7 @@ jobs:
 
   build-desktop:
     name: Build Desktop (Linux/macOS/Windows)
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     needs: [analyze]
     strategy:
       matrix:
@@ -356,8 +356,6 @@ jobs:
           echo "=== Running flutter build linux --release ==="
           flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt
           echo "=== Build Linux exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
-          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         run: |
@@ -367,7 +365,6 @@ jobs:
           echo "=== Running flutter build macos --release ==="
           flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt
           echo "=== Build macOS exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: |
@@ -377,37 +374,11 @@ jobs:
           echo "=== Running flutter build windows --release ==="
           flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt
           echo "=== Build Windows exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
-      - name: Verify Desktop outputs
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Checking Linux outputs ==="
-          ls -la build/linux/ 2>/dev/null || echo "build/linux not found"
-          find build/linux -type f 2>/dev/null | head -30
-          echo "=== Checking macOS outputs ==="
-          ls -la build/macos/ 2>/dev/null || echo "build/macos not found"
-          find build/macos -type f 2>/dev/null | head -30
-          echo "=== Checking Windows outputs ==="
-          ls -la build/windows/ 2>/dev/null || echo "build/windows not found"
-          find build/windows -type f 2>/dev/null | head -30
-          echo "=== Build Linux output tail ==="
-          tail -50 build_linux_output.txt 2>/dev/null || echo "No linux output"
-          echo "=== Build macOS output tail ==="
-          tail -50 build_macos_output.txt 2>/dev/null || echo "No macos output"
-          echo "=== Build Windows output tail ==="
-          tail -50 build_windows_output.txt 2>/dev/null || echo "No windows output"
-      - name: Debug - Check entire build directory structure (Desktop)
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Full build directory tree (Desktop) ==="
-          find build -type f 2>/dev/null | head -100
-          echo "=== All directories in build (Desktop) ==="
-          find build -type d 2>/dev/null | head -50
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-desktop-logs-${{ runner.os }}
+          name: build-desktop-logs-${{ matrix.os }}
           path: |
             build_linux_output.txt
             build_macos_output.txt
@@ -433,16 +404,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ runner.os }}
+          name: release-${{ matrix.os }}
           path: |
             build/linux/**/*
             build/macos/**/*
             build/windows/**/*
-            **/build/linux/**/*
-            **/build/macos/**/*
-            **/build/windows/**/*
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   release:
     name: Create GitHub Release
@@ -471,17 +439,17 @@ jobs:
       - uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: release-Linux
+          name: release-ubuntu-latest
           path: artifacts/linux
       - uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: release-macOS
+          name: release-macos-latest
           path: artifacts/macos
       - uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: release-Windows
+          name: release-windows-latest
           path: artifacts/windows
       - name: List downloaded files
         run: |
