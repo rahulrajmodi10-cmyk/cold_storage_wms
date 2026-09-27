@@ -130,16 +130,22 @@ jobs:
         run: |
           echo "=== Flutter version ==="
           flutter --version
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build apk --release --split-per-abi ==="
           flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt
           echo "=== Build APK exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
+          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build App Bundle (release)
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build appbundle --release ==="
           flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
           echo "=== Build AAB exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
       - name: Verify APK/AAB outputs
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Checking APK outputs ==="
           ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "flutter-apk dir not found"
           echo "=== Checking AAB outputs ==="
@@ -156,10 +162,11 @@ jobs:
           tail -50 build_aab_output.txt
       - name: Debug - Check entire build directory structure
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Full build directory tree ==="
-          find build -type f 2>/dev/null | head -50
+          find build -type f 2>/dev/null | head -100
           echo "=== All directories in build ==="
-          find build -type d 2>/dev/null | head -30
+          find build -type d 2>/dev/null | head -50
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -170,6 +177,7 @@ jobs:
             build_aab_output.txt
       - name: Find all APK and AAB files
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Finding all APK files ==="
           find . -name "*.apk" -type f 2>/dev/null
           echo "=== Finding all AAB files ==="
@@ -221,11 +229,15 @@ jobs:
         run: |
           echo "=== Flutter version ==="
           flutter --version
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build web --release ==="
           flutter build web --release --verbose 2>&1 | tee build_web_output.txt
           echo "=== Build Web exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
+          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Verify Web outputs
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Checking Web outputs ==="
           ls -la build/web/ 2>/dev/null || echo "build/web not found"
           echo "=== Full build/web tree ==="
@@ -234,10 +246,11 @@ jobs:
           tail -50 build_web_output.txt
       - name: Debug - Check entire build directory structure (Web)
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Full build directory tree (Web) ==="
-          find build -type f 2>/dev/null | head -50
+          find build -type f 2>/dev/null | head -100
           echo "=== All directories in build (Web) ==="
-          find build -type d 2>/dev/null | head -30
+          find build -type d 2>/dev/null | head -50
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -246,6 +259,7 @@ jobs:
           path: build_web_output.txt
       - name: List files to upload for Web artifacts
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Files in build/web ==="
           ls -la build/web/ 2>/dev/null || echo "No web build found"
           echo "=== All files in build/web ==="
@@ -300,27 +314,35 @@ jobs:
         run: |
           echo "=== Flutter version ==="
           flutter --version
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build linux --release ==="
           flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt
           echo "=== Build Linux exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
+          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         run: |
           echo "=== Flutter version ==="
           flutter --version
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build macos --release ==="
           flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt
           echo "=== Build macOS exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         run: |
           echo "=== Flutter version ==="
           flutter --version
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build windows --release ==="
           flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt
           echo "=== Build Windows exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Post-build working directory: $(pwd) ==="
       - name: Verify Desktop outputs
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Checking Linux outputs ==="
           ls -la build/linux/ 2>/dev/null || echo "build/linux not found"
           find build/linux -type f 2>/dev/null | head -30
@@ -338,10 +360,11 @@ jobs:
           tail -50 build_windows_output.txt 2>/dev/null || echo "No windows output"
       - name: Debug - Check entire build directory structure (Desktop)
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Full build directory tree (Desktop) ==="
-          find build -type f 2>/dev/null | head -50
+          find build -type f 2>/dev/null | head -100
           echo "=== All directories in build (Desktop) ==="
-          find build -type d 2>/dev/null | head -30
+          find build -type d 2>/dev/null | head -50
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -353,6 +376,7 @@ jobs:
             build_windows_output.txt
       - name: List files to upload for Desktop artifacts
         run: |
+          echo "=== Working directory: $(pwd) ==="
           echo "=== Files in build/linux ==="
           ls -la build/linux/ 2>/dev/null || echo "No Linux build found"
           echo "=== All files in build/linux ==="
