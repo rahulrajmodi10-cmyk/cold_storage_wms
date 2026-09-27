@@ -1,6 +1,6 @@
 // lib/services/temperature_service.dart
 
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/temperature_log.dart';
 import '../models/inventory_item.dart';
 

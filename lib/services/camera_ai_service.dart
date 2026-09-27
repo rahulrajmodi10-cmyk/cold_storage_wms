@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/camera_ai_models.dart';
 
 class CameraAIService {

@@ -1,7 +1,7 @@
 // lib/services/sla_service.dart
 
 import 'dart:async';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SlaService {
   final Database db;

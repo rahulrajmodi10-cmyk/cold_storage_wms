@@ -1,6 +1,6 @@
 // lib/services/inventory_service.dart
 
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/inventory_item.dart';
 
 class InventoryService {
