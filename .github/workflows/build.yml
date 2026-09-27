@@ -127,7 +127,12 @@ jobs:
             sleep 15
           done
       - name: Create Android platform directory
-        run: flutter create --platforms=android .
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android .
+          else
+            echo "Android platform directory already exists"
+          fi
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
@@ -228,7 +233,12 @@ jobs:
             sleep 15
           done
       - name: Create Web platform directory
-        run: flutter create --platforms=web .
+        run: |
+          if [ ! -d "web" ]; then
+            flutter create --platforms=web .
+          else
+            echo "Web platform directory already exists"
+          fi
       - name: Build Web (release)
         run: |
           echo "=== Flutter version ==="
@@ -315,13 +325,28 @@ jobs:
           done
       - name: Create Linux platform directory
         if: matrix.os == 'ubuntu-latest'
-        run: flutter create --platforms=linux .
+        run: |
+          if [ ! -d "linux" ]; then
+            flutter create --platforms=linux .
+          else
+            echo "Linux platform directory already exists"
+          fi
       - name: Create macOS platform directory
         if: matrix.os == 'macos-latest'
-        run: flutter create --platforms=macos .
+        run: |
+          if [ ! -d "macos" ]; then
+            flutter create --platforms=macos .
+          else
+            echo "macOS platform directory already exists"
+          fi
       - name: Create Windows platform directory
         if: matrix.os == 'windows-latest'
-        run: flutter create --platforms=windows .
+        run: |
+          if [ ! -d "windows" ]; then
+            flutter create --platforms=windows .
+          else
+            echo "Windows platform directory already exists"
+          fi
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
