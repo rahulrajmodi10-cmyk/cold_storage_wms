@@ -128,10 +128,15 @@ jobs:
           done
       - name: Create Android platform directory
         run: |
+          echo "=== Checking if android directory exists ==="
+          ls -la
           if [ ! -d "android" ]; then
-            flutter create --platforms=android .
+            echo "Creating Android platform directory..."
+            flutter create --platforms=android . 2>&1 || echo "flutter create failed, checking if it's a 'project already exists' error"
+            ls -la android/ 2>/dev/null || echo "android directory not created"
           else
             echo "Android platform directory already exists"
+            ls -la android/
           fi
       - name: Build APK (release)
         run: |
@@ -234,10 +239,15 @@ jobs:
           done
       - name: Create Web platform directory
         run: |
+          echo "=== Checking if web directory exists ==="
+          ls -la
           if [ ! -d "web" ]; then
-            flutter create --platforms=web .
+            echo "Creating Web platform directory..."
+            flutter create --platforms=web . 2>&1 || echo "flutter create failed, checking if it's a 'project already exists' error"
+            ls -la web/ 2>/dev/null || echo "web directory not created"
           else
             echo "Web platform directory already exists"
+            ls -la web/
           fi
       - name: Build Web (release)
         run: |
@@ -326,26 +336,41 @@ jobs:
       - name: Create Linux platform directory
         if: matrix.os == 'ubuntu-latest'
         run: |
+          echo "=== Checking if linux directory exists ==="
+          ls -la
           if [ ! -d "linux" ]; then
-            flutter create --platforms=linux .
+            echo "Creating Linux platform directory..."
+            flutter create --platforms=linux . 2>&1 || echo "flutter create failed"
+            ls -la linux/ 2>/dev/null || echo "linux directory not created"
           else
             echo "Linux platform directory already exists"
+            ls -la linux/
           fi
       - name: Create macOS platform directory
         if: matrix.os == 'macos-latest'
         run: |
+          echo "=== Checking if macos directory exists ==="
+          ls -la
           if [ ! -d "macos" ]; then
-            flutter create --platforms=macos .
+            echo "Creating macOS platform directory..."
+            flutter create --platforms=macos . 2>&1 || echo "flutter create failed"
+            ls -la macos/ 2>/dev/null || echo "macos directory not created"
           else
             echo "macOS platform directory already exists"
+            ls -la macos/
           fi
       - name: Create Windows platform directory
         if: matrix.os == 'windows-latest'
         run: |
+          echo "=== Checking if windows directory exists ==="
+          ls -la
           if [ ! -d "windows" ]; then
-            flutter create --platforms=windows .
+            echo "Creating Windows platform directory..."
+            flutter create --platforms=windows . 2>&1 || echo "flutter create failed"
+            ls -la windows/ 2>/dev/null || echo "windows directory not created"
           else
             echo "Windows platform directory already exists"
+            ls -la windows/
           fi
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
