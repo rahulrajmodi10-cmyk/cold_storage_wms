@@ -126,6 +126,8 @@ jobs:
             echo "Attempt $i failed, waiting 15 seconds..."
             sleep 15
           done
+      - name: Create Android platform directory
+        run: flutter create --platforms=android .
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
@@ -225,6 +227,8 @@ jobs:
             echo "Attempt $i failed, waiting 15 seconds..."
             sleep 15
           done
+      - name: Create Web platform directory
+        run: flutter create --platforms=web .
       - name: Build Web (release)
         run: |
           echo "=== Flutter version ==="
@@ -309,6 +313,15 @@ jobs:
             echo "Attempt $i failed, waiting 15 seconds..."
             sleep 15
           done
+      - name: Create Linux platform directory
+        if: matrix.os == 'ubuntu-latest'
+        run: flutter create --platforms=linux .
+      - name: Create macOS platform directory
+        if: matrix.os == 'macos-latest'
+        run: flutter create --platforms=macos .
+      - name: Create Windows platform directory
+        if: matrix.os == 'windows-latest'
+        run: flutter create --platforms=windows .
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
