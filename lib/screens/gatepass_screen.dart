@@ -832,8 +832,8 @@ class _GatepassDetailSheet extends StatelessWidget {
                   _buildDetailRow('Entry Time', DateFormat('MMM dd, yyyy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(gatepass.actualEntryTime!))),
                 if (gatepass.actualExitTime != null)
                   _buildDetailRow('Exit Time', DateFormat('MMM dd, yyyy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(gatepass.actualExitTime!))),
-                _buildDetailRow('Origin', gatepass.originLocation),
-                _buildDetailRow('Destination', gatepass.destinationLocation),
+                _buildDetailRow('Origin', gatepass.originLocation ?? 'N/A'),
+                _buildDetailRow('Destination', gatepass.destinationLocation ?? 'N/A'),
                 _buildDetailRow('Total Items', gatepass.totalItems.toString()),
                 _buildDetailRow('Total Quantity', gatepass.totalQuantity.toString()),
                 _buildDetailRow('Total Weight', '${gatepass.totalWeight?.toStringAsFixed(1) ?? '0'} kg'),

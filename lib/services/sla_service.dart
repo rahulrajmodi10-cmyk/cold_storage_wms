@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 
-class SlaService {
+class SLAService {
   final Database db;
   Timer? _timer;
   final Duration interval;

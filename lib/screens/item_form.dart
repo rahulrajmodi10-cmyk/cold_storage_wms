@@ -1,15 +1,14 @@
 // lib/screens/item_form.dart
 
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../services/inventory_service.dart';
 import '../models/inventory_item.dart';
 
 class ItemForm extends StatefulWidget {
-  final Database db;
+  final InventoryService inventoryService;
   final InventoryItem? item;
 
-  const ItemForm({Key? key, required this.db, this.item}) : super(key: key);
+  const ItemForm({Key? key, required this.inventoryService, this.item}) : super(key: key);
 
   @override
   State<ItemForm> createState() => _ItemFormState();
@@ -34,7 +33,7 @@ class _ItemFormState extends State<ItemForm> {
   @override
   void initState() {
     super.initState();
-    _service = InventoryService(widget.db);
+    _service = widget.inventoryService;
     _skuController = TextEditingController(text: widget.item?.sku ?? '');
     _nameController = TextEditingController(text: widget.item?.name ?? '');
     _categoryController = TextEditingController(text: widget.item?.category ?? '');

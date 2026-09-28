@@ -143,7 +143,7 @@ class _LogisticsDashboardState extends State<LogisticsDashboard> {
             const SizedBox(width: 12),
             Expanded(child: _buildStatCard('Delivered', delivered.toString(), Icons.check_circle, Colors.green)),
             const SizedBox(width: 12),
-            Expanded(child: _buildStatCard('In Transit', inProgress.toString(), Icons.directions_truck, Colors.orange)),
+            Expanded(child: _buildStatCard('In Transit', inProgress.toString(), Icons.local_shipping, Colors.orange)),
             const SizedBox(width: 12),
             Expanded(child: _buildStatCard('Cancelled', cancelled.toString(), Icons.cancel, Colors.red)),
           ],
@@ -265,7 +265,7 @@ class _LogisticsDashboardState extends State<LogisticsDashboard> {
             Row(
               children: [
                 Expanded(child: _buildVehicleStatusItem('Available', available, Colors.green, Icons.check_circle)),
-                Expanded(child: _buildVehicleStatusItem('In Transit', inTransit, Colors.blue, Icons.directions_truck)),
+                Expanded(child: _buildVehicleStatusItem('In Transit', inTransit, Colors.blue, Icons.local_shipping)),
                 Expanded(child: _buildVehicleStatusItem('Maintenance', maintenance, Colors.red, Icons.build)),
               ],
             ),

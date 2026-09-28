@@ -393,6 +393,98 @@ class FinanceService {
 
   // ============ Reports ============
 
+  Future<Map<String, double>> getProfitLoss(int fromDate, int toDate) async {
+    final accounts = await getAccounts(type: 'REVENUE');
+    accounts.addAll(await getAccounts(type: 'EXPENSE'));
+
+    final Map<String, double> results = {'revenue': 0.0, 'expense': 0.0};
+
+    for (final account in accounts) {
+      final result = await db.rawQuery('''
+        SELECT
+          SUM(jel.debit) as total_debit,
+          SUM(jel.credit) as total_credit
+        FROM journal_entry_lines jel
+        JOIN journal_entries je ON jel.entry_id = je.id
+        WHERE jel.account_id = ? AND je.entry_date BETWEEN ? AND ? AND je.status = 'POSTED'
+      ''', [account.id, fromDate, toDate]);
+
+      if (result.isNotEmpty) {
+        final debit = (result.first['total_debit'] as num?)?.toDouble() ?? 0.0;
+        final credit = (result.first['total_credit'] as num?)?.toDouble() ?? 0.0;
+        double balance = account.type == 'REVENUE' ? credit - debit : debit - credit;
+
+        if (account.type == 'REVENUE') {
+          results['revenue'] = (results['revenue'] ?? 0.0) + balance;
+        } else {
+          results['expense'] = (results['expense'] ?? 0.0) + balance;
+        }
+      }
+    }
+
+    results['net_profit'] = (results['revenue'] ?? 0.0) - (results['expense'] ?? 0.0);
+    return results;
+  }
+
+  Future<Map<String, dynamic>> getBalanceSheet(int asOfDate) async {
+    final accounts = await getAccounts();
+
+    double totalAssets = 0.0;
+    double totalLiabilities = 0.0;
+    double totalEquity = 0.0;
+
+    for (final account in accounts) {
+      double balance = account.openingBalance ?? 0.0;
+
+      // Calculate from journal entries up to asOfDate
+      final result = await db.rawQuery('''
+        SELECT
+          SUM(jel.debit) as total_debit,
+          SUM(jel.credit) as total_credit
+        FROM journal_entry_lines jel
+        JOIN journal_entries je ON jel.entry_id = je.id
+        WHERE jel.account_id = ? AND je.entry_date <= ? AND je.status = 'POSTED'
+      ''', [account.id, asOfDate]);
+
+      if (result.isNotEmpty) {
+        final debit = (result.first['total_debit'] as num?)?.toDouble() ?? 0.0;
+        final credit = (result.first['total_credit'] as num?)?.toDouble() ?? 0.0;
+
+        if (['ASSET', 'EXPENSE'].contains(account.type)) {
+          balance += debit - credit;
+        } else {
+          balance += credit - debit;
+        }
+      }
+
+      if (account.type == 'ASSET') {
+        totalAssets += balance;
+      } else if (account.type == 'LIABILITY') {
+        totalLiabilities += balance;
+      } else if (account.type == 'EQUITY') {
+        totalEquity += balance;
+      }
+      // REVENUE and EXPENSE are already accounted for in P&L, not balance sheet
+      // But for a proper balance sheet, we should include retained earnings
+    }
+
+    // Add net profit to equity (retained earnings)
+    final pl = await getProfitLoss(
+      DateTime.fromMillisecondsSinceEpoch(asOfDate).copyWith(month: 1, day: 1).millisecondsSinceEpoch,
+      asOfDate
+    );
+    totalEquity += pl['net_profit'] ?? 0.0;
+
+    final balanced = (totalAssets - (totalLiabilities + totalEquity)).abs() < 0.01;
+
+    return {
+      'total_assets': totalAssets,
+      'total_liabilities': totalLiabilities,
+      'total_equity': totalEquity,
+      'balanced': balanced,
+    };
+  }
+
   Future<Map<String, double>> getTrialBalance(int asOfDate) async {
     // Get all active accounts
     final accounts = await getAccounts();

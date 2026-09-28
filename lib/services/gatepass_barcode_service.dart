@@ -423,6 +423,7 @@ class GatepassBarcodeService {
     String? barcodeValue,
     int? entityId,
     String? entityType,
+    String? scanType,
     int? fromDate,
     int? toDate,
   }) async {
@@ -443,6 +444,10 @@ class GatepassBarcodeService {
     if (entityType != null) {
       where.add('entity_type = ?');
       args.add(entityType);
+    }
+    if (scanType != null) {
+      where.add('scan_type = ?');
+      args.add(scanType);
     }
     if (fromDate != null) {
       where.add('timestamp >= ?');

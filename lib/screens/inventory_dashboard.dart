@@ -1,15 +1,20 @@
 // lib/screens/inventory_dashboard.dart
 
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../services/inventory_service.dart';
+import '../services/location_service.dart';
 import '../models/inventory_item.dart';
 import 'item_form.dart';
 
 class InventoryDashboard extends StatefulWidget {
-  final Database db;
+  final InventoryService inventoryService;
+  final LocationService locationService;
 
-  const InventoryDashboard({Key? key, required this.db}) : super(key: key);
+  const InventoryDashboard({
+    Key? key,
+    required this.inventoryService,
+    required this.locationService,
+  }) : super(key: key);
 
   @override
   State<InventoryDashboard> createState() => _InventoryDashboardState();
@@ -26,7 +31,7 @@ class _InventoryDashboardState extends State<InventoryDashboard> {
   @override
   void initState() {
     super.initState();
-    _service = InventoryService(widget.db);
+    _service = widget.inventoryService;
     _loadItems();
   }
 
@@ -155,7 +160,7 @@ class _InventoryDashboardState extends State<InventoryDashboard> {
   void _showItemForm({InventoryItem? item}) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ItemForm(db: widget.db, item: item)),
+      MaterialPageRoute(builder: (_) => ItemForm(inventoryService: _service, item: item)),
     );
     if (result == true) _loadItems();
   }
