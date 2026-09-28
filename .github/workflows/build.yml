@@ -424,8 +424,10 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
+          echo "=== Checking windows directory ==="
+          Get-ChildItem windows/ -Directory
           echo "=== Running flutter build windows --release ==="
-          flutter build windows --release --no-pub 2>&1 | Tee-Object -FilePath build_windows_output.txt
+          flutter build windows --release 2>&1 | Tee-Object -FilePath build_windows_output.txt
           echo "=== Build Windows exit code: $LASTEXITCODE ==="
           if ($LASTEXITCODE -ne 0) {
             echo "=== BUILD FAILED - Showing last 300 lines ==="
