@@ -45,7 +45,7 @@ dependencies:
 
   # Charts & Visualization
   fl_chart: ^0.68.0
-  syncfusion_flutter_charts: ^25.1.39
+  syncfusion_flutter_charts: ^21.2.4
 
   # Permissions & Device Info
   permission_handler: ^11.3.1
