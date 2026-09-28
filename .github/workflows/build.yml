@@ -418,12 +418,13 @@ jobs:
       - name: Build Windows
         if: matrix.os == 'windows-latest'
         timeout-minutes: 40
+        env:
+          CMAKE_GENERATOR: "Visual Studio 17 2022"
         run: |
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build windows --release ==="
-          $env:CMAKE_GENERATOR = "Visual Studio 17 2022"
           flutter build windows --release --verbose 2>&1 | Tee-Object -FilePath build_windows_output.txt
           echo "=== Build Windows exit code: $LASTEXITCODE ==="
           if ($LASTEXITCODE -ne 0) {
