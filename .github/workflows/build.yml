@@ -417,14 +417,19 @@ jobs:
           echo "=== Build macOS exit code: ${PIPESTATUS[0]} ==="
       - name: Build Windows
         if: matrix.os == 'windows-latest'
-        timeout-minutes: 30
+        timeout-minutes: 40
         run: |
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build windows --release ==="
-          flutter build windows --release --verbose 2>&1 | tee build_windows_output.txt
-          echo "=== Build Windows exit code: %LASTEXITCODE%"
+          $env:CMAKE_GENERATOR = "Visual Studio 17 2022"
+          flutter build windows --release --verbose 2>&1 | Tee-Object -FilePath build_windows_output.txt
+          echo "=== Build Windows exit code: $LASTEXITCODE ==="
+          if ($LASTEXITCODE -ne 0) {
+            echo "=== BUILD FAILED - Showing last 200 lines ==="
+            Get-Content build_windows_output.txt -Tail 200
+          }
         shell: powershell
       - name: Upload build logs
         if: always()
