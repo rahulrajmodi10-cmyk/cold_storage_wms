@@ -1341,7 +1341,7 @@ class ColdStorageWMS extends StatelessWidget {
     final receivingService = ReceivingService(db);
     final pickingService = PickingService(db);
     final dispatchService = DispatchService(db);
-    final slaService = SLAService(db);
+    final slaService = SLAService(db, interval: const Duration(minutes: 1));
     final financeService = FinanceService(db);
     final logisticsService = LogisticsService(db);
     final cameraService = CameraAIService(db);

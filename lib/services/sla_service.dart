@@ -8,7 +8,7 @@ class SLAService {
   Timer? _timer;
   final Duration interval;
 
-  SlaService(this.db, {this.interval = const Duration(minutes: 1)});
+  SLAService(this.db, {this.interval = const Duration(minutes: 1)});
 
   void start() {
     _timer ??= Timer.periodic(interval, (_) => _checkSlas());
