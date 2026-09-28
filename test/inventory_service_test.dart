@@ -47,6 +47,18 @@ void main() {
             entity_id INTEGER
           )
         ''');
+        await db.execute('''
+          CREATE TABLE transfer_record (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id INTEGER,
+            from_location INTEGER,
+            to_location INTEGER,
+            quantity INTEGER,
+            operator_id INTEGER,
+            timestamp INTEGER,
+            reason TEXT
+          )
+        ''');
       },
     );
     service = InventoryService(db);
