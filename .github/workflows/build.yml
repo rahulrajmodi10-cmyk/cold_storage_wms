@@ -380,16 +380,21 @@ jobs:
       - name: Create Windows platform directory
         if: matrix.os == 'windows-latest'
         run: |
-          echo "=== Checking if windows directory exists ==="
-          ls -la
-          if [ ! -d "windows" ]; then
-            echo "Creating Windows platform directory..."
-            flutter create --platforms=windows . 2>&1 || echo "flutter create failed"
-            ls -la windows/ 2>/dev/null || echo "windows directory not created"
-          else
-            echo "Windows platform directory already exists"
-            ls -la windows/
-          fi
+          Write-Host "=== Checking if windows directory exists ==="
+          Get-ChildItem
+          if (-not (Test-Path "windows")) {
+            Write-Host "Creating Windows platform directory..."
+            flutter create --platforms=windows . 2>&1
+            if (Test-Path "windows") {
+              Get-ChildItem windows/
+            } else {
+              Write-Host "windows directory not created"
+            }
+          } else {
+            Write-Host "Windows platform directory already exists"
+            Get-ChildItem windows/
+          }
+        shell: powershell
       - name: Build Linux
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 30
@@ -453,9 +458,9 @@ jobs:
         with:
           name: release-${{ matrix.os }}
           path: |
-            build/linux/**/*
-            build/macos/**/*
-            build/windows/**/*
+            build/linux/**/release/bundle/**
+            build/macos/Build/Products/Release/**
+            build/windows/**/runner/Release/**
           retention-days: 30
           if-no-files-found: warn
 
