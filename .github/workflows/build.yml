@@ -426,6 +426,10 @@ jobs:
           echo "=== Working directory: $(pwd) ==="
           echo "=== Checking windows directory ==="
           Get-ChildItem windows/ -Directory
+          echo "=== Checking CMake version ==="
+          cmake --version
+          echo "=== Checking Visual Studio location ==="
+          Get-ChildItem "C:\Program Files\Microsoft Visual Studio\" -Directory -ErrorAction SilentlyContinue
           echo "=== Running flutter build windows --release ==="
           # Capture both stdout and stderr to file and console
           $output = flutter build windows --release 2>&1
@@ -436,6 +440,15 @@ jobs:
           if ($exitCode -ne 0) {
             echo "=== BUILD FAILED - Showing last 300 lines ==="
             Get-Content build_windows_output.txt -Tail 300
+            echo "=== Checking build directory ==="
+            Get-ChildItem build/ -Directory -ErrorAction SilentlyContinue
+            if (Test-Path "build/windows") {
+              Get-ChildItem build/windows/ -Directory -ErrorAction SilentlyContinue
+            }
+          }
+          # Always create the log file even if build fails
+          if (-not (Test-Path "build_windows_output.txt")) {
+            "Build output file not created" | Out-File -FilePath build_windows_output.txt -Encoding utf8
           }
           exit $exitCode
         shell: powershell
