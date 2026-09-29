@@ -427,12 +427,8 @@ jobs:
           echo "=== Checking windows directory ==="
           Get-ChildItem windows/ -Directory
           echo "=== Running flutter build windows --release ==="
-          flutter build windows --release > build_windows_output.txt 2>&1
+          flutter build windows --release --verbose
           echo "=== Build Windows exit code: $LASTEXITCODE ==="
-          if ($LASTEXITCODE -ne 0) {
-            echo "=== BUILD FAILED - Showing last 300 lines ==="
-            Get-Content build_windows_output.txt -Tail 300
-          }
         shell: powershell
       - name: Upload build logs
         if: always()
