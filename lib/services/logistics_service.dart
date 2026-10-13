@@ -25,6 +25,10 @@ class LogisticsService {
   }
 
   Future<List<Carrier>> getCarriers({bool activeOnly = true}) async {
+    return _getCarriers(activeOnly: activeOnly);
+  }
+
+  Future<List<Carrier>> _getCarriers({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('carriers', where: where, orderBy: 'name');
     return maps.map((m) => Carrier.fromMap(m)).toList();
@@ -59,6 +63,14 @@ class LogisticsService {
   }
 
   Future<List<Vehicle>> getVehicles({
+    String? status,
+    int? carrierId,
+    bool activeOnly = true,
+  }) async {
+    return _getVehicles(status: status, carrierId: carrierId, activeOnly: activeOnly);
+  }
+
+  Future<List<Vehicle>> _getVehicles({
     String? status,
     int? carrierId,
     bool activeOnly = true,

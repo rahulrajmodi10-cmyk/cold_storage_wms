@@ -36,7 +36,7 @@ Future<Database> _initDatabase() async {
   final path = join(await getDatabasesPath(), 'wms.db');
   return await openDatabase(
     path,
-    version: 6,
+    version: 5,
     onCreate: (db, version) async {
       // Run all migrations in order
       await _runMigration001(db);
@@ -44,7 +44,6 @@ Future<Database> _initDatabase() async {
       await _runMigration003(db);
       await _runMigration004(db);
       await _runMigration005(db);
-      await _runMigration006(db);
     },
     onUpgrade: (db, oldVersion, newVersion) async {
       if (oldVersion < 2) {
@@ -58,9 +57,6 @@ Future<Database> _initDatabase() async {
       }
       if (oldVersion < 5) {
         await _runMigration005(db);
-      }
-      if (oldVersion < 6) {
-        await _runMigration006(db);
       }
     },
   );
@@ -1320,11 +1316,6 @@ Future<void> _runMigration005(Database db) async {
       updated_at INTEGER
     )
   ''');
-}
-
-// Migration 006: Additional Tables
-Future<void> _runMigration006(Database db) async {
-  // Additional tables if needed
 }
 
 class ColdStorageWMS extends StatelessWidget {

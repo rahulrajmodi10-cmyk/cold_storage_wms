@@ -27,6 +27,10 @@ class CameraAIService {
   }
 
   Future<List<CameraDevice>> getCameras({bool activeOnly = true, int? locationId}) async {
+    return _getCameras(activeOnly: activeOnly, locationId: locationId);
+  }
+
+  Future<List<CameraDevice>> _getCameras({bool activeOnly = true, int? locationId}) async {
     final where = <String>[];
     final args = <dynamic>[];
     if (activeOnly) {
@@ -75,6 +79,24 @@ class CameraAIService {
   }
 
   Future<List<CountingSession>> getCountingSessions({
+    int? cameraId,
+    String? referenceType,
+    int? referenceId,
+    String? status,
+    int? fromDate,
+    int? toDate,
+  }) async {
+    return _getCountingSessions(
+      cameraId: cameraId,
+      referenceType: referenceType,
+      referenceId: referenceId,
+      status: status,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
+  }
+
+  Future<List<CountingSession>> _getCountingSessions({
     int? cameraId,
     String? referenceType,
     int? referenceId,

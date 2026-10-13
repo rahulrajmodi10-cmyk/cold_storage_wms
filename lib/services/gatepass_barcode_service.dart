@@ -21,6 +21,10 @@ class GatepassBarcodeService {
   }
 
   Future<List<GatepassType>> getGatepassTypes({bool activeOnly = true}) async {
+    return _getGatepassTypes(activeOnly: activeOnly);
+  }
+
+  Future<List<GatepassType>> _getGatepassTypes({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('gatepass_types', where: where, orderBy: 'code');
     return maps.map((m) => GatepassType.fromMap(m)).toList();
@@ -260,10 +264,26 @@ class GatepassBarcodeService {
     int? gatepassId,
     int? shipmentId,
   }) async {
+    return _getDispatchSchedules(
+      date: date,
+      status: status,
+      vehicleId: vehicleId,
+      gatepassId: gatepassId,
+      shipmentId: shipmentId,
+    );
+  }
+
+  Future<List<DispatchSchedule>> _getDispatchSchedules({
+    int? date,
+    String? status,
+    int? vehicleId,
+    int? gatepassId,
+    int? shipmentId,
+  }) async {
     final where = <String>[];
     final args = <dynamic>[];
     if (date != null) {
-      where.add('schedule_date = ?');
+      where.add('scheduled_start = ?');
       args.add(date);
     }
     if (status != null) {
@@ -317,6 +337,10 @@ class GatepassBarcodeService {
   }
 
   Future<List<LoadingBay>> getLoadingBays({bool activeOnly = true}) async {
+    return _getLoadingBays(activeOnly: activeOnly);
+  }
+
+  Future<List<LoadingBay>> _getLoadingBays({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('loading_bays', where: where, orderBy: 'code');
     return maps.map((m) => LoadingBay.fromMap(m)).toList();
@@ -360,6 +384,10 @@ class GatepassBarcodeService {
   }
 
   Future<List<BarcodeDefinition>> getBarcodeDefinitions({bool activeOnly = true}) async {
+    return _getBarcodeDefinitions(activeOnly: activeOnly);
+  }
+
+  Future<List<BarcodeDefinition>> _getBarcodeDefinitions({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('barcode_definitions', where: where, orderBy: 'code');
     return maps.map((m) => BarcodeDefinition.fromMap(m)).toList();
@@ -484,6 +512,22 @@ class GatepassBarcodeService {
     int? fromDate,
     int? toDate,
   }) async {
+    return _getBatchScanSessions(
+      sessionType: sessionType,
+      referenceId: referenceId,
+      status: status,
+      fromDate: fromDate,
+      toDate: toDate,
+    );
+  }
+
+  Future<List<BatchScanSession>> _getBatchScanSessions({
+    String? sessionType,
+    int? referenceId,
+    String? status,
+    int? fromDate,
+    int? toDate,
+  }) async {
     final where = <String>[];
     final args = <dynamic>[];
     if (sessionType != null) {
@@ -545,6 +589,10 @@ class GatepassBarcodeService {
   }
 
   Future<List<LabelPrintJob>> getLabelPrintJobs({String? status}) async {
+    return _getLabelPrintJobs(status: status);
+  }
+
+  Future<List<LabelPrintJob>> _getLabelPrintJobs({String? status}) async {
     final where = status != null ? 'status = ?' : null;
     final args = status != null ? [status] : null;
     final maps = await db.query('label_print_jobs', where: where, whereArgs: args, orderBy: 'requested_at DESC');
@@ -572,6 +620,10 @@ class GatepassBarcodeService {
   }
 
   Future<List<PrinterConfig>> getPrinterConfigs({bool activeOnly = true}) async {
+    return _getPrinterConfigs(activeOnly: activeOnly);
+  }
+
+  Future<List<PrinterConfig>> _getPrinterConfigs({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('printer_configs', where: where, orderBy: 'name');
     return maps.map((m) => PrinterConfig.fromMap(m)).toList();
