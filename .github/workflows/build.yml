@@ -452,6 +452,18 @@ jobs:
           }
           exit $exitCode
         shell: powershell
+
+      - name: Verify Windows build outputs
+        if: matrix.os == 'windows-2022'
+        run: |
+          echo "=== Verifying Windows build outputs ==="
+          if (Test-Path "build/windows/x64/runner/Release") {
+            Get-ChildItem build/windows/x64/runner/Release/ -File
+          } else {
+            echo "Release directory not found at expected path"
+            Get-ChildItem build/windows/ -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 20
+          }
+        shell: powershell
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
