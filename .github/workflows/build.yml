@@ -473,7 +473,8 @@ jobs:
             build_linux_output.txt
             build_macos_output.txt
             build_windows_output.txt
-      - name: List files to upload for Desktop artifacts
+      - name: List files to upload for Desktop artifacts (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           echo "=== Working directory: $(pwd) ==="
           echo "=== Files in build/linux ==="
@@ -490,6 +491,19 @@ jobs:
           find build/windows -type f 2>/dev/null | head -30
           echo "=== All files anywhere in build/ ==="
           find build -type f 2>/dev/null | head -30
+      - name: List files to upload for Desktop artifacts (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Write-Host "=== Working directory: $(pwd) ==="
+          Write-Host "=== Files in build/linux ==="
+          if (Test-Path "build/linux") { Get-ChildItem build/linux/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No Linux build found" }
+          Write-Host "=== Files in build/macos ==="
+          if (Test-Path "build/macos") { Get-ChildItem build/macos/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No macOS build found" }
+          Write-Host "=== Files in build/windows ==="
+          if (Test-Path "build/windows") { Get-ChildItem build/windows/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No Windows build found" }
+          Write-Host "=== All files anywhere in build/ ==="
+          if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
+        shell: powershell
       - name: Upload Desktop artifacts
         if: always()
         uses: actions/upload-artifact@v4
