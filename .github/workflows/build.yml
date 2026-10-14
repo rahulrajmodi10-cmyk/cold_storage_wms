@@ -175,6 +175,21 @@ jobs:
           tail -50 build_apk_output.txt
           echo "=== Build AAB output tail ==="
           tail -50 build_aab_output.txt
+      - name: Verify APK/AAB artifacts before upload
+        run: |
+          echo "=== Verifying artifacts exist before upload ==="
+          if [ ! -d "build/app/outputs/flutter-apk" ] || [ -z "$(ls build/app/outputs/flutter-apk/*.apk 2>/dev/null)" ]; then
+            echo "ERROR: No APK files found in build/app/outputs/flutter-apk/"
+            exit 1
+          fi
+          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "ERROR: AAB file not found!"
+            exit 1
+          fi
+          echo "APKs found:"
+          ls -la build/app/outputs/flutter-apk/*.apk
+          echo "AAB found:"
+          ls -la build/app/outputs/bundle/release/app-release.aab
       - name: Debug - Check entire build directory structure
         run: |
           echo "=== Working directory: $(pwd) ==="
@@ -198,7 +213,6 @@ jobs:
           echo "=== Finding all AAB files ==="
           find . -name "*.aab" -type f 2>/dev/null
       - name: Upload APK artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: release-apks
@@ -208,7 +222,7 @@ jobs:
             **/*.apk
             **/*.aab
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-web:
     name: Build Web
@@ -294,8 +308,16 @@ jobs:
           find build/web -type f 2>/dev/null | head -30
           echo "=== All files anywhere in build/ ==="
           find build -type f 2>/dev/null | head -30
+      - name: Verify Web artifacts before upload
+        run: |
+          echo "=== Verifying Web artifacts exist before upload ==="
+          if [ ! -d "build/web" ] || [ -z "$(ls -A build/web 2>/dev/null)" ]; then
+            echo "ERROR: No Web build files found in build/web/"
+            exit 1
+          fi
+          echo "Web build files found:"
+          ls -la build/web/
       - name: Upload Web artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: release-web
@@ -303,7 +325,7 @@ jobs:
             build/web/
             **/build/web/**
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   build-desktop:
     name: Build Desktop (Linux/macOS/Windows)
@@ -504,17 +526,41 @@ jobs:
           Write-Host "=== All files anywhere in build/ ==="
           if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
         shell: powershell
+      - name: Verify Desktop artifacts before upload
+        run: |
+          echo "=== Verifying Desktop artifacts exist before upload ==="
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            if [ ! -d "build/linux" ] || [ -z "$(ls -A build/linux 2>/dev/null)" ]; then
+              echo "ERROR: No Linux desktop build found!"
+              exit 1
+            fi
+            echo "Linux desktop build found:"
+            ls -la build/linux/
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            if [ ! -d "build/macos" ] || [ -z "$(ls -A build/macos 2>/dev/null)" ]; then
+              echo "ERROR: No macOS desktop build found!"
+              exit 1
+            fi
+            echo "macOS desktop build found:"
+            ls -la build/macos/
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            if [ ! -d "build/windows" ] || [ -z "$(ls -A build/windows 2>/dev/null)" ]; then
+              echo "ERROR: No Windows desktop build found!"
+              exit 1
+            fi
+            echo "Windows desktop build found:"
+            ls -la build/windows/
+          fi
       - name: Upload Desktop artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.os }}
+          name: release-desktop-${{ runner.os }}
           path: |
             build/linux/**/release/bundle/**
             build/macos/Build/Products/Release/**
             build/windows/**/runner/Release/**
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
 
   release:
     name: Create GitHub Release
@@ -535,42 +581,60 @@ jobs:
         with:
           name: release-apks
           path: artifacts/apks
+          merge-multiple: true
       - uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
           name: release-web
           path: artifacts/web
+          merge-multiple: true
       - uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
-          name: release-ubuntu-latest
+          name: release-desktop-Linux
           path: artifacts/linux
+          merge-multiple: true
       - uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
-          name: release-macos-latest
+          name: release-desktop-macOS
           path: artifacts/macos
+          merge-multiple: true
       - uses: actions/download-artifact@v4
-        continue-on-error: true
         with:
-          name: release-windows-2022
+          name: release-desktop-Windows
           path: artifacts/windows
-      - name: List downloaded files
+          merge-multiple: true
+      - name: Verify all required artifacts downloaded
         run: |
-          echo "=== Downloaded artifacts ==="
-          find artifacts -type f | head -50
-          echo "=== Directory structure ==="
-          ls -la artifacts/
-          echo "=== APK artifacts ==="
-          ls -la artifacts/apks/ 2>/dev/null || echo "No apks dir"
-          echo "=== Web artifacts ==="
-          ls -la artifacts/web/ 2>/dev/null || echo "No web dir"
-          echo "=== Linux artifacts ==="
-          ls -la artifacts/linux/ 2>/dev/null || echo "No linux dir"
-          echo "=== macOS artifacts ==="
-          ls -la artifacts/macos/ 2>/dev/null || echo "No macos dir"
-          echo "=== Windows artifacts ==="
-          ls -la artifacts/windows/ 2>/dev/null || echo "No windows dir"
+          echo "=== Verifying downloaded artifacts ==="
+          echo "--- APK artifacts ---"
+          if [ ! -d "artifacts/apks" ] || [ -z "$(ls -A artifacts/apks)" ]; then
+            echo "ERROR: No APK artifacts found!"
+            exit 1
+          fi
+          ls -la artifacts/apks/
+          echo "--- Web artifacts ---"
+          if [ ! -d "artifacts/web" ] || [ -z "$(ls -A artifacts/web)" ]; then
+            echo "ERROR: No Web artifacts found!"
+            exit 1
+          fi
+          ls -la artifacts/web/
+          echo "--- Linux desktop artifacts ---"
+          if [ ! -d "artifacts/linux" ] || [ -z "$(ls -A artifacts/linux)" ]; then
+            echo "ERROR: No Linux desktop artifacts found!"
+            exit 1
+          fi
+          ls -la artifacts/linux/
+          echo "--- macOS desktop artifacts ---"
+          if [ ! -d "artifacts/macos" ] || [ -z "$(ls -A artifacts/macos)" ]; then
+            echo "ERROR: No macOS desktop artifacts found!"
+            exit 1
+          fi
+          ls -la artifacts/macos/
+          echo "--- Windows desktop artifacts ---"
+          if [ ! -d "artifacts/windows" ] || [ -z "$(ls -A artifacts/windows)" ]; then
+            echo "ERROR: No Windows desktop artifacts found!"
+            exit 1
+          fi
+          ls -la artifacts/windows/
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
