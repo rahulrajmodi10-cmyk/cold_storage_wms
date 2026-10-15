@@ -1,5 +1,3 @@
-// lib/services/location_service.dart
-
 import 'package:sqflite/sqflite.dart';
 import '../models/storage_location.dart';
 
@@ -10,7 +8,21 @@ class LocationService {
 
   Future<int> createLocation(StorageLocation loc) async {
     if (loc.capacity <= 0) throw ArgumentError('capacity must be positive');
-    final id = await db.insert('storage_location', loc.toMap());
+    if (loc.currentUtilization < 0 || loc.currentUtilization > loc.capacity) {
+      throw ArgumentError('current utilization must be between 0 and capacity');
+    }
+
+    final id = await db.insert(
+      'storage_location',
+      {
+        'rack_id': loc.rackId,
+        'shelf_id': loc.shelfId,
+        'bin_id': loc.binId,
+        'zone': loc.zone,
+        'capacity': loc.capacity,
+        'current_utilization': loc.currentUtilization,
+      },
+    );
     await _audit('create_location', 'Created location ${loc.displayName}', id);
     return id;
   }
@@ -29,7 +41,24 @@ class LocationService {
   }
 
   Future<void> updateLocation(StorageLocation loc) async {
-    await db.update('storage_location', loc.toMap(), where: 'id = ?', whereArgs: [loc.id]);
+    if (loc.capacity <= 0) throw ArgumentError('capacity must be positive');
+    if (loc.currentUtilization < 0 || loc.currentUtilization > loc.capacity) {
+      throw ArgumentError('current utilization must be between 0 and capacity');
+    }
+
+    await db.update(
+      'storage_location',
+      {
+        'rack_id': loc.rackId,
+        'shelf_id': loc.shelfId,
+        'bin_id': loc.binId,
+        'zone': loc.zone,
+        'capacity': loc.capacity,
+        'current_utilization': loc.currentUtilization,
+      },
+      where: 'id = ?',
+      whereArgs: [loc.id],
+    );
     await _audit('update_location', 'Updated location ${loc.displayName}', loc.id!);
   }
 
@@ -39,8 +68,25 @@ class LocationService {
   }
 
   Future<void> updateUtilization(int locationId, double newUtilization) async {
-    await db.update('storage_location', {'current_utilization': newUtilization}, where: 'id = ?', whereArgs: [locationId]);
-    await _audit('update_utilization', 'Updated utilization for location $locationId to $newUtilization', locationId);
+    final existing = await getLocation(locationId);
+    if (existing == null) throw StateError('Location not found');
+
+    if (newUtilization < 0 || newUtilization > existing.capacity) {
+      throw ArgumentError('utilization must be between 0 and capacity');
+    }
+
+    await db.update(
+      'storage_location',
+      {'current_utilization': newUtilization},
+      where: 'id = ?',
+      whereArgs: [locationId],
+    );
+
+    await _audit(
+      'update_utilization',
+      'Updated utilization for location $locationId to $newUtilization',
+      locationId,
+    );
   }
 
   Future<void> _audit(String action, String detail, int? entityId) async {
@@ -50,7 +96,7 @@ class LocationService {
       'detail': detail,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'entity_type': 'storage_location',
-      'entity_id': entityId
+      'entity_id': entityId,
     });
   }
 }

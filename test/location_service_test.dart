@@ -1,5 +1,3 @@
-// test/location_service_test.dart
-
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import '../lib/services/location_service.dart';
@@ -91,5 +89,23 @@ void main() {
       capacity: -100, currentUtilization: 0,
     );
     expect(() => service.createLocation(loc), throwsArgumentError);
+  });
+
+  test('utilization cannot exceed capacity', () async {
+    final id = await service.createLocation(StorageLocation(
+      rackId: 'A', shelfId: '1', binId: '01', zone: 'FROZEN',
+      capacity: 100, currentUtilization: 10,
+    ));
+
+    expect(() => service.updateUtilization(id, 150), throwsArgumentError);
+  });
+
+  test('utilization cannot be negative', () async {
+    final id = await service.createLocation(StorageLocation(
+      rackId: 'A', shelfId: '1', binId: '01', zone: 'FROZEN',
+      capacity: 100, currentUtilization: 10,
+    ));
+
+    expect(() => service.updateUtilization(id, -1), throwsArgumentError);
   });
 }

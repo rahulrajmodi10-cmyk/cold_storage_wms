@@ -1,5 +1,3 @@
-// test/inventory_service_test.dart
-
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import '../lib/services/inventory_service.dart';
@@ -168,5 +166,19 @@ void main() {
     ));
 
     expect(() => service.changeQuantity(id, -20, operatorId: 1), throwsArgumentError);
+  });
+
+  test('change quantity with zero delta is ignored', () async {
+    final id = await service.createItem(InventoryItem(
+      sku: 'SKU006',
+      name: 'ZeroDelta',
+      category: 'Test',
+      quantity: 10,
+      unit: 'kg',
+    ));
+
+    await service.changeQuantity(id, 0, operatorId: 1);
+    final item = await service.getItemById(id);
+    expect(item!.quantity, 10);
   });
 }
