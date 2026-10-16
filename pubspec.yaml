@@ -50,7 +50,7 @@ dependencies:
   # Permissions & Device Info
   permission_handler: ^11.3.1
   device_info_plus: ^10.1.0
-  package_info_plus: ^8.0.0
+  package_info_plus: ^10.0.0
 
   # Utilities
   uuid: ^4.4.0
@@ -78,7 +78,7 @@ dependencies:
   flutter_typeahead: ^5.2.0
 
   # Maps & Location
-  geolocator: ^13.0.0
+  geolocator: ^14.1.1
   google_maps_flutter: ^2.10.1
 
 dev_dependencies:
