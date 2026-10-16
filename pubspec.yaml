@@ -23,7 +23,6 @@ dependencies:
   # tflite_flutter_helper: ^0.3.1  # Optional helper
 
   # Barcode & QR Code
-  barcode_scan2: ^4.3.0
   mobile_scanner: ^4.0.0
   qr_flutter: ^4.1.0
   zxing_lib: ^0.3.1  # For barcode generation
