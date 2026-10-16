@@ -61,7 +61,6 @@ dependencies:
   injectable: ^2.4.2
 
   # File Handling
-  file_picker: ^8.0.0+1
   open_filex: ^4.4.0
   share_plus: ^12.0.2
 
