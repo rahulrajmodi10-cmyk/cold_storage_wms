@@ -141,6 +141,16 @@ jobs:
             echo "Android platform directory already exists"
             ls -la android/
           fi
+      - name: Bump Android SDK to 36
+        run: |
+          echo "=== Bumping compileSdk/targetSdk to 36 ==="
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/compileSdkVersion .*/compileSdkVersion 36/' android/app/build.gradle
+            sed -i 's/targetSdkVersion .*/targetSdkVersion 36/' android/app/build.gradle
+            grep -n "SdkVersion" android/app/build.gradle
+          else
+            echo "android/app/build.gradle not found"
+          fi
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
