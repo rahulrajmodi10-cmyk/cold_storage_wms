@@ -3,7 +3,9 @@
 ## Prerequisites
 
 - **OS**: Linux (Ubuntu 22.04+), macOS (12+), or Windows 10/11
-- **Flutter SDK**: 3.22+ (stable channel)
+- **Flutter SDK**: 3.47.7+ (stable channel)
+- **Dart SDK**: 3.13+
+- **JDK**: 17 (for Android builds)
 - **Android SDK**: API level 34 (for Android builds)
 - **Git**: For version control
 
@@ -15,8 +17,8 @@
 ```bash
 # Download and extract Flutter
 cd ~
-wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.0-stable.tar.xz
-tar xf flutter_linux_3.22.0-stable.tar.xz
+wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.47.7-stable.tar.xz
+tar xf flutter_linux_3.47.7-stable.tar.xz
 export PATH="$PATH:~/flutter/bin"
 
 # Verify installation

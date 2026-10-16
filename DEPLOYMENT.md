@@ -3,7 +3,7 @@
 ## Prerequisites Checklist
 
 - [ ] GitHub repository created
-- [ ] Flutter 3.47.5 installed locally (for verification)
+- [ ] Flutter 3.47.7 installed locally (for verification)
 - [ ] GitHub CLI (`gh`) installed (optional, for manual triggers)
 
 ---

@@ -1,8 +1,8 @@
 name: cold_storage_wms
 description: Cold Storage Warehouse Management System with Accounts, Finance, Logistics, AI Camera, Gatepass & Barcode
-version: 1.0.0
+version: 1.0.1
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.13.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -78,16 +78,15 @@ dependencies:
   flutter_typeahead: ^5.2.0
 
   # Maps & Location
-  geolocator: ^14.1.1
+  geolocator: 14.0.2
   google_maps_flutter: ^2.10.1
 
 dependency_overrides:
-  geolocator_android: ^5.1.1+1
+  geolocator_android: 5.1.1+1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: ^1.24.0
   flutter_lints: ^4.0.0
   build_runner: ^2.4.11
   json_serializable: ^6.8.0

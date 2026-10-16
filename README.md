@@ -170,8 +170,9 @@ cold_storage_wms/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter SDK >= 3.2.0
-- Dart SDK >= 3.2.0
+- Flutter SDK >= 3.47.7
+- Dart SDK >= 3.13.0
+- Java 17 (Android builds)
 - Android Studio / VS Code
 - SQLite (via sqflite_ffi for desktop)
 

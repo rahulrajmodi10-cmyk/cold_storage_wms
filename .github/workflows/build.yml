@@ -21,7 +21,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -64,7 +64,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -104,11 +104,15 @@ jobs:
     needs: [analyze, test]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Install dependencies for sqflite_common_ffi
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -141,8 +145,11 @@ jobs:
             echo "Android platform directory already exists"
             ls -la android/
           fi
+      - name: Allow legacy TensorFlow Lite Kotlin target
+        run: echo "kotlin.jvm.target.validation.mode=warning" >> android/gradle.properties
       - name: Build APK (release)
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -153,6 +160,7 @@ jobs:
           echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build App Bundle (release)
         run: |
+          set -o pipefail
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build appbundle --release ==="
           flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
@@ -234,7 +242,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -273,6 +281,7 @@ jobs:
           flutter --version
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build web --release ==="
+          set -o pipefail
           flutter build web --release --verbose 2>&1 | tee build_web_output.txt
           echo "=== Build Web exit code: ${PIPESTATUS[0]} ==="
           echo "=== Post-build working directory: $(pwd) ==="
@@ -343,7 +352,7 @@ jobs:
           sudo apt-get install -y libsqlite3-dev clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.47.7'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -421,6 +430,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 30
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -431,6 +441,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 30
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -496,7 +507,8 @@ jobs:
             build_macos_output.txt
             build_windows_output.txt
       - name: List files to upload for Desktop artifacts (Linux/macOS)
-        if: runner.os != 'Windows'
+        if: matrix.os != 'windows-2022'
+        shell: bash
         run: |
           echo "=== Working directory: $(pwd) ==="
           echo "=== Files in build/linux ==="
@@ -514,7 +526,7 @@ jobs:
           echo "=== All files anywhere in build/ ==="
           find build -type f 2>/dev/null | head -30
       - name: List files to upload for Desktop artifacts (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-2022'
         run: |
           Write-Host "=== Working directory: $(pwd) ==="
           Write-Host "=== Files in build/linux ==="
@@ -527,6 +539,8 @@ jobs:
           if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
         shell: powershell
       - name: Verify Desktop artifacts before upload
+        if: matrix.os != 'windows-2022'
+        shell: bash
         run: |
           echo "=== Verifying Desktop artifacts exist before upload ==="
           if [ "${{ runner.os }}" == "Linux" ]; then
@@ -551,14 +565,67 @@ jobs:
             echo "Windows desktop build found:"
             ls -la build/windows/
           fi
+      - name: Verify Windows desktop artifacts before upload
+        if: matrix.os == 'windows-2022'
+        shell: powershell
+        run: |
+          $releasePath = "build/windows/x64/runner/Release"
+          if (-not (Test-Path $releasePath)) {
+            throw "Windows release directory not found: $releasePath"
+          }
+          $files = Get-ChildItem $releasePath -Recurse -File
+          if (-not $files) {
+            throw "No Windows release files found in $releasePath"
+          }
+          $files | Select-Object -First 30
+      - name: Package Linux desktop artifact
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python3 - <<'PY'
+          import os
+          import zipfile
+          from pathlib import Path
+
+          source = Path("build/linux/x64/release/bundle")
+          with zipfile.ZipFile("desktop-package.zip", "w", zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+              for path in sorted(source.rglob("*")):
+                  if not path.is_file() and not path.is_symlink():
+                      continue
+                  info = zipfile.ZipInfo(path.relative_to(source).as_posix())
+                  info.create_system = 3
+                  info.compress_type = zipfile.ZIP_DEFLATED
+                  info.external_attr = (path.lstat().st_mode & 0xFFFF) << 16
+                  payload = os.readlink(path).encode() if path.is_symlink() else path.read_bytes()
+                  archive.writestr(info, payload)
+          with zipfile.ZipFile("desktop-package.zip") as archive:
+              executable_mode = (archive.getinfo("cold_storage_wms").external_attr >> 16) & 0o777
+              if not executable_mode & 0o111:
+                  raise SystemExit("Linux application executable permission was not preserved")
+          PY
+          unzip -t desktop-package.zip
+      - name: Package macOS desktop artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/macos/Build/Products/Release/cold_storage_wms.app \
+            desktop-package.zip
+          mkdir -p "$RUNNER_TEMP/desktop-package-check"
+          ditto -x -k desktop-package.zip "$RUNNER_TEMP/desktop-package-check"
+          test -d "$RUNNER_TEMP/desktop-package-check/cold_storage_wms.app"
+      - name: Package Windows desktop artifact
+        if: matrix.os == 'windows-2022'
+        shell: powershell
+        run: |
+          $releasePath = "build/windows/x64/runner/Release"
+          Compress-Archive -Path "$releasePath\*" -DestinationPath "desktop-package.zip" -Force
+          if (-not (Test-Path "desktop-package.zip")) {
+            throw "Windows desktop archive was not created"
+          }
       - name: Upload Desktop artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-desktop-${{ runner.os }}
-          path: |
-            build/linux/**/release/bundle/**
-            build/macos/Build/Products/Release/**
-            build/windows/**/runner/Release/**
+          path: desktop-package.zip
           retention-days: 30
           if-no-files-found: error
 
@@ -606,35 +673,96 @@ jobs:
         run: |
           echo "=== Verifying downloaded artifacts ==="
           echo "--- APK artifacts ---"
-          if [ ! -d "artifacts/apks" ] || [ -z "$(ls -A artifacts/apks)" ]; then
-            echo "ERROR: No APK artifacts found!"
+          if [ ! -d "artifacts/apks" ] || ! find artifacts/apks -type f -name "*.apk" -print -quit | grep -q .; then
+            echo "ERROR: No APK files found!"
             exit 1
           fi
-          ls -la artifacts/apks/
+          if ! find artifacts/apks -type f -name "*.aab" -print -quit | grep -q .; then
+            echo "ERROR: No App Bundle files found!"
+            exit 1
+          fi
+          find artifacts/apks -type f \( -name "*.apk" -o -name "*.aab" \) -print
           echo "--- Web artifacts ---"
           if [ ! -d "artifacts/web" ] || [ -z "$(ls -A artifacts/web)" ]; then
             echo "ERROR: No Web artifacts found!"
             exit 1
           fi
           ls -la artifacts/web/
-          echo "--- Linux desktop artifacts ---"
-          if [ ! -d "artifacts/linux" ] || [ -z "$(ls -A artifacts/linux)" ]; then
-            echo "ERROR: No Linux desktop artifacts found!"
+          echo "--- Linux desktop archive ---"
+          if [ ! -f "artifacts/linux/desktop-package.zip" ]; then
+            echo "ERROR: Linux desktop archive not found!"
             exit 1
           fi
           ls -la artifacts/linux/
-          echo "--- macOS desktop artifacts ---"
-          if [ ! -d "artifacts/macos" ] || [ -z "$(ls -A artifacts/macos)" ]; then
-            echo "ERROR: No macOS desktop artifacts found!"
+          echo "--- macOS desktop archive ---"
+          if [ ! -f "artifacts/macos/desktop-package.zip" ]; then
+            echo "ERROR: macOS desktop archive not found!"
             exit 1
           fi
           ls -la artifacts/macos/
-          echo "--- Windows desktop artifacts ---"
-          if [ ! -d "artifacts/windows" ] || [ -z "$(ls -A artifacts/windows)" ]; then
-            echo "ERROR: No Windows desktop artifacts found!"
+          echo "--- Windows desktop archive ---"
+          if [ ! -f "artifacts/windows/desktop-package.zip" ]; then
+            echo "ERROR: Windows desktop archive not found!"
             exit 1
           fi
           ls -la artifacts/windows/
+      - name: Package downloadable platform builds
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import shutil
+          import zipfile
+          from pathlib import Path
+
+          artifacts = Path("artifacts")
+
+          def find_file(root, name):
+              matches = [path for path in root.rglob(name) if path.is_file()]
+              if len(matches) != 1:
+                  raise SystemExit(f"Expected one {name} under {root}, found {len(matches)}")
+              return matches[0]
+
+          def write_zip(source, destination):
+              with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+                  for path in sorted(source.rglob("*")):
+                      if not path.is_file() and not path.is_symlink():
+                          continue
+                      info = zipfile.ZipInfo(path.relative_to(source).as_posix())
+                      info.create_system = 3
+                      info.compress_type = zipfile.ZIP_DEFLATED
+                      mode = path.lstat().st_mode
+                      info.external_attr = (mode & 0xFFFF) << 16
+                      payload = os.readlink(path).encode() if path.is_symlink() else path.read_bytes()
+                      archive.writestr(info, payload)
+
+          output = artifacts / "release-assets"
+          output.mkdir(parents=True, exist_ok=True)
+          tag = os.environ["RELEASE_TAG"]
+
+          apk_files = sorted((artifacts / "apks").rglob("*.apk"))
+          aab_files = sorted((artifacts / "apks").rglob("*.aab"))
+          if not apk_files or not aab_files:
+              raise SystemExit("Expected both APK and AAB build outputs")
+          for package in apk_files + aab_files:
+              shutil.copy2(package, output / package.name)
+
+          web_index = find_file(artifacts / "web", "index.html")
+          web_archive = output / f"cold-storage-wms-{tag}-web.zip"
+          write_zip(web_index.parent, web_archive)
+
+          for platform, filename in (
+              ("linux", f"cold-storage-wms-{tag}-linux-x64.zip"),
+              ("macos", f"cold-storage-wms-{tag}-macos.zip"),
+              ("windows", f"cold-storage-wms-{tag}-windows-x64.zip"),
+          ):
+              archive = find_file(artifacts / platform, "desktop-package.zip")
+              shutil.copy2(archive, output / filename)
+
+          for package in sorted(output.iterdir()):
+              print(f"Created {package} ({package.stat().st_size} bytes)")
+          PY
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -647,28 +775,21 @@ jobs:
             - Automated build from tag ${{ github.ref_name }}
 
             ### Downloads
-            - **Android APKs** (arm64, arm32, x64): `app-release-*.apk`
-            - **Android App Bundle**: `app-release.aab`
-            - **Web**: Extract and host on any static hosting
-            - **Desktop**: Platform-specific builds in respective folders
+            - **Android APKs** (arm64, arm32, x64) and App Bundle
+            - **Web**: `cold-storage-wms-${{ github.ref_name }}-web.zip` (extract and host)
+            - **Linux x64**: `cold-storage-wms-${{ github.ref_name }}-linux-x64.zip`
+            - **macOS**: `cold-storage-wms-${{ github.ref_name }}-macos.zip`
+            - **Windows x64**: `cold-storage-wms-${{ github.ref_name }}-windows-x64.zip`
 
             ### Installation
             ```bash
             # Android
             adb install app-release-arm64-v8a.apk
 
-            # Web
-            # Host contents of web/ folder on any static hosting
-
-            # Desktop
-            # Run the executable in the respective platform folder
+            # Web: extract the web ZIP and host its contents
+            # Desktop: extract the ZIP for your operating system
             ```
           files: |
-            artifacts/apks/*.apk
-            artifacts/apks/*.aab
-            artifacts/web/**
-            artifacts/linux/**
-            artifacts/macos/**
-            artifacts/windows/**
+            artifacts/release-assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
