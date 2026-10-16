@@ -67,7 +67,7 @@ dependencies:
   share_plus: ^12.0.2
 
   # Background Tasks
-  workmanager: ^0.5.2
+  workmanager: ^0.10.10
   flutter_local_notifications: ^17.2.2
 
   # UI Components

@@ -511,20 +511,18 @@ jobs:
         shell: bash
         run: |
           echo "=== Working directory: $(pwd) ==="
-          echo "=== Files in build/linux ==="
-          ls -la build/linux/ 2>/dev/null || echo "No Linux build found"
-          echo "=== All files in build/linux ==="
-          find build/linux -type f 2>/dev/null | head -30
-          echo "=== Files in build/macos ==="
-          ls -la build/macos/ 2>/dev/null || echo "No macOS build found"
-          echo "=== All files in build/macos ==="
-          find build/macos -type f 2>/dev/null | head -30
-          echo "=== Files in build/windows ==="
-          ls -la build/windows/ 2>/dev/null || echo "No Windows build found"
-          echo "=== All files in build/windows ==="
-          find build/windows -type f 2>/dev/null | head -30
+          for platform in linux macos windows; do
+            echo "=== Files in build/$platform ==="
+            if [ -d "build/$platform" ]; then
+              find "build/$platform" -type f -print | sed -n '1,30p'
+            else
+              echo "No $platform build found on this runner"
+            fi
+          done
           echo "=== All files anywhere in build/ ==="
-          find build -type f 2>/dev/null | head -30
+          if [ -d build ]; then
+            find build -type f -print | sed -n '1,30p'
+          fi
       - name: List files to upload for Desktop artifacts (Windows)
         if: matrix.os == 'windows-2022'
         run: |
