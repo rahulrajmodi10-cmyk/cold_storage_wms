@@ -151,6 +151,16 @@ jobs:
           else
             echo "android/app/build.gradle not found"
           fi
+      - name: Set Android app name and description
+        run: |
+          echo "=== Setting Android app label ==="
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          if [ -f "$MANIFEST" ]; then
+            sed -i 's/android:label="cold_storage_wms"/android:label="Cold Storage WMS"/' "$MANIFEST"
+            grep -n "android:label" "$MANIFEST"
+          else
+            echo "$MANIFEST not found"
+          fi
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
