@@ -147,6 +147,37 @@ jobs:
           fi
       - name: Allow legacy TensorFlow Lite Kotlin target
         run: echo "kotlin.jvm.target.validation.mode=warning" >> android/gradle.properties
+      - name: Enable core library desugaring for notifications
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          gradle_file = Path("android/app/build.gradle.kts")
+          if not gradle_file.is_file():
+              raise SystemExit(f"Expected generated Android Gradle file: {gradle_file}")
+          content = gradle_file.read_text()
+
+          if "isCoreLibraryDesugaringEnabled = true" not in content:
+              anchor = "    compileOptions {\n"
+              if content.count(anchor) != 1:
+                  raise SystemExit("Could not locate the generated Android compileOptions block")
+              content = content.replace(
+                  anchor,
+                  anchor + "        isCoreLibraryDesugaringEnabled = true\n",
+                  1,
+              )
+
+          dependency = '    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")'
+          if dependency not in content:
+              match = re.search(r"(?m)^dependencies\s*\{\s*$", content)
+              if match:
+                  content = content[:match.end()] + "\n" + dependency + content[match.end():]
+              else:
+                  content += "\ndependencies {\n" + dependency + "\n}\n"
+
+          gradle_file.write_text(content)
+          PY
       - name: Build APK (release)
         run: |
           set -o pipefail
