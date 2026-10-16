@@ -19,7 +19,7 @@ dependencies:
   # Camera & AI
   camera: ^0.10.5+9
   image: ^4.2.0
-  tflite_flutter: ^0.10.1
+  tflite_flutter: ^0.12.1
   # tflite_flutter_helper: ^0.3.1  # Optional helper
 
   # Barcode & QR Code
