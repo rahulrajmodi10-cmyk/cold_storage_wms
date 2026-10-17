@@ -4,20 +4,34 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:sqflite/sqflite.dart';
 import '../models/camera_ai_models.dart';
+import 'audit_service.dart';
 
 class CameraAIService {
   final Database db;
+  final AuditService auditService;
 
-  CameraAIService(this.db);
+  CameraAIService(this.db, {AuditService? auditService})
+      : auditService = auditService ?? AuditService(db);
 
   // ============ Camera Devices ============
 
-  Future<int> createCamera(CameraDevice camera) async {
+  Future<int> createCamera(CameraDevice camera, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = camera.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('camera_devices', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('camera_devices', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_camera',
+        detail: 'Created camera ${camera.code} - ${camera.name}',
+        entityType: 'camera_devices',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<CameraDevice?> getCamera(int id) async {
@@ -44,26 +58,61 @@ class CameraAIService {
     return maps.map((m) => CameraDevice.fromMap(m)).toList();
   }
 
-  Future<int> updateCamera(CameraDevice camera) async {
+  Future<int> updateCamera(CameraDevice camera, {int? userId}) async {
     final map = camera.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('camera_devices', map, where: 'id = ?', whereArgs: [camera.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('camera_devices', map, where: 'id = ?', whereArgs: [camera.id]);
+      if (count == 0) throw StateError('Camera not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_camera',
+        detail: 'Updated camera ${camera.code}',
+        entityType: 'camera_devices',
+        entityId: camera.id,
+        userId: userId,
+      );
+    });
+    return camera.id!;
   }
 
-  Future<int> updateCameraHeartbeat(int cameraId) async {
-    return await db.update('camera_devices', {
-      'last_heartbeat': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [cameraId]);
+  Future<int> updateCameraHeartbeat(int cameraId, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('camera_devices', {
+        'last_heartbeat': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [cameraId]);
+      if (count == 0) throw StateError('Camera not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'camera_heartbeat',
+        detail: 'Camera heartbeat updated',
+        entityType: 'camera_devices',
+        entityId: cameraId,
+        userId: userId,
+      );
+    });
+    return cameraId;
   }
 
   // ============ Counting Sessions ============
 
-  Future<int> createCountingSession(CountingSession session) async {
+  Future<int> createCountingSession(CountingSession session, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = session.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('counting_sessions', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('counting_sessions', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_counting_session',
+        detail: 'Created counting session ${session.sessionNumber}',
+        entityType: 'counting_sessions',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<CountingSession?> getCountingSession(int id) async {
@@ -134,13 +183,25 @@ class CameraAIService {
     return maps.map((m) => CountingSession.fromMap(m)).toList();
   }
 
-  Future<int> updateCountingSession(CountingSession session) async {
+  Future<int> updateCountingSession(CountingSession session, {int? userId}) async {
     final map = session.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('counting_sessions', map, where: 'id = ?', whereArgs: [session.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('counting_sessions', map, where: 'id = ?', whereArgs: [session.id]);
+      if (count == 0) throw StateError('Counting session not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_counting_session',
+        detail: 'Updated counting session ${session.sessionNumber}',
+        entityType: 'counting_sessions',
+        entityId: session.id,
+        userId: userId,
+      );
+    });
+    return session.id!;
   }
 
-  Future<int> completeCountingSession(int sessionId, {int? manualCount, int? verifiedCount, int? verifiedBy, String? notes}) async {
+  Future<int> completeCountingSession(int sessionId, {int? manualCount, int? verifiedCount, int? verifiedBy, String? notes, int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final session = await getCountingSession(sessionId);
     if (session == null) return 0;
@@ -173,21 +234,52 @@ class CameraAIService {
       'updated_at': now,
     };
 
-    return await db.update('counting_sessions', map, where: 'id = ?', whereArgs: [sessionId]);
+    await db.transaction((txn) async {
+      final count = await txn.update('counting_sessions', map, where: 'id = ?', whereArgs: [sessionId]);
+      if (count == 0) throw StateError('Counting session not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'complete_counting_session',
+        detail: 'Completed counting session ${session.sessionNumber} (discrepancy: $discrepancy)',
+        entityType: 'counting_sessions',
+        entityId: sessionId,
+        userId: userId ?? verifiedBy,
+      );
+    });
+    return sessionId;
   }
 
   // ============ Detection Events ============
 
-  Future<int> addDetectionEvent(DetectionEvent event) async {
-    return await db.insert('detection_events', event.toMap());
+  Future<int> addDetectionEvent(DetectionEvent event, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('detection_events', event.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_detection_event',
+        detail: 'Added detection event for session ${event.sessionId}',
+        entityType: 'detection_events',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
-  Future<int> addDetectionEventsBatch(List<DetectionEvent> events) async {
+  Future<int> addDetectionEventsBatch(List<DetectionEvent> events, {int? userId}) async {
     if (events.isEmpty) return 0;
     await db.transaction((txn) async {
       for (final event in events) {
         await txn.insert('detection_events', event.toMap());
       }
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_detection_events_batch',
+        detail: 'Added ${events.length} detection events',
+        entityType: 'detection_events',
+        entityId: events.first.sessionId,
+        userId: userId,
+      );
     });
     return events.length;
   }
@@ -197,12 +289,24 @@ class CameraAIService {
     return maps.map((m) => DetectionEvent.fromMap(m)).toList();
   }
 
-  Future<int> updateDetectionEventCounted(int eventId, int countTimestamp, String direction) async {
-    return await db.update('detection_events', {
-      'counted': 1,
-      'count_timestamp': countTimestamp,
-      'direction': direction,
-    }, where: 'id = ?', whereArgs: [eventId]);
+  Future<int> updateDetectionEventCounted(int eventId, int countTimestamp, String direction, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('detection_events', {
+        'counted': 1,
+        'count_timestamp': countTimestamp,
+        'direction': direction,
+      }, where: 'id = ?', whereArgs: [eventId]);
+      if (count == 0) throw StateError('Detection event not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_detection_event_counted',
+        detail: 'Marked detection event as counted ($direction)',
+        entityType: 'detection_events',
+        entityId: eventId,
+        userId: userId,
+      );
+    });
+    return eventId;
   }
 
   Future<Map<String, dynamic>> getSessionStats(int sessionId) async {
@@ -223,11 +327,22 @@ class CameraAIService {
 
   // ============ Count Verification ============
 
-  Future<int> createVerification(CountVerification verification) async {
+  Future<int> createVerification(CountVerification verification, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = verification.toMap();
     map['created_at'] = now;
-    return await db.insert('count_verifications', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('count_verifications', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_verification',
+        detail: 'Created verification for session ${verification.sessionId}',
+        entityType: 'count_verifications',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<CountVerification>> getVerifications(int sessionId) async {
@@ -235,23 +350,46 @@ class CameraAIService {
     return maps.map((m) => CountVerification.fromMap(m)).toList();
   }
 
-  Future<int> updateVerificationStatus(int verificationId, String status, {String? notes, String? evidenceImages}) async {
+  Future<int> updateVerificationStatus(int verificationId, String status, {String? notes, String? evidenceImages, int? userId}) async {
     final Map<String, dynamic> map = {'status': status};
     if (notes != null) map['verification_notes'] = notes;
     if (evidenceImages != null) map['evidence_images'] = evidenceImages;
     if (status == 'APPROVED' || status == 'REJECTED') {
       map['completed_at'] = DateTime.now().millisecondsSinceEpoch;
     }
-    return await db.update('count_verifications', map, where: 'id = ?', whereArgs: [verificationId]);
+    await db.transaction((txn) async {
+      final count = await txn.update('count_verifications', map, where: 'id = ?', whereArgs: [verificationId]);
+      if (count == 0) throw StateError('Verification not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_verification_status',
+        detail: 'Verification status changed to $status',
+        entityType: 'count_verifications',
+        entityId: verificationId,
+        userId: userId,
+      );
+    });
+    return verificationId;
   }
 
   // ============ Camera Calibration ============
 
-  Future<int> createCalibration(CameraCalibration calibration) async {
+  Future<int> createCalibration(CameraCalibration calibration, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = calibration.toMap();
     map['calibrated_at'] = now;
-    return await db.insert('camera_calibrations', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('camera_calibrations', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_calibration',
+        detail: 'Created calibration for camera ${calibration.cameraId} (${calibration.calibrationType})',
+        entityType: 'camera_calibrations',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<CameraCalibration>> getCalibrations(int cameraId, {bool activeOnly = true}) async {
@@ -276,12 +414,23 @@ class CameraAIService {
 
   // ============ ML Models ============
 
-  Future<int> createMLModel(MLModel model) async {
+  Future<int> createMLModel(MLModel model, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = model.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('ml_models', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('ml_models', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_ml_model',
+        detail: 'Created ML model ${model.name} v${model.version}',
+        entityType: 'ml_models',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<MLModel?> getActiveMLModel() async {
@@ -295,23 +444,44 @@ class CameraAIService {
     return maps.map((m) => MLModel.fromMap(m)).toList();
   }
 
-  Future<int> deployMLModel(int modelId) async {
-    // Deactivate all other models
-    await db.update('ml_models', {'is_active': 0});
-    // Activate selected model
-    return await db.update('ml_models', {
-      'is_active': 1,
-      'deployed_at': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [modelId]);
+  Future<int> deployMLModel(int modelId, {int? userId}) async {
+    await db.transaction((txn) async {
+      await txn.update('ml_models', {'is_active': 0});
+      final count = await txn.update('ml_models', {
+        'is_active': 1,
+        'deployed_at': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [modelId]);
+      if (count == 0) throw StateError('ML model not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'deploy_ml_model',
+        detail: 'Deployed ML model $modelId',
+        entityType: 'ml_models',
+        entityId: modelId,
+        userId: userId,
+      );
+    });
+    return modelId;
   }
 
   // ============ Camera Alerts ============
 
-  Future<int> createAlert(CameraAlert alert) async {
+  Future<int> createAlert(CameraAlert alert, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = alert.toMap();
     map['created_at'] = now;
-    return await db.insert('camera_alerts', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('camera_alerts', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_camera_alert',
+        detail: 'Created alert ${alert.alertType} for camera ${alert.cameraId}',
+        entityType: 'camera_alerts',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<CameraAlert>> getAlerts({
@@ -342,20 +512,44 @@ class CameraAIService {
     return maps.map((m) => CameraAlert.fromMap(m)).toList();
   }
 
-  Future<int> acknowledgeAlert(int alertId, int acknowledgedBy) async {
-    return await db.update('camera_alerts', {
-      'acknowledged': 1,
-      'acknowledged_by': acknowledgedBy,
-      'acknowledged_at': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [alertId]);
+  Future<int> acknowledgeAlert(int alertId, int acknowledgedBy, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('camera_alerts', {
+        'acknowledged': 1,
+        'acknowledged_by': acknowledgedBy,
+        'acknowledged_at': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [alertId]);
+      if (count == 0) throw StateError('Alert not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'acknowledge_camera_alert',
+        detail: 'Acknowledged alert $alertId',
+        entityType: 'camera_alerts',
+        entityId: alertId,
+        userId: userId ?? acknowledgedBy,
+      );
+    });
+    return alertId;
   }
 
-  Future<int> resolveAlert(int alertId, int resolvedBy) async {
-    return await db.update('camera_alerts', {
-      'resolved': 1,
-      'resolved_by': resolvedBy,
-      'resolved_at': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [alertId]);
+  Future<int> resolveAlert(int alertId, int resolvedBy, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('camera_alerts', {
+        'resolved': 1,
+        'resolved_by': resolvedBy,
+        'resolved_at': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [alertId]);
+      if (count == 0) throw StateError('Alert not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'resolve_camera_alert',
+        detail: 'Resolved alert $alertId',
+        entityType: 'camera_alerts',
+        entityId: alertId,
+        userId: userId ?? resolvedBy,
+      );
+    });
+    return alertId;
   }
 
   // ============ AI Counting Logic (Integration with TFLite) ============
@@ -388,6 +582,7 @@ class CameraAIService {
     int? referenceId,
     int? expectedCount,
     int? operatorId,
+    int? userId,
   }) async {
     final sessionNumber = 'CNT-${DateTime.now().millisecondsSinceEpoch}';
     final session = CountingSession(
@@ -400,17 +595,14 @@ class CameraAIService {
       startTime: DateTime.now().millisecondsSinceEpoch,
       operatorId: operatorId,
     );
-    final id = await createCountingSession(session);
+    final id = await createCountingSession(session, userId: userId);
     return session.copyWith(id: id);
   }
 
   /// Real-time counting stream (for UI updates)
   Stream<int> getCountStream(int sessionId) {
-    // This would be implemented with a StreamController that gets updated
-    // as detection events are processed
     final controller = StreamController<int>.broadcast();
 
-    // Poll database for AI count updates
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       final session = await getCountingSession(sessionId);
       if (session != null) {
@@ -429,6 +621,7 @@ class CameraAIService {
   }
 
   // ============ Analytics ============
+  // (Read-only methods unchanged)
 
   Future<Map<String, dynamic>> getCountingAccuracy(int fromDate, int toDate) async {
     final result = await db.rawQuery('''

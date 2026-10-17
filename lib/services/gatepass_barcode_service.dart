@@ -4,20 +4,34 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
+import 'audit_service.dart';
 
 class GatepassBarcodeService {
   final Database db;
+  final AuditService auditService;
 
-  GatepassBarcodeService(this.db);
+  GatepassBarcodeService(this.db, {AuditService? auditService})
+      : auditService = auditService ?? AuditService(db);
 
   // ============ Gatepass Types ============
 
-  Future<int> createGatepassType(GatepassType type) async {
+  Future<int> createGatepassType(GatepassType type, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = type.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('gatepass_types', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('gatepass_types', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_gatepass_type',
+        detail: 'Created gatepass type ${type.code} - ${type.name}',
+        entityType: 'gatepass_types',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<GatepassType>> getGatepassTypes({bool activeOnly = true}) async {
@@ -30,20 +44,43 @@ class GatepassBarcodeService {
     return maps.map((m) => GatepassType.fromMap(m)).toList();
   }
 
-  Future<int> updateGatepassType(GatepassType type) async {
+  Future<int> updateGatepassType(GatepassType type, {int? userId}) async {
     final map = type.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('gatepass_types', map, where: 'id = ?', whereArgs: [type.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass_types', map, where: 'id = ?', whereArgs: [type.id]);
+      if (count == 0) throw StateError('Gatepass type not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_gatepass_type',
+        detail: 'Updated gatepass type ${type.code}',
+        entityType: 'gatepass_types',
+        entityId: type.id,
+        userId: userId,
+      );
+    });
+    return type.id!;
   }
 
   // ============ Gatepass ============
 
-  Future<int> createGatepass(Gatepass gatepass) async {
+  Future<int> createGatepass(Gatepass gatepass, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = gatepass.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('gatepass', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('gatepass', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_gatepass',
+        detail: 'Created gatepass ${gatepass.gatepassNumber}',
+        entityType: 'gatepass',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Gatepass?> getGatepass(int id) async {
@@ -105,13 +142,25 @@ class GatepassBarcodeService {
     return maps.map((m) => Gatepass.fromMap(m)).toList();
   }
 
-  Future<int> updateGatepass(Gatepass gatepass) async {
+  Future<int> updateGatepass(Gatepass gatepass, {int? userId}) async {
     final map = gatepass.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('gatepass', map, where: 'id = ?', whereArgs: [gatepass.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass', map, where: 'id = ?', whereArgs: [gatepass.id]);
+      if (count == 0) throw StateError('Gatepass not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_gatepass',
+        detail: 'Updated gatepass ${gatepass.gatepassNumber}',
+        entityType: 'gatepass',
+        entityId: gatepass.id,
+        userId: userId,
+      );
+    });
+    return gatepass.id!;
   }
 
-  Future<int> updateGatepassStatus(int id, String status, {Map<String, dynamic>? extraFields}) async {
+  Future<int> updateGatepassStatus(int id, String status, {Map<String, dynamic>? extraFields, int? userId}) async {
     final Map<String, dynamic> map = {
       'status': status,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
@@ -119,14 +168,26 @@ class GatepassBarcodeService {
     if (extraFields != null) {
       map.addAll(extraFields);
     }
-    return await db.update('gatepass', map, where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass', map, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Gatepass not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_gatepass_status',
+        detail: 'Gatepass status changed to $status',
+        entityType: 'gatepass',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   Future<int> submitGatepass(int id, int userId) async {
     return await updateGatepassStatus(id, 'SUBMITTED', extraFields: {
       'approved_by': userId,
       'approved_at': DateTime.now().millisecondsSinceEpoch,
-    });
+    }, userId: userId);
   }
 
   Future<int> approveGatepass(int id, int userId) async {
@@ -134,7 +195,7 @@ class GatepassBarcodeService {
       'approved_by': userId,
       'approved_at': DateTime.now().millisecondsSinceEpoch,
       'valid_from': DateTime.now().millisecondsSinceEpoch,
-    });
+    }, userId: userId);
   }
 
   Future<int> rejectGatepass(int id, int userId, String reason) async {
@@ -142,13 +203,13 @@ class GatepassBarcodeService {
       'approved_by': userId,
       'approved_at': DateTime.now().millisecondsSinceEpoch,
       'rejection_reason': reason,
-    });
+    }, userId: userId);
   }
 
   Future<int> activateGatepass(int id, int userId) async {
     return await updateGatepassStatus(id, 'ACTIVE', extraFields: {
       'actual_entry_time': DateTime.now().millisecondsSinceEpoch,
-    });
+    }, userId: userId);
   }
 
   Future<int> completeGatepass(int id, int userId, {String? notes}) async {
@@ -157,13 +218,24 @@ class GatepassBarcodeService {
       'completed_at': DateTime.now().millisecondsSinceEpoch,
       'actual_exit_time': DateTime.now().millisecondsSinceEpoch,
       'completion_notes': notes,
-    });
+    }, userId: userId);
   }
 
   // ============ Gatepass Items ============
 
-  Future<int> addGatepassItem(GatepassItem item) async {
-    return await db.insert('gatepass_items', item.toMap());
+  Future<int> addGatepassItem(GatepassItem item, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('gatepass_items', item.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_gatepass_item',
+        detail: 'Added item to gatepass ${item.gatepassId}',
+        entityType: 'gatepass_items',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<GatepassItem>> getGatepassItems(int gatepassId) async {
@@ -171,8 +243,20 @@ class GatepassBarcodeService {
     return maps.map((m) => GatepassItem.fromMap(m)).toList();
   }
 
-  Future<int> updateGatepassItem(GatepassItem item) async {
-    return await db.update('gatepass_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+  Future<int> updateGatepassItem(GatepassItem item, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+      if (count == 0) throw StateError('Gatepass item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_gatepass_item',
+        detail: 'Updated gatepass item',
+        entityType: 'gatepass_items',
+        entityId: item.id,
+        userId: userId,
+      );
+    });
+    return item.id!;
   }
 
   Future<int> verifyGatepassItem(int itemId, {
@@ -183,23 +267,46 @@ class GatepassBarcodeService {
     String? notes,
     int? verifiedBy,
   }) async {
-    return await db.update('gatepass_items', {
-      'verified_quantity': verifiedQuantity,
-      'verified_weight': verifiedWeight,
-      'verified_packages': verifiedPackages,
-      'verification_status': verificationStatus,
-      'verification_notes': notes,
-    }, where: 'id = ?', whereArgs: [itemId]);
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass_items', {
+        'verified_quantity': verifiedQuantity,
+        'verified_weight': verifiedWeight,
+        'verified_packages': verifiedPackages,
+        'verification_status': verificationStatus,
+        'verification_notes': notes,
+      }, where: 'id = ?', whereArgs: [itemId]);
+      if (count == 0) throw StateError('Gatepass item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'verify_gatepass_item',
+        detail: 'Verified item with status $verificationStatus',
+        entityType: 'gatepass_items',
+        entityId: itemId,
+        userId: verifiedBy,
+      );
+    });
+    return itemId;
   }
 
   // ============ Security Gates ============
 
-  Future<int> createSecurityGate(SecurityGate gate) async {
+  Future<int> createSecurityGate(SecurityGate gate, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = gate.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('security_gates', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('security_gates', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_security_gate',
+        detail: 'Created security gate ${gate.code}',
+        entityType: 'security_gates',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<SecurityGate>> getSecurityGates({bool activeOnly = true}) async {
@@ -210,8 +317,19 @@ class GatepassBarcodeService {
 
   // ============ Gatepass Vehicle Log ============
 
-  Future<int> logVehicleEntry(GatepassVehicleLog log) async {
-    return await db.insert('gatepass_vehicle_log', log.toMap());
+  Future<int> logVehicleEntry(GatepassVehicleLog log, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('gatepass_vehicle_log', log.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'log_vehicle_entry',
+        detail: 'Logged vehicle entry for gatepass ${log.gatepassId}',
+        entityType: 'gatepass_vehicle_log',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<GatepassVehicleLog>> getVehicleLogs(int gatepassId) async {
@@ -221,8 +339,19 @@ class GatepassBarcodeService {
 
   // ============ Gatepass Approvals ============
 
-  Future<int> createGatepassApproval(GatepassApproval approval) async {
-    return await db.insert('gatepass_approvals', approval.toMap());
+  Future<int> createGatepassApproval(GatepassApproval approval, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('gatepass_approvals', approval.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_gatepass_approval',
+        detail: 'Created approval for gatepass ${approval.gatepassId}',
+        entityType: 'gatepass_approvals',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<GatepassApproval>> getGatepassApprovals(int gatepassId) async {
@@ -238,17 +367,40 @@ class GatepassBarcodeService {
     };
     if (comments != null) map['comments'] = comments;
     if (delegatedTo != null) map['delegated_to'] = delegatedTo;
-    return await db.update('gatepass_approvals', map, where: 'id = ?', whereArgs: [approvalId]);
+    await db.transaction((txn) async {
+      final count = await txn.update('gatepass_approvals', map, where: 'id = ?', whereArgs: [approvalId]);
+      if (count == 0) throw StateError('Gatepass approval not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'process_gatepass_approval',
+        detail: 'Approval processed with status $status',
+        entityType: 'gatepass_approvals',
+        entityId: approvalId,
+        userId: approverId,
+      );
+    });
+    return approvalId;
   }
 
   // ============ Dispatch Schedules ============
 
-  Future<int> createDispatchSchedule(DispatchSchedule schedule) async {
+  Future<int> createDispatchSchedule(DispatchSchedule schedule, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = schedule.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('dispatch_schedules', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('dispatch_schedules', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_dispatch_schedule',
+        detail: 'Created dispatch schedule',
+        entityType: 'dispatch_schedules',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<DispatchSchedule?> getDispatchSchedule(int id) async {
@@ -306,34 +458,81 @@ class GatepassBarcodeService {
     return maps.map((m) => DispatchSchedule.fromMap(m)).toList();
   }
 
-  Future<int> updateDispatchSchedule(DispatchSchedule schedule) async {
+  Future<int> updateDispatchSchedule(DispatchSchedule schedule, {int? userId}) async {
     final map = schedule.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('dispatch_schedules', map, where: 'id = ?', whereArgs: [schedule.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('dispatch_schedules', map, where: 'id = ?', whereArgs: [schedule.id]);
+      if (count == 0) throw StateError('Dispatch schedule not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_dispatch_schedule',
+        detail: 'Updated dispatch schedule',
+        entityType: 'dispatch_schedules',
+        entityId: schedule.id,
+        userId: userId,
+      );
+    });
+    return schedule.id!;
   }
 
-  Future<int> startDispatchSchedule(int id) async {
-    return await db.update('dispatch_schedules', {
-      'status': 'IN_PROGRESS',
-      'actual_start': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [id]);
+  Future<int> startDispatchSchedule(int id, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('dispatch_schedules', {
+        'status': 'IN_PROGRESS',
+        'actual_start': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Dispatch schedule not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'start_dispatch_schedule',
+        detail: 'Dispatch schedule started',
+        entityType: 'dispatch_schedules',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
-  Future<int> completeDispatchSchedule(int id) async {
-    return await db.update('dispatch_schedules', {
-      'status': 'COMPLETED',
-      'actual_end': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [id]);
+  Future<int> completeDispatchSchedule(int id, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('dispatch_schedules', {
+        'status': 'COMPLETED',
+        'actual_end': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Dispatch schedule not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'complete_dispatch_schedule',
+        detail: 'Dispatch schedule completed',
+        entityType: 'dispatch_schedules',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   // ============ Loading Bays ============
 
-  Future<int> createLoadingBay(LoadingBay bay) async {
+  Future<int> createLoadingBay(LoadingBay bay, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = bay.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('loading_bays', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('loading_bays', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_loading_bay',
+        detail: 'Created loading bay ${bay.code}',
+        entityType: 'loading_bays',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<LoadingBay>> getLoadingBays({bool activeOnly = true}) async {
@@ -347,6 +546,7 @@ class GatepassBarcodeService {
   }
 
   // ============ QR Code Generation ============
+  // (Unchanged - read-only)
 
   String generateGatepassQR(Gatepass gatepass) {
     final data = {
@@ -375,12 +575,23 @@ class GatepassBarcodeService {
 
   // ============ Barcode Definitions ============
 
-  Future<int> createBarcodeDefinition(BarcodeDefinition def) async {
+  Future<int> createBarcodeDefinition(BarcodeDefinition def, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = def.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('barcode_definitions', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('barcode_definitions', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_barcode_definition',
+        detail: 'Created barcode definition ${def.code}',
+        entityType: 'barcode_definitions',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<BarcodeDefinition>> getBarcodeDefinitions({bool activeOnly = true}) async {
@@ -401,12 +612,23 @@ class GatepassBarcodeService {
 
   // ============ Barcodes ============
 
-  Future<int> createBarcode(Barcode barcode) async {
+  Future<int> createBarcode(Barcode barcode, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = barcode.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('barcodes', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('barcodes', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_barcode',
+        detail: 'Created barcode ${barcode.barcodeValue}',
+        entityType: 'barcodes',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Barcode?> getBarcodeByValue(String value) async {
@@ -426,24 +648,58 @@ class GatepassBarcodeService {
     return Barcode.fromMap(maps.first);
   }
 
-  Future<int> updateBarcodePrintCount(int barcodeId) async {
-    return await db.rawUpdate('''
-      UPDATE barcodes
-      SET print_count = print_count + 1,
-          last_printed_at = ?,
-          updated_at = ?
-      WHERE id = ?
-    ''', [DateTime.now().millisecondsSinceEpoch, DateTime.now().millisecondsSinceEpoch, barcodeId]);
+  Future<int> updateBarcodePrintCount(int barcodeId, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.rawUpdate('''
+        UPDATE barcodes
+        SET print_count = print_count + 1,
+            last_printed_at = ?,
+            updated_at = ?
+        WHERE id = ?
+      ''', [DateTime.now().millisecondsSinceEpoch, DateTime.now().millisecondsSinceEpoch, barcodeId]);
+      if (count == 0) throw StateError('Barcode not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'print_barcode',
+        detail: 'Incremented print count for barcode $barcodeId',
+        entityType: 'barcodes',
+        entityId: barcodeId,
+        userId: userId,
+      );
+    });
+    return barcodeId;
   }
 
-  Future<void> voidBarcode(int barcodeId) async {
-    await db.update('barcodes', {'status': 'VOIDED', 'updated_at': DateTime.now().millisecondsSinceEpoch}, where: 'id = ?', whereArgs: [barcodeId]);
+  Future<void> voidBarcode(int barcodeId, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('barcodes', {'status': 'VOIDED', 'updated_at': DateTime.now().millisecondsSinceEpoch}, where: 'id = ?', whereArgs: [barcodeId]);
+      if (count == 0) throw StateError('Barcode not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'void_barcode',
+        detail: 'Voided barcode $barcodeId',
+        entityType: 'barcodes',
+        entityId: barcodeId,
+        userId: userId,
+      );
+    });
   }
 
   // ============ Barcode Scans ============
 
-  Future<int> logBarcodeScan(BarcodeScan scan) async {
-    return await db.insert('barcode_scans', scan.toMap());
+  Future<int> logBarcodeScan(BarcodeScan scan, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('barcode_scans', scan.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'log_barcode_scan',
+        detail: 'Logged barcode scan ${scan.barcodeValue}',
+        entityType: 'barcode_scans',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<BarcodeScan>> getBarcodeScans({
@@ -491,12 +747,23 @@ class GatepassBarcodeService {
 
   // ============ Batch Scan Sessions ============
 
-  Future<int> createBatchScanSession(BatchScanSession session) async {
+  Future<int> createBatchScanSession(BatchScanSession session, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = session.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('batch_scan_sessions', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('batch_scan_sessions', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_batch_scan_session',
+        detail: 'Created batch scan session ${session.sessionType}',
+        entityType: 'batch_scan_sessions',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<BatchScanSession?> getBatchScanSession(int id) async {
@@ -554,14 +821,37 @@ class GatepassBarcodeService {
     return maps.map((m) => BatchScanSession.fromMap(m)).toList();
   }
 
-  Future<int> updateBatchScanSession(BatchScanSession session) async {
+  Future<int> updateBatchScanSession(BatchScanSession session, {int? userId}) async {
     final map = session.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('batch_scan_sessions', map, where: 'id = ?', whereArgs: [session.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('batch_scan_sessions', map, where: 'id = ?', whereArgs: [session.id]);
+      if (count == 0) throw StateError('Batch scan session not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_batch_scan_session',
+        detail: 'Updated batch scan session',
+        entityType: 'batch_scan_sessions',
+        entityId: session.id,
+        userId: userId,
+      );
+    });
+    return session.id!;
   }
 
-  Future<int> addBatchScanItem(BatchScanItem item) async {
-    return await db.insert('batch_scan_items', item.toMap());
+  Future<int> addBatchScanItem(BatchScanItem item, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('batch_scan_items', item.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_batch_scan_item',
+        detail: 'Added item to batch scan session ${item.sessionId}',
+        entityType: 'batch_scan_items',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<BatchScanItem>> getBatchScanItems(int sessionId) async {
@@ -569,17 +859,40 @@ class GatepassBarcodeService {
     return maps.map((m) => BatchScanItem.fromMap(m)).toList();
   }
 
-  Future<int> updateBatchScanItem(BatchScanItem item) async {
-    return await db.update('batch_scan_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+  Future<int> updateBatchScanItem(BatchScanItem item, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('batch_scan_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+      if (count == 0) throw StateError('Batch scan item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_batch_scan_item',
+        detail: 'Updated batch scan item',
+        entityType: 'batch_scan_items',
+        entityId: item.id,
+        userId: userId,
+      );
+    });
+    return item.id!;
   }
 
   // ============ Label Print Jobs ============
 
-  Future<int> createLabelPrintJob(LabelPrintJob job) async {
+  Future<int> createLabelPrintJob(LabelPrintJob job, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = job.toMap();
     map['requested_at'] = now;
-    return await db.insert('label_print_jobs', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('label_print_jobs', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_label_print_job',
+        detail: 'Created label print job',
+        entityType: 'label_print_jobs',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<LabelPrintJob?> getLabelPrintJob(int id) async {
@@ -599,24 +912,47 @@ class GatepassBarcodeService {
     return maps.map((m) => LabelPrintJob.fromMap(m)).toList();
   }
 
-  Future<int> updateLabelPrintJobStatus(int id, String status, {int? printedCount, int? failedCount, String? errorLog}) async {
+  Future<int> updateLabelPrintJobStatus(int id, String status, {int? printedCount, int? failedCount, String? errorLog, int? userId}) async {
     final map = {'status': status, 'updated_at': DateTime.now().millisecondsSinceEpoch};
     if (printedCount != null) map['printed_count'] = printedCount;
     if (failedCount != null) map['failed_count'] = failedCount;
     if (errorLog != null) map['error_log'] = errorLog;
     if (status == 'PRINTING') map['started_at'] = DateTime.now().millisecondsSinceEpoch;
     if (status == 'COMPLETED' || status == 'FAILED' || status == 'CANCELLED') map['completed_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('label_print_jobs', map, where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('label_print_jobs', map, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Label print job not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_label_print_job_status',
+        detail: 'Label print job status changed to $status',
+        entityType: 'label_print_jobs',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   // ============ Printer Configs ============
 
-  Future<int> createPrinterConfig(PrinterConfig config) async {
+  Future<int> createPrinterConfig(PrinterConfig config, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = config.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('printer_configs', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('printer_configs', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_printer_config',
+        detail: 'Created printer config ${config.name}',
+        entityType: 'printer_configs',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<PrinterConfig>> getPrinterConfigs({bool activeOnly = true}) async {
@@ -636,6 +972,7 @@ class GatepassBarcodeService {
   }
 
   // ============ Analytics ============
+  // (Read-only methods unchanged)
 
   Future<Map<String, dynamic>> getGatepassSummary(int fromDate, int toDate) async {
     final result = await db.rawQuery('''

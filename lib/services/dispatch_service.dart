@@ -3,15 +3,18 @@
 import 'package:sqflite/sqflite.dart';
 import 'inventory_service.dart';
 import 'location_service.dart';
+import 'audit_service.dart';
 
 class DispatchService {
   final Database db;
   final InventoryService inventoryService;
   final LocationService locationService;
+  final AuditService auditService;
 
   DispatchService(this.db)
       : inventoryService = InventoryService(db),
-        locationService = LocationService(db);
+        locationService = LocationService(db),
+        auditService = AuditService(db);
 
   /// Generate gatepass for dispatch
   Future<int> createDispatchGatepass({
@@ -21,13 +24,14 @@ class DispatchService {
     required String recipient,
     String? vehicleNumber,
     String? destination,
+    int? userId,
   }) async {
     final item = await inventoryService.getItemById(itemId);
     if (item == null) throw StateError('Item not found');
     if (item.quantity < quantity) throw StateError('Insufficient stock');
     if (item.status != 'IN_STOCK') throw StateError('Item not available for dispatch');
 
-    return await db.insert('gatepass', {
+    final id = await db.insert('gatepass', {
       'item_id': itemId,
       'quantity': quantity,
       'operator_id': operatorId,
@@ -37,10 +41,20 @@ class DispatchService {
       'status': 'PENDING',
       'created_at': DateTime.now().millisecondsSinceEpoch,
     });
+
+    await auditService.log(
+      action: 'dispatch_gatepass_created',
+      detail: 'Created dispatch gatepass for $quantity of ${item.sku} to $recipient',
+      entityType: 'gatepass',
+      entityId: id,
+      userId: userId ?? operatorId,
+    );
+
+    return id;
   }
 
   /// Complete dispatch: scan gatepass, reduce inventory, update location
-  Future<void> completeDispatch(int gatepassId, {required int operatorId}) async {
+  Future<void> completeDispatch(int gatepassId, {required int operatorId, int? userId}) async {
     final maps = await db.query('gatepass', where: 'id = ?', whereArgs: [gatepassId]);
     if (maps.isEmpty) throw StateError('Gatepass not found');
     final gp = maps.first;
@@ -52,9 +66,10 @@ class DispatchService {
 
     await db.transaction((txn) async {
       // Update inventory
+      final newQuantity = item.quantity - (gp['quantity'] as int);
       await txn.update('inventory_item', {
-        'quantity': item.quantity - (gp['quantity'] as int),
-        'status': item.quantity - (gp['quantity'] as int) <= 0 ? 'DISPATCHED' : 'IN_STOCK',
+        'quantity': newQuantity,
+        'status': newQuantity <= 0 ? 'DISPATCHED' : 'IN_STOCK',
         'updated_at': DateTime.now().millisecondsSinceEpoch,
       }, where: 'id = ?', whereArgs: [item.id]);
 
@@ -85,8 +100,15 @@ class DispatchService {
         'completed_at': DateTime.now().millisecondsSinceEpoch,
         'completed_by': operatorId,
       }, where: 'id = ?', whereArgs: [gatepassId]);
-    });
 
-    await inventoryService.audit('dispatch_complete', 'Dispatched ${gp['quantity']} of ${item.sku} to ${gp['recipient']}', item.id);
+      await auditService.logInTransaction(
+        txn,
+        action: 'dispatch_complete',
+        detail: 'Dispatched ${gp['quantity']} of ${item.sku} to ${gp['recipient']}',
+        entityType: 'inventory_item',
+        entityId: item.id,
+        userId: userId ?? operatorId,
+      );
+    });
   }
 }

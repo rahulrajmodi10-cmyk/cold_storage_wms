@@ -2,20 +2,34 @@
 
 import 'package:sqflite/sqflite.dart';
 import '../models/logistics_models.dart';
+import 'audit_service.dart';
 
 class LogisticsService {
   final Database db;
+  final AuditService auditService;
 
-  LogisticsService(this.db);
+  LogisticsService(this.db, {AuditService? auditService})
+      : auditService = auditService ?? AuditService(db);
 
   // ============ Carriers ============
 
-  Future<int> createCarrier(Carrier carrier) async {
+  Future<int> createCarrier(Carrier carrier, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = carrier.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('carriers', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('carriers', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_carrier',
+        detail: 'Created carrier ${carrier.name}',
+        entityType: 'carriers',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Carrier?> getCarrier(int id) async {
@@ -34,20 +48,43 @@ class LogisticsService {
     return maps.map((m) => Carrier.fromMap(m)).toList();
   }
 
-  Future<int> updateCarrier(Carrier carrier) async {
+  Future<int> updateCarrier(Carrier carrier, {int? userId}) async {
     final map = carrier.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('carriers', map, where: 'id = ?', whereArgs: [carrier.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('carriers', map, where: 'id = ?', whereArgs: [carrier.id]);
+      if (count == 0) throw StateError('Carrier not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_carrier',
+        detail: 'Updated carrier ${carrier.name}',
+        entityType: 'carriers',
+        entityId: carrier.id,
+        userId: userId,
+      );
+    });
+    return carrier.id!;
   }
 
   // ============ Vehicles ============
 
-  Future<int> createVehicle(Vehicle vehicle) async {
+  Future<int> createVehicle(Vehicle vehicle, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = vehicle.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('vehicles', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('vehicles', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_vehicle',
+        detail: 'Created vehicle ${vehicle.registrationNumber}',
+        entityType: 'vehicles',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Vehicle?> getVehicle(int id) async {
@@ -97,27 +134,62 @@ class LogisticsService {
     return maps.map((m) => Vehicle.fromMap(m)).toList();
   }
 
-  Future<int> updateVehicle(Vehicle vehicle) async {
+  Future<int> updateVehicle(Vehicle vehicle, {int? userId}) async {
     final map = vehicle.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('vehicles', map, where: 'id = ?', whereArgs: [vehicle.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('vehicles', map, where: 'id = ?', whereArgs: [vehicle.id]);
+      if (count == 0) throw StateError('Vehicle not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_vehicle',
+        detail: 'Updated vehicle ${vehicle.registrationNumber}',
+        entityType: 'vehicles',
+        entityId: vehicle.id,
+        userId: userId,
+      );
+    });
+    return vehicle.id!;
   }
 
-  Future<int> updateVehicleStatus(int id, String status) async {
-    return await db.update('vehicles', {
-      'status': status,
-      'updated_at': DateTime.now().millisecondsSinceEpoch,
-    }, where: 'id = ?', whereArgs: [id]);
+  Future<int> updateVehicleStatus(int id, String status, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('vehicles', {
+        'status': status,
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      }, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Vehicle not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_vehicle_status',
+        detail: 'Vehicle status changed to $status',
+        entityType: 'vehicles',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   // ============ Routes ============
 
-  Future<int> createRoute(Route route) async {
+  Future<int> createRoute(Route route, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = route.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('routes', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('routes', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_route',
+        detail: 'Created route ${route.name}',
+        entityType: 'routes',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Route?> getRoute(int id) async {
@@ -132,16 +204,39 @@ class LogisticsService {
     return maps.map((m) => Route.fromMap(m)).toList();
   }
 
-  Future<int> updateRoute(Route route) async {
+  Future<int> updateRoute(Route route, {int? userId}) async {
     final map = route.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('routes', map, where: 'id = ?', whereArgs: [route.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('routes', map, where: 'id = ?', whereArgs: [route.id]);
+      if (count == 0) throw StateError('Route not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_route',
+        detail: 'Updated route ${route.name}',
+        entityType: 'routes',
+        entityId: route.id,
+        userId: userId,
+      );
+    });
+    return route.id!;
   }
 
   // ============ Route Stops ============
 
-  Future<int> addRouteStop(RouteStop stop) async {
-    return await db.insert('route_stops', stop.toMap());
+  Future<int> addRouteStop(RouteStop stop, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('route_stops', stop.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_route_stop',
+        detail: 'Added stop to route ${stop.routeId}',
+        entityType: 'route_stops',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<RouteStop>> getRouteStops(int routeId) async {
@@ -151,12 +246,23 @@ class LogisticsService {
 
   // ============ Shipments ============
 
-  Future<int> createShipment(Shipment shipment) async {
+  Future<int> createShipment(Shipment shipment, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = shipment.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('shipments', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('shipments', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_shipment',
+        detail: 'Created shipment ${shipment.shipmentNumber}',
+        entityType: 'shipments',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<Shipment?> getShipment(int id) async {
@@ -213,13 +319,25 @@ class LogisticsService {
     return maps.map((m) => Shipment.fromMap(m)).toList();
   }
 
-  Future<int> updateShipment(Shipment shipment) async {
+  Future<int> updateShipment(Shipment shipment, {int? userId}) async {
     final map = shipment.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('shipments', map, where: 'id = ?', whereArgs: [shipment.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('shipments', map, where: 'id = ?', whereArgs: [shipment.id]);
+      if (count == 0) throw StateError('Shipment not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_shipment',
+        detail: 'Updated shipment ${shipment.shipmentNumber}',
+        entityType: 'shipments',
+        entityId: shipment.id,
+        userId: userId,
+      );
+    });
+    return shipment.id!;
   }
 
-  Future<int> updateShipmentStatus(int id, String status, {int? timestamp, Map<String, dynamic>? extraFields}) async {
+  Future<int> updateShipmentStatus(int id, String status, {int? timestamp, Map<String, dynamic>? extraFields, int? userId}) async {
     final Map<String, dynamic> map = {
       'status': status,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
@@ -246,13 +364,36 @@ class LogisticsService {
     if (extraFields != null) {
       map.addAll(extraFields);
     }
-    return await db.update('shipments', map, where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('shipments', map, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Shipment not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_shipment_status',
+        detail: 'Shipment status changed to $status',
+        entityType: 'shipments',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   // ============ Shipment Items ============
 
-  Future<int> addShipmentItem(ShipmentItem item) async {
-    return await db.insert('shipment_items', item.toMap());
+  Future<int> addShipmentItem(ShipmentItem item, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('shipment_items', item.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_shipment_item',
+        detail: 'Added item to shipment ${item.shipmentId}',
+        entityType: 'shipment_items',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<ShipmentItem>> getShipmentItems(int shipmentId) async {
@@ -260,26 +401,73 @@ class LogisticsService {
     return maps.map((m) => ShipmentItem.fromMap(m)).toList();
   }
 
-  Future<int> updateShipmentItem(ShipmentItem item) async {
-    return await db.update('shipment_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+  Future<int> updateShipmentItem(ShipmentItem item, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('shipment_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
+      if (count == 0) throw StateError('Shipment item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_shipment_item',
+        detail: 'Updated shipment item',
+        entityType: 'shipment_items',
+        entityId: item.id,
+        userId: userId,
+      );
+    });
+    return item.id!;
   }
 
-  Future<int> updateShipmentItemLoadedQuantity(int itemId, double loadedQuantity) async {
-    return await db.update('shipment_items', {
-      'loaded_quantity': loadedQuantity,
-    }, where: 'id = ?', whereArgs: [itemId]);
+  Future<int> updateShipmentItemLoadedQuantity(int itemId, double loadedQuantity, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('shipment_items', {
+        'loaded_quantity': loadedQuantity,
+      }, where: 'id = ?', whereArgs: [itemId]);
+      if (count == 0) throw StateError('Shipment item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_shipment_item_loaded',
+        detail: 'Updated loaded quantity to $loadedQuantity',
+        entityType: 'shipment_items',
+        entityId: itemId,
+        userId: userId,
+      );
+    });
+    return itemId;
   }
 
-  Future<int> updateShipmentItemDeliveredQuantity(int itemId, double deliveredQuantity) async {
-    return await db.update('shipment_items', {
-      'delivered_quantity': deliveredQuantity,
-    }, where: 'id = ?', whereArgs: [itemId]);
+  Future<int> updateShipmentItemDeliveredQuantity(int itemId, double deliveredQuantity, {int? userId}) async {
+    await db.transaction((txn) async {
+      final count = await txn.update('shipment_items', {
+        'delivered_quantity': deliveredQuantity,
+      }, where: 'id = ?', whereArgs: [itemId]);
+      if (count == 0) throw StateError('Shipment item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_shipment_item_delivered',
+        detail: 'Updated delivered quantity to $deliveredQuantity',
+        entityType: 'shipment_items',
+        entityId: itemId,
+        userId: userId,
+      );
+    });
+    return itemId;
   }
 
   // ============ Shipment Tracking ============
 
-  Future<int> addTrackingPoint(ShipmentTracking tracking) async {
-    return await db.insert('shipment_tracking', tracking.toMap());
+  Future<int> addTrackingPoint(ShipmentTracking tracking, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('shipment_tracking', tracking.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_tracking_point',
+        detail: 'Added tracking point for shipment ${tracking.shipmentId}',
+        entityType: 'shipment_tracking',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<ShipmentTracking>> getShipmentTracking(int shipmentId) async {
@@ -301,12 +489,23 @@ class LogisticsService {
 
   // ============ Load Plans ============
 
-  Future<int> createLoadPlan(LoadPlan plan) async {
+  Future<int> createLoadPlan(LoadPlan plan, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = plan.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('load_plans', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('load_plans', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_load_plan',
+        detail: 'Created load plan for shipment ${plan.shipmentId}',
+        entityType: 'load_plans',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<LoadPlan?> getLoadPlan(int id) async {
@@ -336,16 +535,39 @@ class LogisticsService {
     return maps.map((m) => LoadPlan.fromMap(m)).toList();
   }
 
-  Future<int> updateLoadPlan(LoadPlan plan) async {
+  Future<int> updateLoadPlan(LoadPlan plan, {int? userId}) async {
     final map = plan.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
-    return await db.update('load_plans', map, where: 'id = ?', whereArgs: [plan.id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('load_plans', map, where: 'id = ?', whereArgs: [plan.id]);
+      if (count == 0) throw StateError('Load plan not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_load_plan',
+        detail: 'Updated load plan',
+        entityType: 'load_plans',
+        entityId: plan.id,
+        userId: userId,
+      );
+    });
+    return plan.id!;
   }
 
   // ============ Load Plan Items ============
 
-  Future<int> addLoadPlanItem(LoadPlanItem item) async {
-    return await db.insert('load_plan_items', item.toMap());
+  Future<int> addLoadPlanItem(LoadPlanItem item, {int? userId}) async {
+    return await db.transaction((txn) async {
+      final id = await txn.insert('load_plan_items', item.toMap());
+      await auditService.logInTransaction(
+        txn,
+        action: 'add_load_plan_item',
+        detail: 'Added item to load plan ${item.loadPlanId}',
+        entityType: 'load_plan_items',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<LoadPlanItem>> getLoadPlanItems(int loadPlanId) async {
@@ -353,22 +575,45 @@ class LogisticsService {
     return maps.map((m) => LoadPlanItem.fromMap(m)).toList();
   }
 
-  Future<int> updateLoadPlanItemStatus(int itemId, String status, {double? loadedQuantity, int? loadedAt, int? loadedBy}) async {
+  Future<int> updateLoadPlanItemStatus(int itemId, String status, {double? loadedQuantity, int? loadedAt, int? loadedBy, int? userId}) async {
     final Map<String, dynamic> map = {'status': status};
     if (loadedQuantity != null) map['loaded_quantity'] = loadedQuantity;
     if (loadedAt != null) map['loaded_at'] = loadedAt;
     if (loadedBy != null) map['loaded_by'] = loadedBy;
-    return await db.update('load_plan_items', map, where: 'id = ?', whereArgs: [itemId]);
+    await db.transaction((txn) async {
+      final count = await txn.update('load_plan_items', map, where: 'id = ?', whereArgs: [itemId]);
+      if (count == 0) throw StateError('Load plan item not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_load_plan_item_status',
+        detail: 'Load plan item status changed to $status',
+        entityType: 'load_plan_items',
+        entityId: itemId,
+        userId: userId,
+      );
+    });
+    return itemId;
   }
 
   // ============ Freight Rates ============
 
-  Future<int> createFreightRate(FreightRate rate) async {
+  Future<int> createFreightRate(FreightRate rate, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = rate.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('freight_rates', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('freight_rates', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_freight_rate',
+        detail: 'Created freight rate for route ${rate.routeId}',
+        entityType: 'freight_rates',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<FreightRate>> getFreightRates({
@@ -405,19 +650,29 @@ class LogisticsService {
   Future<FreightRate?> getBestFreightRate(int routeId, String vehicleType, int date) async {
     final rates = await getFreightRates(routeId: routeId, vehicleType: vehicleType, effectiveDate: date);
     if (rates.isEmpty) return null;
-    // Return rate with lowest base rate
     rates.sort((a, b) => a.baseRate.compareTo(b.baseRate));
     return rates.first;
   }
 
   // ============ Freight Bills ============
 
-  Future<int> createFreightBill(FreightBill bill) async {
+  Future<int> createFreightBill(FreightBill bill, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = bill.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('freight_bills', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('freight_bills', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_freight_bill',
+        detail: 'Created freight bill ${bill.billNumber}',
+        entityType: 'freight_bills',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<FreightBill?> getFreightBill(int id) async {
@@ -449,24 +704,47 @@ class LogisticsService {
     return maps.map((m) => FreightBill.fromMap(m)).toList();
   }
 
-  Future<int> updateFreightBillStatus(int id, String status, {int? verifiedBy, int? paidDate}) async {
+  Future<int> updateFreightBillStatus(int id, String status, {int? verifiedBy, int? paidDate, int? userId}) async {
     final map = {'status': status, 'updated_at': DateTime.now().millisecondsSinceEpoch};
     if (verifiedBy != null) {
       map['verified_by'] = verifiedBy;
       map['verified_at'] = DateTime.now().millisecondsSinceEpoch;
     }
     if (paidDate != null) map['paid_date'] = paidDate;
-    return await db.update('freight_bills', map, where: 'id = ?', whereArgs: [id]);
+    await db.transaction((txn) async {
+      final count = await txn.update('freight_bills', map, where: 'id = ?', whereArgs: [id]);
+      if (count == 0) throw StateError('Freight bill not found');
+      await auditService.logInTransaction(
+        txn,
+        action: 'update_freight_bill_status',
+        detail: 'Freight bill status changed to $status',
+        entityType: 'freight_bills',
+        entityId: id,
+        userId: userId,
+      );
+    });
+    return id;
   }
 
   // ============ Vehicle Maintenance ============
 
-  Future<int> createMaintenance(VehicleMaintenance maintenance) async {
+  Future<int> createMaintenance(VehicleMaintenance maintenance, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final map = maintenance.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
-    return await db.insert('vehicle_maintenance', map);
+    return await db.transaction((txn) async {
+      final id = await txn.insert('vehicle_maintenance', map);
+      await auditService.logInTransaction(
+        txn,
+        action: 'create_maintenance',
+        detail: 'Created maintenance for vehicle ${maintenance.vehicleId}',
+        entityType: 'vehicle_maintenance',
+        entityId: id,
+        userId: userId,
+      );
+      return id;
+    });
   }
 
   Future<List<VehicleMaintenance>> getVehicleMaintenance(int vehicleId, {String? status}) async {
@@ -494,6 +772,7 @@ class LogisticsService {
   }
 
   // ============ Analytics ============
+  // (Read-only methods unchanged)
 
   Future<Map<String, dynamic>> getShipmentSummary(int fromDate, int toDate) async {
     final result = await db.rawQuery('''

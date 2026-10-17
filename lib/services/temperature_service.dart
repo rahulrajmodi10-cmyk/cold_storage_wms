@@ -3,11 +3,14 @@
 import 'package:sqflite/sqflite.dart';
 import '../models/temperature_log.dart';
 import '../models/inventory_item.dart';
+import 'audit_service.dart';
 
 class TemperatureService {
   final Database db;
+  final AuditService auditService;
 
-  TemperatureService(this.db);
+  TemperatureService(this.db, {AuditService? auditService})
+      : auditService = auditService ?? AuditService(db);
 
   Future<int> logTemperature(TemperatureLog log) async {
     final id = await db.insert('temperature_log', log.toMap());
@@ -62,13 +65,11 @@ class TemperatureService {
       'acknowledged': 0,
       'created_at': DateTime.now().millisecondsSinceEpoch
     });
-    await db.insert('audit_log', {
-      'user_id': null,
-      'action': 'temperature_alert',
-      'detail': message,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-      'entity_type': 'inventory_item',
-      'entity_id': targetId
-    });
+    await auditService.log(
+      action: 'temperature_alert',
+      detail: message,
+      entityType: 'inventory_item',
+      entityId: targetId,
+    );
   }
 }

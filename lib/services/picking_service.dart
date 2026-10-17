@@ -3,16 +3,19 @@
 import 'package:sqflite/sqflite.dart';
 import 'inventory_service.dart';
 import 'location_service.dart';
+import 'audit_service.dart';
 import '../models/transfer_record.dart';
 
 class PickingService {
   final Database db;
   final InventoryService inventoryService;
   final LocationService locationService;
+  final AuditService auditService;
 
   PickingService(this.db)
       : inventoryService = InventoryService(db),
-        locationService = LocationService(db);
+        locationService = LocationService(db),
+        auditService = AuditService(db);
 
   /// Create a pick request (SLA tracked)
   Future<int> createPickRequest({
@@ -20,6 +23,7 @@ class PickingService {
     required int quantity,
     required int operatorId,
     String? notes,
+    int? userId,
   }) async {
     final item = await inventoryService.getItemById(itemId);
     if (item == null) throw StateError('Item not found');
@@ -27,7 +31,7 @@ class PickingService {
     if (item.status == 'QUARANTINED') throw StateError('Item is quarantined');
 
     // Create transfer record as pick request
-    return await db.insert('transfer_record', {
+    final id = await db.insert('transfer_record', {
       'item_id': itemId,
       'from_location': item.locationId,
       'to_location': null,
@@ -36,10 +40,20 @@ class PickingService {
       'timestamp': DateTime.now().millisecondsSinceEpoch,
       'reason': 'pick_request',
     });
+
+    await auditService.log(
+      action: 'pick_request',
+      detail: 'Created pick request for ${quantity} of ${item.sku}',
+      entityType: 'inventory_item',
+      entityId: itemId,
+      userId: userId ?? operatorId,
+    );
+
+    return id;
   }
 
   /// Complete a pick request
-  Future<void> completePick(int pickRequestId, {required int operatorId}) async {
+  Future<void> completePick(int pickRequestId, {required int operatorId, int? userId}) async {
     final maps = await db.query('transfer_record', where: 'id = ?', whereArgs: [pickRequestId]);
     if (maps.isEmpty) throw StateError('Pick request not found');
     final record = TransferRecord.fromMap(maps.first);
@@ -80,9 +94,16 @@ class PickingService {
       await txn.update('transfer_record', {
         'reason': 'pick_completed',
       }, where: 'id = ?', whereArgs: [pickRequestId]);
-    });
 
-    await inventoryService.audit('pick_complete', 'Picked ${record.quantity} of ${item.sku}', item.id);
+      await auditService.logInTransaction(
+        txn,
+        action: 'pick_complete',
+        detail: 'Picked ${record.quantity} of ${item.sku}',
+        entityType: 'inventory_item',
+        entityId: item.id,
+        userId: userId ?? operatorId,
+      );
+    });
   }
 
   Future<List<TransferRecord>> getPendingPicks() async {

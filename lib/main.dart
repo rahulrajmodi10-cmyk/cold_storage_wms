@@ -58,6 +58,9 @@ Future<Database> _initDatabase() async {
       if (oldVersion < 5) {
         await _runMigration005(db);
       }
+      if (oldVersion < 6) {
+        await _runMigration006(db);
+      }
     },
   );
 }
