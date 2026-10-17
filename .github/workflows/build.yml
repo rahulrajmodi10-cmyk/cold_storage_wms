@@ -198,18 +198,24 @@ jobs:
       - name: Verify APK/AAB artifacts before upload
         run: |
           echo "=== Verifying artifacts exist before upload ==="
-          if [ ! -d "build/app/outputs/flutter-apk" ] || [ -z "$(ls build/app/outputs/flutter-apk/*.apk 2>/dev/null)" ]; then
-            echo "ERROR: No APK files found in build/app/outputs/flutter-apk/"
+          echo "=== Searching for APK files anywhere in build/ ==="
+          APK_COUNT=$(find build -name "*.apk" -type f 2>/dev/null | wc -l)
+          echo "APK files found: $APK_COUNT"
+          if [ "$APK_COUNT" -eq 0 ]; then
+            echo "ERROR: No APK files found anywhere in build/"
             exit 1
           fi
-          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
-            echo "ERROR: AAB file not found!"
+          echo "=== Found APKs ==="
+          find build -name "*.apk" -type f -exec ls -la {} \;
+          echo "=== Searching for AAB files anywhere in build/ ==="
+          AAB_COUNT=$(find build -name "*.aab" -type f 2>/dev/null | wc -l)
+          echo "AAB files found: $AAB_COUNT"
+          if [ "$AAB_COUNT" -eq 0 ]; then
+            echo "ERROR: No AAB files found anywhere in build/"
             exit 1
           fi
-          echo "APKs found:"
-          ls -la build/app/outputs/flutter-apk/*.apk
-          echo "AAB found:"
-          ls -la build/app/outputs/bundle/release/app-release.aab
+          echo "=== Found AABs ==="
+          find build -name "*.aab" -type f -exec ls -la {} \;
       - name: Debug - Check entire build directory structure
         run: |
           echo "=== Working directory: $(pwd) ==="
@@ -237,10 +243,8 @@ jobs:
         with:
           name: release-apks
           path: |
-            build/app/outputs/flutter-apk/*.apk
-            build/app/outputs/bundle/release/*.aab
-            **/*.apk
-            **/*.aab
+            build/**/*.apk
+            build/**/*.aab
           retention-days: 30
           if-no-files-found: error
 
