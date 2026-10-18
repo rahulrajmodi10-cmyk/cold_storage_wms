@@ -2,7 +2,7 @@
 
 import 'package:sqflite/sqflite.dart';
 import 'inventory_service.dart';
-import 'location_service.dart'
+import 'location_service.dart';
 import 'temperature_service.dart';
 import 'audit_service.dart';
 import '../models/inventory_item.dart';

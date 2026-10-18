@@ -556,7 +556,7 @@ class FinanceService {
       await auditService.logInTransaction(
         txn,
         action: 'create_journal_entry',
-        detail: 'Created journal entry ${entry.reference}',
+        detail: 'Created journal entry ${entry.entryNumber}',
         entityType: 'journal_entries',
         entityId: entryId,
         userId: userId,
