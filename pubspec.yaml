@@ -50,7 +50,6 @@ dependencies:
   # Permissions & Device Info
   permission_handler: ^11.3.1
   device_info_plus: ^10.1.0
-  package_info_plus: ^10.0.0
 
   # Utilities
   uuid: ^4.4.0
