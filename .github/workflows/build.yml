@@ -129,6 +129,14 @@ jobs:
             sleep 15
           done
         shell: bash
+      - name: Generate local.properties
+        run: |
+          echo "=== Generating android/local.properties ==="
+          mkdir -p android
+          echo "flutter.sdk=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
+          echo "sdk.dir=${ANDROID_HOME:-/usr/lib/android-sdk}" >> android/local.properties
+          echo "=== local.properties contents ==="
+          cat android/local.properties
       - name: Create Android platform directory
         run: |
           echo "=== Checking if android directory exists ==="
