@@ -9,10 +9,8 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
-plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-}
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
