@@ -72,7 +72,7 @@ else
     JAVACMD="java"
     which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH."
 
-    java_version=$("$JAVACMD" -version 2>&1 | awk -F '"' '/version/ {print $2}')
+    java_version=$($JAVACMD -version 2>&1 | awk -F '"' '/version/ {print $2}')
     echo "Found java version: $java_version"
 fi
 
