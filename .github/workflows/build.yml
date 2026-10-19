@@ -132,42 +132,20 @@ jobs:
       - name: Generate local.properties
         run: |
           echo "=== Generating android/local.properties ==="
-          mkdir -p android
           echo "flutterRoot=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
           echo "sdk.dir=${ANDROID_HOME:-/usr/lib/android-sdk}" >> android/local.properties
           echo "=== local.properties contents ==="
           cat android/local.properties
-      - name: Create Android platform directory
+      - name: Verify Android platform directory
         run: |
           echo "=== Checking if android directory exists ==="
           ls -la
           if [ ! -d "android" ]; then
-            echo "Creating Android platform directory..."
-            flutter create --platforms=android . 2>&1 || echo "flutter create failed, checking if it's a 'project already exists' error"
-            ls -la android/ 2>/dev/null || echo "android directory not created"
+            echo "ERROR: Android platform directory not found!"
+            exit 1
           else
             echo "Android platform directory already exists"
             ls -la android/
-          fi
-      - name: Bump Android SDK to 36
-        run: |
-          echo "=== Bumping compileSdk/targetSdk to 36 ==="
-          if [ -f android/app/build.gradle ]; then
-            sed -i 's/compileSdkVersion .*/compileSdkVersion 36/' android/app/build.gradle
-            sed -i 's/targetSdkVersion .*/targetSdkVersion 36/' android/app/build.gradle
-            grep -n "SdkVersion" android/app/build.gradle
-          else
-            echo "android/app/build.gradle not found"
-          fi
-      - name: Set Android app name and description
-        run: |
-          echo "=== Setting Android app label ==="
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          if [ -f "$MANIFEST" ]; then
-            sed -i 's/android:label="cold_storage_wms"/android:label="Cold Storage WMS"/' "$MANIFEST"
-            grep -n "android:label" "$MANIFEST"
-          else
-            echo "$MANIFEST not found"
           fi
       - name: Build APK (release)
         run: |
