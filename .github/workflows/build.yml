@@ -132,7 +132,7 @@ jobs:
       - name: Generate local.properties
         run: |
           echo "=== Generating android/local.properties ==="
-          echo "flutterRoot=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
+          echo "flutter.sdk=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
           echo "sdk.dir=${ANDROID_HOME:-/usr/lib/android-sdk}" >> android/local.properties
           echo "=== local.properties contents ==="
           cat android/local.properties

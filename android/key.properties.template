@@ -1,8 +1,0 @@
-# Release keystore signing properties.
-# Copy this file to key.properties and fill in your own values.
-# key.properties is gitignored — do not commit real keystore passwords.
-
-keyAlias=your_key_alias
-keyPassword=your_key_password
-storeFile=/path/to/release-keystore.jks
-storePassword=your_store_password
