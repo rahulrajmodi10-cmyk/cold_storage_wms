@@ -149,6 +149,7 @@ jobs:
           fi
       - name: Build APK (release)
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -159,6 +160,7 @@ jobs:
           echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build App Bundle (release)
         run: |
+          set -o pipefail
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build appbundle --release ==="
           flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
@@ -279,6 +281,7 @@ jobs:
           fi
       - name: Build Web (release)
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -431,6 +434,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 30
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -441,6 +445,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 30
         run: |
+          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
