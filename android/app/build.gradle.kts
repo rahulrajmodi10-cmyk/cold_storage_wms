@@ -22,9 +22,15 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    // Allow multiple libraries with same namespace (fixes TF Lite namespace conflict)
-    // This enables automatic namespace handling for transitive dependencies
-    defaults.build.features.namespaceAutomatic = true
+    // Handle TensorFlow Lite transitive dependency namespace conflicts (org.tensorflow.lite)
+    // Force a single version of tensorflow-lite to avoid duplicate namespace errors
+    configurations.all {
+        resolutionStrategy {
+            force("org.tensorflow:tensorflow-lite:2.14.0")
+            force("org.tensorflow:tensorflow-lite-gpu:2.14.0")
+            force("org.tensorflow:tensorflow-lite-support:0.4.4")
+        }
+    }
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
