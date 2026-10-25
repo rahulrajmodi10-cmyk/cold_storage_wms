@@ -27,11 +27,12 @@ android {
     configurations.all {
         resolutionStrategy {
             // Force consistent versions across all tensorflow-lite artifacts to avoid namespace conflicts
-            // and missing class errors during R8 minification
-            force("org.tensorflow:tensorflow-lite:2.14.0")
-            force("org.tensorflow:tensorflow-lite-gpu:2.14.0")
+            // and missing class errors during R8 minification.
+            // Using 2.13.0 which has the complete GpuDelegateFactory classes.
+            force("org.tensorflow:tensorflow-lite:2.13.0")
+            force("org.tensorflow:tensorflow-lite-gpu:2.13.0")
             force("org.tensorflow:tensorflow-lite-support:0.4.4")
-            force("org.tensorflow:tensorflow-lite-api:2.14.0")
+            force("org.tensorflow:tensorflow-lite-api:2.13.0")
         }
     }
 
