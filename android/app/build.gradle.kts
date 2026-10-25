@@ -26,11 +26,12 @@ android {
     // Force a single version of tensorflow-lite to avoid duplicate namespace errors
     configurations.all {
         resolutionStrategy {
+            // Force consistent versions across all tensorflow-lite artifacts to avoid namespace conflicts
+            // and missing class errors during R8 minification
             force("org.tensorflow:tensorflow-lite:2.14.0")
             force("org.tensorflow:tensorflow-lite-gpu:2.14.0")
             force("org.tensorflow:tensorflow-lite-support:0.4.4")
-            // Exclude tensorflow-lite-api as it duplicates the org.tensorflow.lite namespace
-            exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
+            force("org.tensorflow:tensorflow-lite-api:2.14.0")
         }
     }
 
