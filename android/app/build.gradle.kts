@@ -29,6 +29,19 @@ android {
             force("org.tensorflow:tensorflow-lite:2.14.0")
             force("org.tensorflow:tensorflow-lite-gpu:2.14.0")
             force("org.tensorflow:tensorflow-lite-support:0.4.4")
+            // Exclude tensorflow-lite-api as it duplicates the org.tensorflow.lite namespace
+            exclude(group = "org.tensorflow", module = "tensorflow-lite-api")
+        }
+    }
+
+    // Exclude duplicate AndroidManifest.xml from tensorflow-lite modules to resolve namespace conflict
+    packaging {
+        resources {
+            excludes.add("META-INF/org/tensorflow/lite/**")
+        }
+        jniLibs {
+            // Allow duplicate .so files from tensorflow-lite and tensorflow-lite-gpu
+            pickFirsts.add("**/libtensorflowlite_jni.so")
         }
     }
 
