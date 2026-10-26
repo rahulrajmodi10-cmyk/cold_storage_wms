@@ -1,5 +1,7 @@
 // lib/main.dart
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -25,8 +27,13 @@ import 'services/gatepass_barcode_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  sqfliteFfiInit();
-  databaseFactory = databaseFactoryFfi;
+
+  // Only initialize sqflite_ffi on desktop platforms (Windows, Linux, macOS)
+  // On Android/iOS, use the native sqflite implementation
+  if (!Platform.isAndroid && !Platform.isIOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
 
   final db = await _initDatabase();
   runApp(ColdStorageWMS(db: db));
