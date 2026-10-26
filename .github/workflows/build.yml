@@ -637,7 +637,7 @@ jobs:
             adb install app-release-arm64-v8a.apk
             ```
           files: |
-            artifacts/apks/*.apk
-            artifacts/apks/*.aab
+            artifacts/apks/**/*.apk
+            artifacts/apks/**/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
