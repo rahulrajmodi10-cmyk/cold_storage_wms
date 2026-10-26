@@ -541,7 +541,8 @@ jobs:
           Write-Host "=== All files anywhere in build/ ==="
           if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
         shell: powershell
-      - name: Verify Desktop artifacts before upload
+      - name: Verify Desktop artifacts before upload (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           echo "=== Verifying Desktop artifacts exist before upload ==="
           if [ "${{ runner.os }}" == "Linux" ]; then
@@ -558,14 +559,24 @@ jobs:
             fi
             echo "macOS desktop build found:"
             ls -la build/macos/
-          elif [ "${{ runner.os }}" == "Windows" ]; then
-            if [ ! -d "build/windows" ] || [ -z "$(ls -A build/windows 2>/dev/null)" ]; then
-              echo "ERROR: No Windows desktop build found!"
-              exit 1
-            fi
-            echo "Windows desktop build found:"
-            ls -la build/windows/
           fi
+        shell: bash
+      - name: Verify Desktop artifacts before upload (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Write-Host "=== Verifying Desktop artifacts exist before upload ==="
+          if (-not (Test-Path "build/windows")) {
+            Write-Host "ERROR: No Windows desktop build found!"
+            exit 1
+          }
+          $files = Get-ChildItem build/windows/ -Recurse -File -ErrorAction SilentlyContinue
+          if (-not $files) {
+            Write-Host "ERROR: No Windows desktop build files found!"
+            exit 1
+          }
+          Write-Host "Windows desktop build found:"
+          Get-ChildItem build/windows/ -Recurse -File | Select-Object -First 20 | Format-Table -AutoSize
+        shell: powershell
       - name: Upload Desktop artifacts
         uses: actions/upload-artifact@v4
         with:
