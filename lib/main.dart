@@ -51,6 +51,8 @@ Future<Database> _initDatabase() async {
       await _runMigration003(db);
       await _runMigration004(db);
       await _runMigration005(db);
+      // Seed demo data
+      await _seedDemoData(db);
     },
     onUpgrade: (db, oldVersion, newVersion) async {
       if (oldVersion < 2) {
@@ -67,6 +69,894 @@ Future<Database> _initDatabase() async {
       }
     },
   );
+}
+
+Future<void> _seedDemoData(Database db) async {
+  final now = DateTime.now().millisecondsSinceEpoch;
+  final yesterday = now - 86400000;
+  final lastWeek = now - 604800000;
+  final nextWeek = now + 604800000;
+
+  await db.transaction((txn) async {
+    // Seed users
+    await txn.insert('users', {
+      'username': 'admin',
+      'password_hash': 'admin123',
+      'role': 'ADMIN',
+    });
+    await txn.insert('users', {
+      'username': 'operator',
+      'password_hash': 'operator123',
+      'role': 'OPERATOR',
+    });
+    await txn.insert('users', {
+      'username': 'manager',
+      'password_hash': 'manager123',
+      'role': 'MANAGER',
+    });
+
+    // Seed storage locations
+    await txn.insert('storage_location', {
+      'rack_id': 'R01',
+      'shelf_id': 'S01',
+      'bin_id': 'B01',
+      'zone': 'CHILLED',
+      'capacity': 1000,
+      'current_utilization': 250,
+    });
+    await txn.insert('storage_location', {
+      'rack_id': 'R01',
+      'shelf_id': 'S02',
+      'bin_id': 'B01',
+      'zone': 'FROZEN',
+      'capacity': 800,
+      'current_utilization': 150,
+    });
+    await txn.insert('storage_location', {
+      'rack_id': 'R02',
+      'shelf_id': 'S01',
+      'bin_id': 'B01',
+      'zone': 'AMBIENT',
+      'capacity': 1200,
+      'current_utilization': 300,
+    });
+    await txn.insert('storage_location', {
+      'rack_id': 'R02',
+      'shelf_id': 'S02',
+      'bin_id': 'B01',
+      'zone': 'CHILLED',
+      'capacity': 1000,
+      'current_utilization': 400,
+    });
+    await txn.insert('storage_location', {
+      'rack_id': 'R03',
+      'shelf_id': 'S01',
+      'bin_id': 'B01',
+      'zone': 'FROZEN',
+      'capacity': 600,
+      'current_utilization': 100,
+    });
+
+    // Seed inventory items
+    await txn.insert('inventory_item', {
+      'sku': 'PROD-001',
+      'name': 'Fresh Apples',
+      'category': 'Produce',
+      'quantity': 100,
+      'unit': 'kg',
+      'location_id': 1,
+      'expiry_date': nextWeek,
+      'min_temp': 1.0,
+      'max_temp': 4.0,
+      'current_temp': 3.2,
+      'humidity': 85,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'PROD-002',
+      'name': 'Organic Carrots',
+      'category': 'Produce',
+      'quantity': 150,
+      'unit': 'kg',
+      'location_id': 1,
+      'expiry_date': nextWeek,
+      'min_temp': 1.0,
+      'max_temp': 4.0,
+      'current_temp': 2.8,
+      'humidity': 90,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'MEAT-001',
+      'name': 'Chicken Breast',
+      'category': 'Meat',
+      'quantity': 50,
+      'unit': 'kg',
+      'location_id': 2,
+      'expiry_date': nextWeek,
+      'min_temp': -2.0,
+      'max_temp': 0.0,
+      'current_temp': -1.5,
+      'humidity': 75,
+      'status': 'IN_STOCK',
+      'created_at': yesterday,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'MEAT-002',
+      'name': 'Ground Beef',
+      'category': 'Meat',
+      'quantity': 75,
+      'unit': 'kg',
+      'location_id': 2,
+      'expiry_date': nextWeek,
+      'min_temp': -2.0,
+      'max_temp': 0.0,
+      'current_temp': -1.0,
+      'humidity': 70,
+      'status': 'IN_STOCK',
+      'created_at': yesterday,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'DAIRY-001',
+      'name': 'Whole Milk',
+      'category': 'Dairy',
+      'quantity': 200,
+      'unit': 'L',
+      'location_id': 1,
+      'expiry_date': nextWeek,
+      'min_temp': 1.0,
+      'max_temp': 4.0,
+      'current_temp': 3.5,
+      'humidity': 80,
+      'status': 'IN_STOCK',
+      'created_at': yesterday,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'DAIRY-002',
+      'name': 'Greek Yogurt',
+      'category': 'Dairy',
+      'quantity': 120,
+      'unit': 'pcs',
+      'location_id': 1,
+      'expiry_date': nextWeek,
+      'min_temp': 1.0,
+      'max_temp': 4.0,
+      'current_temp': 3.0,
+      'humidity': 80,
+      'status': 'IN_STOCK',
+      'created_at': yesterday,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'FROZ-001',
+      'name': 'Frozen Peas',
+      'category': 'Frozen',
+      'quantity': 300,
+      'unit': 'kg',
+      'location_id': 5,
+      'expiry_date': nextWeek,
+      'min_temp': -20.0,
+      'max_temp': -15.0,
+      'current_temp': -18.0,
+      'humidity': 60,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'FROZ-002',
+      'name': 'Ice Cream',
+      'category': 'Frozen',
+      'quantity': 80,
+      'unit': 'pcs',
+      'location_id': 5,
+      'expiry_date': nextWeek,
+      'min_temp': -25.0,
+      'max_temp': -18.0,
+      'current_temp': -20.0,
+      'humidity': 55,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'AMB-001',
+      'name': 'Canned Tomatoes',
+      'category': 'Other',
+      'quantity': 500,
+      'unit': 'cans',
+      'location_id': 3,
+      'expiry_date': nextWeek + 2592000000,
+      'min_temp': 15.0,
+      'max_temp': 25.0,
+      'current_temp': 22.0,
+      'humidity': 50,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+    await txn.insert('inventory_item', {
+      'sku': 'AMB-002',
+      'name': 'Olive Oil',
+      'category': 'Other',
+      'quantity': 100,
+      'unit': 'L',
+      'location_id': 3,
+      'expiry_date': nextWeek + 2592000000,
+      'min_temp': 15.0,
+      'max_temp': 25.0,
+      'current_temp': 20.0,
+      'humidity': 45,
+      'status': 'IN_STOCK',
+      'created_at': lastWeek,
+      'updated_at': now,
+    });
+
+    // Seed temperature logs
+    for (int i = 0; i < 10; i++) {
+      await txn.insert('temperature_log', {
+        'item_id': 1,
+        'location_id': 1,
+        'temperature': 3.0 + (i % 3) * 0.2,
+        'humidity': 85 + (i % 5),
+        'timestamp': now - (i * 3600000),
+        'sensor_id': 'sensor_001',
+      });
+    }
+    for (int i = 0; i < 10; i++) {
+      await txn.insert('temperature_log', {
+        'item_id': 3,
+        'location_id': 2,
+        'temperature': -1.5 + (i % 3) * 0.1,
+        'humidity': 75 + (i % 5),
+        'timestamp': now - (i * 3600000),
+        'sensor_id': 'sensor_002',
+      });
+    }
+
+    // Seed gatepass types
+    await txn.insert('gatepass_types', {
+      'code': 'INBOUND',
+      'name': 'Inbound Delivery',
+      'description': 'Goods received from suppliers',
+      'workflow_type': 'RECEIVING',
+      'requires_vehicle': 1,
+      'requires_driver': 1,
+      'requires_security_check': 1,
+      'validity_hours': 24,
+      'color_code': '#4CAF50',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('gatepass_types', {
+      'code': 'OUTBOUND',
+      'name': 'Outbound Dispatch',
+      'description': 'Goods shipped to customers',
+      'workflow_type': 'DISPATCH',
+      'requires_vehicle': 1,
+      'requires_driver': 1,
+      'requires_security_check': 1,
+      'validity_hours': 48,
+      'color_code': '#2196F3',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('gatepass_types', {
+      'code': 'TRANSFER',
+      'name': 'Inter-location Transfer',
+      'description': 'Transfer between storage locations',
+      'workflow_type': 'TRANSFER',
+      'requires_vehicle': 0,
+      'requires_driver': 0,
+      'requires_security_check': 1,
+      'validity_hours': 12,
+      'color_code': '#FF9800',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed parties (vendors/customers)
+    await txn.insert('parties', {
+      'name': 'Fresh Farms Co.',
+      'type': 'VENDOR',
+      'gstin': '27ABCDE1234F1Z5',
+      'address': '123 Farm Road',
+      'city': 'Mumbai',
+      'state': 'Maharashtra',
+      'pincode': '400001',
+      'phone': '9876543210',
+      'email': 'orders@freshfarms.com',
+      'contact_person': 'Rajesh Kumar',
+      'credit_limit': 500000,
+      'payment_terms': 30,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('parties', {
+      'name': 'City Supermarket Chain',
+      'type': 'CUSTOMER',
+      'gstin': '27FGHIJ5678K2Z6',
+      'address': '456 Market Street',
+      'city': 'Delhi',
+      'state': 'Delhi',
+      'pincode': '110001',
+      'phone': '9876543211',
+      'email': 'procurement@citysuper.com',
+      'contact_person': 'Priya Sharma',
+      'credit_limit': 1000000,
+      'payment_terms': 45,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('parties', {
+      'name': 'Cold Chain Logistics Ltd',
+      'type': 'CARRIER',
+      'gstin': '27KLMNO9012P3Z7',
+      'address': '789 Transport Hub',
+      'city': 'Bangalore',
+      'state': 'Karnataka',
+      'pincode': '560001',
+      'phone': '9876543212',
+      'email': 'ops@coldchainlogistics.com',
+      'contact_person': 'Amit Singh',
+      'credit_limit': 0,
+      'payment_terms': 15,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed chart of accounts
+    await txn.insert('chart_of_accounts', {
+      'code': '1000',
+      'name': 'Cash',
+      'type': 'ASSET',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '1100',
+      'name': 'Accounts Receivable',
+      'type': 'ASSET',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '1200',
+      'name': 'Inventory',
+      'type': 'ASSET',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '2000',
+      'name': 'Accounts Payable',
+      'type': 'LIABILITY',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '4000',
+      'name': 'Sales Revenue',
+      'type': 'REVENUE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '5000',
+      'name': 'Cost of Goods Sold',
+      'type': 'EXPENSE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '5100',
+      'name': 'Storage Expenses',
+      'type': 'EXPENSE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('chart_of_accounts', {
+      'code': '5200',
+      'name': 'Transportation Expenses',
+      'type': 'EXPENSE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed tax rates
+    await txn.insert('tax_rates', {
+      'name': 'GST 5%',
+      'type': 'GST',
+      'rate': 5.0,
+      'effective_from': now,
+      'is_active': 1,
+    });
+    await txn.insert('tax_rates', {
+      'name': 'GST 12%',
+      'type': 'GST',
+      'rate': 12.0,
+      'effective_from': now,
+      'is_active': 1,
+    });
+    await txn.insert('tax_rates', {
+      'name': 'GST 18%',
+      'type': 'GST',
+      'rate': 18.0,
+      'effective_from': now,
+      'is_active': 1,
+    });
+
+    // Seed carriers
+    await txn.insert('carriers', {
+      'name': 'Cold Chain Logistics Ltd',
+      'code': 'CCL',
+      'contact_person': 'Amit Singh',
+      'phone': '9876543212',
+      'email': 'ops@coldchainlogistics.com',
+      'address': '789 Transport Hub, Bangalore',
+      'gstin': '27KLMNO9012P3Z7',
+      'license_number': 'DL-01-AB-1234',
+      'rating': 4.5,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('carriers', {
+      'name': 'Arctic Transport',
+      'code': 'ART',
+      'contact_person': 'Vikram Patel',
+      'phone': '9876543213',
+      'email': 'dispatch@arctictransport.com',
+      'address': '321 Frozen Lane, Hyderabad',
+      'gstin': '36PQRST3456U4Z8',
+      'license_number': 'TS-09-CD-5678',
+      'rating': 4.2,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed vehicles
+    await txn.insert('vehicles', {
+      'carrier_id': 1,
+      'registration_number': 'MH-01-AB-1234',
+      'vehicle_type': 'REFRIGERATED_TRUCK',
+      'capacity_weight': 5000,
+      'capacity_volume': 30,
+      'capacity_pallets': 12,
+      'temperature_controlled': 1,
+      'min_temp': -25.0,
+      'max_temp': 10.0,
+      'gps_device_id': 'GPS-001',
+      'insurance_expiry': nextWeek + 2592000000,
+      'fitness_expiry': nextWeek + 2592000000,
+      'permit_expiry': nextWeek + 2592000000,
+      'driver_name': 'Suresh Kumar',
+      'driver_phone': '9876543220',
+      'driver_license': 'MH-1234567890',
+      'status': 'AVAILABLE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('vehicles', {
+      'carrier_id': 1,
+      'registration_number': 'MH-01-AB-5678',
+      'vehicle_type': 'REFRIGERATED_VAN',
+      'capacity_weight': 1500,
+      'capacity_volume': 10,
+      'capacity_pallets': 4,
+      'temperature_controlled': 1,
+      'min_temp': -20.0,
+      'max_temp': 5.0,
+      'gps_device_id': 'GPS-002',
+      'insurance_expiry': nextWeek + 2592000000,
+      'fitness_expiry': nextWeek + 2592000000,
+      'permit_expiry': nextWeek + 2592000000,
+      'driver_name': 'Ramesh Yadav',
+      'driver_phone': '9876543221',
+      'driver_license': 'MH-0987654321',
+      'status': 'AVAILABLE',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed routes
+    await txn.insert('routes', {
+      'code': 'MUM-DEL',
+      'name': 'Mumbai to Delhi',
+      'origin': 'Mumbai',
+      'destination': 'Delhi',
+      'distance_km': 1400,
+      'estimated_duration_minutes': 1440,
+      'toll_charges': 5000,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('routes', {
+      'code': 'BLR-CHE',
+      'name': 'Bangalore to Chennai',
+      'origin': 'Bangalore',
+      'destination': 'Chennai',
+      'distance_km': 350,
+      'estimated_duration_minutes': 420,
+      'toll_charges': 1200,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed barcode definitions
+    await txn.insert('barcode_definitions', {
+      'code': 'ITEM_STD',
+      'name': 'Standard Item Barcode',
+      'symbology': 'CODE128',
+      'prefix': 'ITM',
+      'format_template': 'ITM-{id:06d}',
+      'width_mm': 50,
+      'height_mm': 25,
+      'module_width': 0.33,
+      'include_text': 1,
+      'font_size': 10,
+      'error_correction': 'M',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('barcode_definitions', {
+      'code': 'GP_QR',
+      'name': 'Gatepass QR Code',
+      'symbology': 'QR_CODE',
+      'prefix': 'GP',
+      'format_template': 'GP-{id:08d}',
+      'width_mm': 40,
+      'height_mm': 40,
+      'module_width': 0.5,
+      'include_text': 1,
+      'font_size': 8,
+      'error_correction': 'M',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('barcode_definitions', {
+      'code': 'LOC_BC',
+      'name': 'Location Barcode',
+      'symbology': 'CODE128',
+      'prefix': 'LOC',
+      'format_template': 'LOC-{zone}-{rack}-{shelf}',
+      'width_mm': 60,
+      'height_mm': 20,
+      'module_width': 0.33,
+      'include_text': 1,
+      'font_size': 8,
+      'error_correction': 'M',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed barcode for items
+    await txn.insert('barcodes', {
+      'barcode_value': 'ITM-000001',
+      'barcode_type_id': 1,
+      'entity_type': 'ITEM',
+      'entity_id': 1,
+      'label_data': '{"name":"Fresh Apples","sku":"PROD-001"}',
+      'status': 'ACTIVE',
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('barcodes', {
+      'barcode_value': 'ITM-000002',
+      'barcode_type_id': 1,
+      'entity_type': 'ITEM',
+      'entity_id': 2,
+      'label_data': '{"name":"Organic Carrots","sku":"PROD-002"}',
+      'status': 'ACTIVE',
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('barcodes', {
+      'barcode_value': 'ITM-000003',
+      'barcode_type_id': 1,
+      'entity_type': 'ITEM',
+      'entity_id': 3,
+      'label_data': '{"name":"Chicken Breast","sku":"MEAT-001"}',
+      'status': 'ACTIVE',
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed printer config
+    await txn.insert('printer_configs', {
+      'name': 'Default Label Printer',
+      'printer_type': 'ZEBRA',
+      'connection_type': 'USB',
+      'usb_vid_pid': '0a5f:0064',
+      'paper_width_mm': 102,
+      'paper_height_mm': 152,
+      'print_speed': 4,
+      'print_density': 12,
+      'is_default': 1,
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed security gates
+    await txn.insert('security_gates', {
+      'code': 'GATE-01',
+      'name': 'Main Entry Gate',
+      'gate_type': 'ENTRY',
+      'location_description': 'Main warehouse entrance',
+      'latitude': 19.0760,
+      'longitude': 72.8777,
+      'barrier_type': 'BOOM_BARRIER',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('security_gates', {
+      'code': 'GATE-02',
+      'name': 'Exit Gate',
+      'gate_type': 'EXIT',
+      'location_description': 'Warehouse exit',
+      'latitude': 19.0760,
+      'longitude': 72.8777,
+      'barrier_type': 'BOOM_BARRIER',
+      'is_active': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed camera devices
+    await txn.insert('camera_devices', {
+      'name': 'Receiving Dock Camera',
+      'code': 'CAM-001',
+      'device_type': 'IP_CAMERA',
+      'location_id': 1,
+      'ip_address': '192.168.1.100',
+      'port': 554,
+      'username': 'admin',
+      'password_hash': 'camera123',
+      'rtsp_url': 'rtsp://192.168.1.100:554/stream1',
+      'resolution_width': 1920,
+      'resolution_height': 1080,
+      'fps': 30,
+      'model_path': 'assets/models/pallet_counter.tflite',
+      'model_version': '1.0',
+      'confidence_threshold': 0.5,
+      'iou_threshold': 0.45,
+      'detection_classes': 'pallet,box,crate',
+      'count_direction': 'IN',
+      'roi_coordinates': '[100,100,1820,980]',
+      'calibration_factor': 1.0,
+      'is_active': 1,
+      'last_heartbeat': now,
+      'created_at': now,
+      'updated_at': now,
+    });
+    await txn.insert('camera_devices', {
+      'name': 'Dispatch Dock Camera',
+      'code': 'CAM-002',
+      'device_type': 'IP_CAMERA',
+      'location_id': 3,
+      'ip_address': '192.168.1.101',
+      'port': 554,
+      'username': 'admin',
+      'password_hash': 'camera123',
+      'rtsp_url': 'rtsp://192.168.1.101:554/stream1',
+      'resolution_width': 1920,
+      'resolution_height': 1080,
+      'fps': 30,
+      'model_path': 'assets/models/pallet_counter.tflite',
+      'model_version': '1.0',
+      'confidence_threshold': 0.5,
+      'iou_threshold': 0.45,
+      'detection_classes': 'pallet,box,crate',
+      'count_direction': 'OUT',
+      'roi_coordinates': '[100,100,1820,980]',
+      'calibration_factor': 1.0,
+      'is_active': 1,
+      'last_heartbeat': now,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed ML models
+    await txn.insert('ml_models', {
+      'name': 'Pallet Counter v1',
+      'version': '1.0',
+      'model_type': 'OBJECT_DETECTION',
+      'framework': 'TFLITE',
+      'input_width': 320,
+      'input_height': 320,
+      'input_channels': 3,
+      'classes': 'pallet,box,crate',
+      'model_file_path': 'assets/models/pallet_counter.tflite',
+      'label_file_path': 'assets/labels/pallet_labels.txt',
+      'metrics_json': '{"mAP":0.85,"precision":0.88,"recall":0.82}',
+      'training_data_info': '10000 images from warehouse cameras',
+      'is_active': 1,
+      'deployed_at': now,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed gatepass (sample inbound)
+    await txn.insert('gatepass', {
+      'gatepass_number': 'GP-IN-000001',
+      'gatepass_type_id': 1,
+      'party_id': 1,
+      'status': 'COMPLETED',
+      'vehicle_id': 1,
+      'vehicle_number': 'MH-01-AB-1234',
+      'driver_name': 'Suresh Kumar',
+      'driver_phone': '9876543220',
+      'requested_date': yesterday,
+      'approved_date': yesterday,
+      'valid_from': yesterday,
+      'valid_to': now + 86400000,
+      'actual_entry_time': yesterday + 3600000,
+      'actual_exit_time': yesterday + 7200000,
+      'entry_gate_id': 1,
+      'exit_gate_id': 2,
+      'security_check_status': 'PASSED',
+      'seal_number': 'SL-001',
+      'seal_intact': 1,
+      'total_items': 2,
+      'total_quantity': 250,
+      'total_packages': 50,
+      'created_by': 1,
+      'created_at': yesterday,
+      'updated_at': now,
+    });
+    await txn.insert('gatepass', {
+      'gatepass_number': 'GP-OUT-000001',
+      'gatepass_type_id': 2,
+      'party_id': 2,
+      'status': 'APPROVED',
+      'vehicle_id': 1,
+      'vehicle_number': 'MH-01-AB-1234',
+      'driver_name': 'Suresh Kumar',
+      'driver_phone': '9876543220',
+      'requested_date': now,
+      'approved_date': now,
+      'valid_from': now,
+      'valid_to': nextWeek,
+      'security_officer_id': 1,
+      'security_check_status': 'PENDING',
+      'total_items': 3,
+      'total_quantity': 180,
+      'total_packages': 36,
+      'created_by': 1,
+      'created_at': now,
+      'updated_at': now,
+    });
+
+    // Seed gatepass items
+    await txn.insert('gatepass_items', {
+      'gatepass_id': 1,
+      'item_id': 1,
+      'description': 'Fresh Apples',
+      'quantity': 100,
+      'unit': 'kg',
+      'weight_per_unit': 1,
+      'total_weight': 100,
+      'packages': 20,
+      'package_type': 'CRATE',
+      'verified_quantity': 100,
+      'verified_weight': 100,
+      'verified_packages': 20,
+      'verification_status': 'VERIFIED',
+    });
+    await txn.insert('gatepass_items', {
+      'gatepass_id': 1,
+      'item_id': 2,
+      'description': 'Organic Carrots',
+      'quantity': 150,
+      'unit': 'kg',
+      'weight_per_unit': 1,
+      'total_weight': 150,
+      'packages': 30,
+      'package_type': 'CRATE',
+      'verified_quantity': 150,
+      'verified_weight': 150,
+      'verified_packages': 30,
+      'verification_status': 'VERIFIED',
+    });
+    await txn.insert('gatepass_items', {
+      'gatepass_id': 2,
+      'item_id': 1,
+      'description': 'Fresh Apples',
+      'quantity': 50,
+      'unit': 'kg',
+      'weight_per_unit': 1,
+      'total_weight': 50,
+      'packages': 10,
+      'package_type': 'CRATE',
+      'verification_status': 'PENDING',
+    });
+    await txn.insert('gatepass_items', {
+      'gatepass_id': 2,
+      'item_id': 3,
+      'description': 'Chicken Breast',
+      'quantity': 30,
+      'unit': 'kg',
+      'weight_per_unit': 1,
+      'total_weight': 30,
+      'packages': 6,
+      'package_type': 'BOX',
+      'temperature_required': 1,
+      'min_temp': -2.0,
+      'max_temp': 0.0,
+      'verification_status': 'PENDING',
+    });
+    await txn.insert('gatepass_items', {
+      'gatepass_id': 2,
+      'item_id': 5,
+      'description': 'Whole Milk',
+      'quantity': 100,
+      'unit': 'L',
+      'weight_per_unit': 1.03,
+      'total_weight': 103,
+      'packages': 20,
+      'package_type': 'CARTON',
+      'temperature_required': 1,
+      'min_temp': 1.0,
+      'max_temp': 4.0,
+      'verification_status': 'PENDING',
+    });
+
+    // Seed audit logs
+    await txn.insert('audit_log', {
+      'user_id': 1,
+      'action': 'system_init',
+      'detail': 'Database initialized with demo data',
+      'timestamp': now,
+      'entity_type': 'system',
+      'entity_id': 0,
+    });
+    await txn.insert('audit_log', {
+      'user_id': 1,
+      'action': 'create_inventory',
+      'detail': 'Created demo inventory items',
+      'timestamp': now,
+      'entity_type': 'inventory_item',
+      'entity_id': 1,
+    });
+
+    // Seed settings
+    await txn.insert('settings', {'key': 'app_name', 'value': 'Cold Storage WMS'});
+    await txn.insert('settings', {'key': 'default_currency', 'value': 'INR'});
+    await txn.insert('settings', {'key': 'timezone', 'value': 'Asia/Kolkata'});
+    await txn.insert('settings', {'key': 'date_format', 'value': 'dd/MM/yyyy'});
+    await txn.insert('settings', {'key': 'temp_unit', 'value': 'C'});
+  });
 }
 
 // Migration 001: Inventory Schema
