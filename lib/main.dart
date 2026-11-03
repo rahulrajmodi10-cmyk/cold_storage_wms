@@ -3,7 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'screens/inventory_dashboard.dart';
@@ -30,9 +30,15 @@ void main() async {
 
   // Only initialize sqflite_ffi on desktop platforms (Windows, Linux, macOS)
   // On Android/iOS, use the native sqflite implementation
-  if (!Platform.isAndroid && !Platform.isIOS) {
+  // Use const check to avoid R8/minification issues
+  final bool isDesktop = !Platform.isAndroid && !Platform.isIOS;
+  if (isDesktop) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+  } else {
+    // Explicitly ensure native sqflite factory is used on mobile
+    // This prevents accidental FFI usage on Android/iOS
+    // sqflite native factory is the default on mobile platforms
   }
 
   final db = await _initDatabase();
@@ -43,7 +49,7 @@ Future<Database> _initDatabase() async {
   final path = join(await getDatabasesPath(), 'wms.db');
   return await openDatabase(
     path,
-    version: 5,
+    version: 6,
     onCreate: (db, version) async {
       // Run all migrations in order
       await _runMigration001(db);
@@ -67,36 +73,42 @@ Future<Database> _initDatabase() async {
       if (oldVersion < 5) {
         await _runMigration005(db);
       }
+      if (oldVersion < 6) {
+        // Migration 006: Seed demo data if tables are empty (self-healing for existing installs)
+        final userCount = sqflite.Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users'));
+        if (userCount == 0) {
+          await _seedDemoData(db);
+        }
+      }
     },
   );
 }
 
-Future<void> _seedDemoData(Database db) async {
+Future<void> _seedDemoData(DatabaseExecutor db) async {
   final now = DateTime.now().millisecondsSinceEpoch;
   final yesterday = now - 86400000;
   final lastWeek = now - 604800000;
   final nextWeek = now + 604800000;
 
-  await db.transaction((txn) async {
-    // Seed users
-    await txn.insert('users', {
+  // Seed users
+  await db.insert('users', {
       'username': 'admin',
       'password_hash': 'admin123',
       'role': 'ADMIN',
     });
-    await txn.insert('users', {
+    await db.insert('users', {
       'username': 'operator',
       'password_hash': 'operator123',
       'role': 'OPERATOR',
     });
-    await txn.insert('users', {
+    await db.insert('users', {
       'username': 'manager',
       'password_hash': 'manager123',
       'role': 'MANAGER',
     });
 
     // Seed storage locations
-    await txn.insert('storage_location', {
+    await db.insert('storage_location', {
       'rack_id': 'R01',
       'shelf_id': 'S01',
       'bin_id': 'B01',
@@ -104,7 +116,7 @@ Future<void> _seedDemoData(Database db) async {
       'capacity': 1000,
       'current_utilization': 250,
     });
-    await txn.insert('storage_location', {
+    await db.insert('storage_location', {
       'rack_id': 'R01',
       'shelf_id': 'S02',
       'bin_id': 'B01',
@@ -112,7 +124,7 @@ Future<void> _seedDemoData(Database db) async {
       'capacity': 800,
       'current_utilization': 150,
     });
-    await txn.insert('storage_location', {
+    await db.insert('storage_location', {
       'rack_id': 'R02',
       'shelf_id': 'S01',
       'bin_id': 'B01',
@@ -120,7 +132,7 @@ Future<void> _seedDemoData(Database db) async {
       'capacity': 1200,
       'current_utilization': 300,
     });
-    await txn.insert('storage_location', {
+    await db.insert('storage_location', {
       'rack_id': 'R02',
       'shelf_id': 'S02',
       'bin_id': 'B01',
@@ -128,7 +140,7 @@ Future<void> _seedDemoData(Database db) async {
       'capacity': 1000,
       'current_utilization': 400,
     });
-    await txn.insert('storage_location', {
+    await db.insert('storage_location', {
       'rack_id': 'R03',
       'shelf_id': 'S01',
       'bin_id': 'B01',
@@ -138,7 +150,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed inventory items
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'PROD-001',
       'name': 'Fresh Apples',
       'category': 'Produce',
@@ -154,7 +166,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': lastWeek,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'PROD-002',
       'name': 'Organic Carrots',
       'category': 'Produce',
@@ -170,7 +182,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': lastWeek,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'MEAT-001',
       'name': 'Chicken Breast',
       'category': 'Meat',
@@ -186,7 +198,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': yesterday,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'MEAT-002',
       'name': 'Ground Beef',
       'category': 'Meat',
@@ -202,7 +214,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': yesterday,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'DAIRY-001',
       'name': 'Whole Milk',
       'category': 'Dairy',
@@ -218,7 +230,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': yesterday,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'DAIRY-002',
       'name': 'Greek Yogurt',
       'category': 'Dairy',
@@ -234,7 +246,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': yesterday,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'FROZ-001',
       'name': 'Frozen Peas',
       'category': 'Frozen',
@@ -250,7 +262,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': lastWeek,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'FROZ-002',
       'name': 'Ice Cream',
       'category': 'Frozen',
@@ -266,7 +278,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': lastWeek,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'AMB-001',
       'name': 'Canned Tomatoes',
       'category': 'Other',
@@ -282,7 +294,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': lastWeek,
       'updated_at': now,
     });
-    await txn.insert('inventory_item', {
+    await db.insert('inventory_item', {
       'sku': 'AMB-002',
       'name': 'Olive Oil',
       'category': 'Other',
@@ -301,7 +313,7 @@ Future<void> _seedDemoData(Database db) async {
 
     // Seed temperature logs
     for (int i = 0; i < 10; i++) {
-      await txn.insert('temperature_log', {
+      await db.insert('temperature_log', {
         'item_id': 1,
         'location_id': 1,
         'temperature': 3.0 + (i % 3) * 0.2,
@@ -311,7 +323,7 @@ Future<void> _seedDemoData(Database db) async {
       });
     }
     for (int i = 0; i < 10; i++) {
-      await txn.insert('temperature_log', {
+      await db.insert('temperature_log', {
         'item_id': 3,
         'location_id': 2,
         'temperature': -1.5 + (i % 3) * 0.1,
@@ -322,7 +334,7 @@ Future<void> _seedDemoData(Database db) async {
     }
 
     // Seed gatepass types
-    await txn.insert('gatepass_types', {
+    await db.insert('gatepass_types', {
       'code': 'INBOUND',
       'name': 'Inbound Delivery',
       'description': 'Goods received from suppliers',
@@ -336,7 +348,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('gatepass_types', {
+    await db.insert('gatepass_types', {
       'code': 'OUTBOUND',
       'name': 'Outbound Dispatch',
       'description': 'Goods shipped to customers',
@@ -350,7 +362,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('gatepass_types', {
+    await db.insert('gatepass_types', {
       'code': 'TRANSFER',
       'name': 'Inter-location Transfer',
       'description': 'Transfer between storage locations',
@@ -366,7 +378,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed parties (vendors/customers)
-    await txn.insert('parties', {
+    await db.insert('parties', {
       'name': 'Fresh Farms Co.',
       'type': 'VENDOR',
       'gstin': '27ABCDE1234F1Z5',
@@ -383,7 +395,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('parties', {
+    await db.insert('parties', {
       'name': 'City Supermarket Chain',
       'type': 'CUSTOMER',
       'gstin': '27FGHIJ5678K2Z6',
@@ -400,7 +412,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('parties', {
+    await db.insert('parties', {
       'name': 'Cold Chain Logistics Ltd',
       'type': 'CARRIER',
       'gstin': '27KLMNO9012P3Z7',
@@ -419,7 +431,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed chart of accounts
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '1000',
       'name': 'Cash',
       'type': 'ASSET',
@@ -427,7 +439,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '1100',
       'name': 'Accounts Receivable',
       'type': 'ASSET',
@@ -435,7 +447,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '1200',
       'name': 'Inventory',
       'type': 'ASSET',
@@ -443,7 +455,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '2000',
       'name': 'Accounts Payable',
       'type': 'LIABILITY',
@@ -451,7 +463,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '4000',
       'name': 'Sales Revenue',
       'type': 'REVENUE',
@@ -459,7 +471,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '5000',
       'name': 'Cost of Goods Sold',
       'type': 'EXPENSE',
@@ -467,7 +479,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '5100',
       'name': 'Storage Expenses',
       'type': 'EXPENSE',
@@ -475,7 +487,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('chart_of_accounts', {
+    await db.insert('chart_of_accounts', {
       'code': '5200',
       'name': 'Transportation Expenses',
       'type': 'EXPENSE',
@@ -485,21 +497,21 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed tax rates
-    await txn.insert('tax_rates', {
+    await db.insert('tax_rates', {
       'name': 'GST 5%',
       'type': 'GST',
       'rate': 5.0,
       'effective_from': now,
       'is_active': 1,
     });
-    await txn.insert('tax_rates', {
+    await db.insert('tax_rates', {
       'name': 'GST 12%',
       'type': 'GST',
       'rate': 12.0,
       'effective_from': now,
       'is_active': 1,
     });
-    await txn.insert('tax_rates', {
+    await db.insert('tax_rates', {
       'name': 'GST 18%',
       'type': 'GST',
       'rate': 18.0,
@@ -508,7 +520,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed carriers
-    await txn.insert('carriers', {
+    await db.insert('carriers', {
       'name': 'Cold Chain Logistics Ltd',
       'code': 'CCL',
       'contact_person': 'Amit Singh',
@@ -522,7 +534,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('carriers', {
+    await db.insert('carriers', {
       'name': 'Arctic Transport',
       'code': 'ART',
       'contact_person': 'Vikram Patel',
@@ -538,7 +550,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed vehicles
-    await txn.insert('vehicles', {
+    await db.insert('vehicles', {
       'carrier_id': 1,
       'registration_number': 'MH-01-AB-1234',
       'vehicle_type': 'REFRIGERATED_TRUCK',
@@ -560,7 +572,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('vehicles', {
+    await db.insert('vehicles', {
       'carrier_id': 1,
       'registration_number': 'MH-01-AB-5678',
       'vehicle_type': 'REFRIGERATED_VAN',
@@ -584,7 +596,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed routes
-    await txn.insert('routes', {
+    await db.insert('routes', {
       'code': 'MUM-DEL',
       'name': 'Mumbai to Delhi',
       'origin': 'Mumbai',
@@ -596,7 +608,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('routes', {
+    await db.insert('routes', {
       'code': 'BLR-CHE',
       'name': 'Bangalore to Chennai',
       'origin': 'Bangalore',
@@ -610,7 +622,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed barcode definitions
-    await txn.insert('barcode_definitions', {
+    await db.insert('barcode_definitions', {
       'code': 'ITEM_STD',
       'name': 'Standard Item Barcode',
       'symbology': 'CODE128',
@@ -626,7 +638,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('barcode_definitions', {
+    await db.insert('barcode_definitions', {
       'code': 'GP_QR',
       'name': 'Gatepass QR Code',
       'symbology': 'QR_CODE',
@@ -642,7 +654,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('barcode_definitions', {
+    await db.insert('barcode_definitions', {
       'code': 'LOC_BC',
       'name': 'Location Barcode',
       'symbology': 'CODE128',
@@ -660,7 +672,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed barcode for items
-    await txn.insert('barcodes', {
+    await db.insert('barcodes', {
       'barcode_value': 'ITM-000001',
       'barcode_type_id': 1,
       'entity_type': 'ITEM',
@@ -670,7 +682,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('barcodes', {
+    await db.insert('barcodes', {
       'barcode_value': 'ITM-000002',
       'barcode_type_id': 1,
       'entity_type': 'ITEM',
@@ -680,7 +692,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('barcodes', {
+    await db.insert('barcodes', {
       'barcode_value': 'ITM-000003',
       'barcode_type_id': 1,
       'entity_type': 'ITEM',
@@ -692,7 +704,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed printer config
-    await txn.insert('printer_configs', {
+    await db.insert('printer_configs', {
       'name': 'Default Label Printer',
       'printer_type': 'ZEBRA',
       'connection_type': 'USB',
@@ -708,7 +720,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed security gates
-    await txn.insert('security_gates', {
+    await db.insert('security_gates', {
       'code': 'GATE-01',
       'name': 'Main Entry Gate',
       'gate_type': 'ENTRY',
@@ -720,7 +732,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('security_gates', {
+    await db.insert('security_gates', {
       'code': 'GATE-02',
       'name': 'Exit Gate',
       'gate_type': 'EXIT',
@@ -734,7 +746,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed camera devices
-    await txn.insert('camera_devices', {
+    await db.insert('camera_devices', {
       'name': 'Receiving Dock Camera',
       'code': 'CAM-001',
       'device_type': 'IP_CAMERA',
@@ -760,7 +772,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': now,
       'updated_at': now,
     });
-    await txn.insert('camera_devices', {
+    await db.insert('camera_devices', {
       'name': 'Dispatch Dock Camera',
       'code': 'CAM-002',
       'device_type': 'IP_CAMERA',
@@ -788,7 +800,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed ML models
-    await txn.insert('ml_models', {
+    await db.insert('ml_models', {
       'name': 'Pallet Counter v1',
       'version': '1.0',
       'model_type': 'OBJECT_DETECTION',
@@ -808,7 +820,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed gatepass (sample inbound)
-    await txn.insert('gatepass', {
+    await db.insert('gatepass', {
       'gatepass_number': 'GP-IN-000001',
       'gatepass_type_id': 1,
       'party_id': 1,
@@ -835,7 +847,7 @@ Future<void> _seedDemoData(Database db) async {
       'created_at': yesterday,
       'updated_at': now,
     });
-    await txn.insert('gatepass', {
+    await db.insert('gatepass', {
       'gatepass_number': 'GP-OUT-000001',
       'gatepass_type_id': 2,
       'party_id': 2,
@@ -859,7 +871,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed gatepass items
-    await txn.insert('gatepass_items', {
+    await db.insert('gatepass_items', {
       'gatepass_id': 1,
       'item_id': 1,
       'description': 'Fresh Apples',
@@ -874,7 +886,7 @@ Future<void> _seedDemoData(Database db) async {
       'verified_packages': 20,
       'verification_status': 'VERIFIED',
     });
-    await txn.insert('gatepass_items', {
+    await db.insert('gatepass_items', {
       'gatepass_id': 1,
       'item_id': 2,
       'description': 'Organic Carrots',
@@ -889,7 +901,7 @@ Future<void> _seedDemoData(Database db) async {
       'verified_packages': 30,
       'verification_status': 'VERIFIED',
     });
-    await txn.insert('gatepass_items', {
+    await db.insert('gatepass_items', {
       'gatepass_id': 2,
       'item_id': 1,
       'description': 'Fresh Apples',
@@ -901,7 +913,7 @@ Future<void> _seedDemoData(Database db) async {
       'package_type': 'CRATE',
       'verification_status': 'PENDING',
     });
-    await txn.insert('gatepass_items', {
+    await db.insert('gatepass_items', {
       'gatepass_id': 2,
       'item_id': 3,
       'description': 'Chicken Breast',
@@ -916,7 +928,7 @@ Future<void> _seedDemoData(Database db) async {
       'max_temp': 0.0,
       'verification_status': 'PENDING',
     });
-    await txn.insert('gatepass_items', {
+    await db.insert('gatepass_items', {
       'gatepass_id': 2,
       'item_id': 5,
       'description': 'Whole Milk',
@@ -933,7 +945,7 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed audit logs
-    await txn.insert('audit_log', {
+    await db.insert('audit_log', {
       'user_id': 1,
       'action': 'system_init',
       'detail': 'Database initialized with demo data',
@@ -941,7 +953,7 @@ Future<void> _seedDemoData(Database db) async {
       'entity_type': 'system',
       'entity_id': 0,
     });
-    await txn.insert('audit_log', {
+    await db.insert('audit_log', {
       'user_id': 1,
       'action': 'create_inventory',
       'detail': 'Created demo inventory items',
@@ -951,12 +963,11 @@ Future<void> _seedDemoData(Database db) async {
     });
 
     // Seed settings
-    await txn.insert('settings', {'key': 'app_name', 'value': 'Cold Storage WMS'});
-    await txn.insert('settings', {'key': 'default_currency', 'value': 'INR'});
-    await txn.insert('settings', {'key': 'timezone', 'value': 'Asia/Kolkata'});
-    await txn.insert('settings', {'key': 'date_format', 'value': 'dd/MM/yyyy'});
-    await txn.insert('settings', {'key': 'temp_unit', 'value': 'C'});
-  });
+    await db.insert('settings', {'key': 'app_name', 'value': 'Cold Storage WMS'});
+    await db.insert('settings', {'key': 'default_currency', 'value': 'INR'});
+    await db.insert('settings', {'key': 'timezone', 'value': 'Asia/Kolkata'});
+    await db.insert('settings', {'key': 'date_format', 'value': 'dd/MM/yyyy'});
+    await db.insert('settings', {'key': 'temp_unit', 'value': 'C'});
 }
 
 // Migration 001: Inventory Schema
@@ -968,21 +979,6 @@ Future<void> _runMigration001(Database db) async {
       password_hash TEXT,
       role TEXT,
       face_embedding BLOB
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gatepass (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
-      quantity INTEGER,
-      operator_id INTEGER,
-      recipient TEXT,
-      vehicle_number TEXT,
-      destination TEXT,
-      status TEXT,
-      created_at INTEGER,
-      completed_at INTEGER,
-      completed_by INTEGER
     )
   ''');
   await db.execute('''
