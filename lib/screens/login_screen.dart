@@ -19,12 +19,9 @@ import '../services/receiving_service.dart';
 import '../services/picking_service.dart';
 import '../services/dispatch_service.dart';
 import '../services/sla_service.dart';
-import 'inventory_dashboard.dart';
-import 'finance_dashboard.dart';
-import 'logistics_dashboard.dart';
-import 'camera_counting_screen.dart';
-import 'gatepass_screen.dart';
-import 'barcode_scanner_screen.dart';
+import '../services/audit_service.dart';
+import 'home_dashboard.dart';
+import 'package:sqflite/sqflite.dart';
 
 class LoginScreen extends StatefulWidget {
   final Database db;
@@ -194,8 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => MainAppShell(
-              db: widget.db,
+            builder: (_) => HomeDashboard(
               userId: userId,
               username: username,
               role: role,
@@ -210,6 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
               pickingService: _pickingService,
               dispatchService: _dispatchService,
               slaService: _slaService,
+              auditService: widget.authService?.auditService ?? AuditService(widget.db),
             ),
           ),
         );
@@ -483,123 +480,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-// Main App Shell with Bottom Navigation
-class MainAppShell extends StatefulWidget {
-  final Database db;
-  final int userId;
-  final String username;
-  final String role;
-  final InventoryService inventoryService;
-  final LocationService locationService;
-  final TemperatureService temperatureService;
-  final FinanceService financeService;
-  final LogisticsService logisticsService;
-  final CameraAIService cameraService;
-  final GatepassBarcodeService gatepassService;
-  final ReceivingService receivingService;
-  final PickingService pickingService;
-  final DispatchService dispatchService;
-  final SLAService slaService;
-
-  const MainAppShell({
-    super.key,
-    required this.db,
-    required this.userId,
-    required this.username,
-    required this.role,
-    required this.inventoryService,
-    required this.locationService,
-    required this.temperatureService,
-    required this.financeService,
-    required this.logisticsService,
-    required this.cameraService,
-    required this.gatepassService,
-    required this.receivingService,
-    required this.pickingService,
-    required this.dispatchService,
-    required this.slaService,
-  });
-
-  @override
-  State<MainAppShell> createState() => _MainAppShellState();
-}
-
-class _MainAppShellState extends State<MainAppShell> {
-  int _currentIndex = 0;
-
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-    _screens = [
-      InventoryDashboard(
-        inventoryService: widget.inventoryService,
-        locationService: widget.locationService,
-      ),
-      FinanceDashboard(financeService: widget.financeService),
-      LogisticsDashboard(logisticsService: widget.logisticsService),
-      CameraCountingScreen(
-        cameraService: widget.cameraService,
-        gatepassService: widget.gatepassService,
-      ),
-      GatepassScreen(
-        gatepassService: widget.gatepassService,
-        inventoryService: widget.inventoryService,
-      ),
-      BarcodeScannerScreen(
-        barcodeService: widget.gatepassService,
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2),
-            label: 'Inventory',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_outlined),
-            selectedIcon: Icon(Icons.account_balance),
-            label: 'Finance',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.local_shipping_outlined),
-            selectedIcon: Icon(Icons.local_shipping),
-            label: 'Logistics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.videocam_outlined),
-            selectedIcon: Icon(Icons.videocam),
-            label: 'AI Camera',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.badge_outlined),
-            selectedIcon: Icon(Icons.badge),
-            label: 'Gatepass',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.qr_code_scanner_outlined),
-            selectedIcon: Icon(Icons.qr_code_scanner),
-            label: 'Barcode',
-          ),
-        ],
       ),
     );
   }
