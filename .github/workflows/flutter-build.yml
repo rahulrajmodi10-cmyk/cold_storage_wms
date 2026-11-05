@@ -11,9 +11,6 @@ permissions:
 
 jobs:
   build-apk:
-    defaults:
-      run:
-        shell: bash
     runs-on: ubuntu-latest
 
     steps:
