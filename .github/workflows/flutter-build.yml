@@ -11,6 +11,9 @@ permissions:
 
 jobs:
   build-apk:
+    defaults:
+      run:
+        shell: bash
     runs-on: ubuntu-latest
 
     steps:
@@ -59,7 +62,7 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter analyze on lib/models/ lib/services/ ==="
-          flutter analyze lib/models/ lib/services/ --fatal-infos 2>&1 | tee analyze_output.txt || true
+          flutter analyze lib/models/ lib/services/ --fatal-infos 2>&1 | tee analyze_output.txt
       - name: Upload analyze output
         if: always()
         uses: actions/upload-artifact@v4
@@ -86,7 +89,6 @@ jobs:
           path: build/app/outputs/flutter-apk/release/app-release.apk
 
       - name: Upload build logs
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs
