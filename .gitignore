@@ -23,3 +23,21 @@ web_logs*/
 
 # Artifacts (large APK files)
 artifacts/
+
+# Log files
+**/*.log
+full_logcat.txt
+app_logcat.txt
+app_final.txt
+
+# Generated files (should be regenerated)
+lib/models/*.g.dart
+
+# Backup files
+*.backup
+pubspec.yaml.backup
+pubspec_no_flutter.yaml
+
+# Old test directories
+test_lib/
+service_tests/

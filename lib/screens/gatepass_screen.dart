@@ -130,7 +130,7 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
                 children: [
                   Text('Type: ${_getTypeName(gp.gatepassTypeId)} | Vehicle: ${gp.vehicleNumber ?? 'N/A'}'),
                   Text('Driver: ${gp.driverName ?? 'N/A'} | ${DateFormat('MMM dd, yyyy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(gp.requestedDate ?? 0))}'),
-                  Text('Items: ${gp.totalItems} | Qty: ${gp.totalQuantity} | Weight: ${gp.totalWeight?.toStringAsFixed(1) ?? '0'} kg'),
+                  Text('Items: ${gp.totalItems} | Qty: ${gp.totalQuantity} | Weight: ${gp.totalWeight.toStringAsFixed(1)} kg'),
                 ],
               ),
               trailing: Column(

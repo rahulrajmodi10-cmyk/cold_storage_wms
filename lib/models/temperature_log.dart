@@ -1,5 +1,10 @@
 // lib/models/temperature_log.dart
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'temperature_log.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class TemperatureLog {
   final int? id;
   final int itemId;
@@ -19,27 +24,6 @@ class TemperatureLog {
     required this.sensorId,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'item_id': itemId,
-      'location_id': locationId,
-      'temperature': temperature,
-      'humidity': humidity,
-      'timestamp': timestamp,
-      'sensor_id': sensorId,
-    };
-  }
-
-  factory TemperatureLog.fromMap(Map<String, dynamic> m) {
-    return TemperatureLog(
-      id: m['id'] as int?,
-      itemId: m['item_id'] as int,
-      locationId: m['location_id'] as int,
-      temperature: (m['temperature'] as num).toDouble(),
-      humidity: (m['humidity'] as num).toDouble(),
-      timestamp: m['timestamp'] as int,
-      sensorId: m['sensor_id'] as String,
-    );
-  }
+  factory TemperatureLog.fromJson(Map<String, dynamic> json) => _$TemperatureLogFromJson(json);
+  Map<String, dynamic> toJson() => _$TemperatureLogToJson(this);
 }

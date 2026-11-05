@@ -1,5 +1,10 @@
 // lib/models/storage_location.dart
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'storage_location.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class StorageLocation {
   final int? id;
   final String rackId;
@@ -21,27 +26,6 @@ class StorageLocation {
 
   String get displayName => '$rackId-$shelfId-$binId';
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'rack_id': rackId,
-      'shelf_id': shelfId,
-      'bin_id': binId,
-      'zone': zone,
-      'capacity': capacity,
-      'current_utilization': currentUtilization,
-    };
-  }
-
-  factory StorageLocation.fromMap(Map<String, dynamic> m) {
-    return StorageLocation(
-      id: m['id'] as int?,
-      rackId: m['rack_id'] as String,
-      shelfId: m['shelf_id'] as String,
-      binId: m['bin_id'] as String,
-      zone: m['zone'] as String,
-      capacity: (m['capacity'] as num).toDouble(),
-      currentUtilization: (m['current_utilization'] as num).toDouble(),
-    );
-  }
+  factory StorageLocation.fromJson(Map<String, dynamic> json) => _$StorageLocationFromJson(json);
+  Map<String, dynamic> toJson() => _$StorageLocationToJson(this);
 }

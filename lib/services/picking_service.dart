@@ -56,7 +56,7 @@ class PickingService {
   Future<void> completePick(int pickRequestId, {required int operatorId, int? userId}) async {
     final maps = await db.query('transfer_record', where: 'id = ?', whereArgs: [pickRequestId]);
     if (maps.isEmpty) throw StateError('Pick request not found');
-    final record = TransferRecord.fromMap(maps.first);
+    final record = TransferRecord.fromJson(maps.first);
     if (record.reason != 'pick_request') throw StateError('Not a pick request');
 
     final item = await inventoryService.getItemById(record.itemId);
@@ -108,6 +108,6 @@ class PickingService {
 
   Future<List<TransferRecord>> getPendingPicks() async {
     final maps = await db.query('transfer_record', where: 'reason = ?', whereArgs: ['pick_request']);
-    return maps.map((m) => TransferRecord.fromMap(m)).toList();
+    return maps.map((m) => TransferRecord.fromJson(m)).toList();
   }
 }

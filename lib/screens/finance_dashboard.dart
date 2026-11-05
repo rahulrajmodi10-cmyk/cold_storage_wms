@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/finance_service.dart';
 import '../models/finance_models.dart';
+import 'parties_screen.dart';
 
 class FinanceDashboard extends StatefulWidget {
   final FinanceService financeService;
@@ -92,6 +93,20 @@ class _FinanceDashboardState extends State<FinanceDashboard> {
             ],
             onChanged: (value) {
               setState(() => _selectedPeriod = value!);
+              _loadData();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.people),
+            tooltip: 'Parties',
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      PartiesScreen(financeService: widget.financeService),
+                ),
+              );
               _loadData();
             },
           ),

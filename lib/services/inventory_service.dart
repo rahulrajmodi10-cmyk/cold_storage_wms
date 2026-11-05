@@ -48,7 +48,7 @@ class InventoryService {
   Future<InventoryItem?> getItemById(int id) async {
     final maps = await db.query('inventory_item', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return InventoryItem.fromMap(maps.first);
+    return InventoryItem.fromJson(maps.first);
   }
 
   Future<List<InventoryItem>> searchItems({String? query, String? category, String? status}) async {
@@ -76,7 +76,7 @@ class InventoryService {
       whereArgs: args,
     );
 
-    return maps.map((m) => InventoryItem.fromMap(m)).toList();
+    return maps.map((m) => InventoryItem.fromJson(m)).toList();
   }
 
   Future<void> updateItem(InventoryItem item, {int? userId}) async {
@@ -191,7 +191,7 @@ class InventoryService {
       final itemMaps = await txn.query('inventory_item', where: 'id = ?', whereArgs: [itemId]);
       if (itemMaps.isEmpty) throw StateError('Item not found');
 
-      final item = InventoryItem.fromMap(itemMaps.first);
+      final item = InventoryItem.fromJson(itemMaps.first);
       if (item.quantity < quantity) throw StateError('Insufficient stock');
       if (item.locationId != fromLocationId) throw StateError('Item not at from_location');
 

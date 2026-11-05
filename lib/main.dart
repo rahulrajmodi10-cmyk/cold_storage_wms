@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
+import 'screens/login_screen.dart';
 import 'screens/inventory_dashboard.dart';
 import 'screens/item_form.dart';
 import 'screens/finance_dashboard.dart';
@@ -2218,19 +2219,6 @@ class ColdStorageWMS extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize services
-    final inventoryService = InventoryService(db);
-    final locationService = LocationService(db);
-    final temperatureService = TemperatureService(db);
-    final receivingService = ReceivingService(db);
-    final pickingService = PickingService(db);
-    final dispatchService = DispatchService(db);
-    final slaService = SLAService(db, interval: const Duration(minutes: 1));
-    final financeService = FinanceService(db);
-    final logisticsService = LogisticsService(db);
-    final cameraService = CameraAIService(db);
-    final gatepassService = GatepassBarcodeService(db);
-
     return MaterialApp(
       title: 'Cold Storage WMS',
       theme: ThemeData(
@@ -2238,99 +2226,8 @@ class ColdStorageWMS extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: MainNavigationScreen(
-        inventoryService: inventoryService,
-        locationService: locationService,
-        temperatureService: temperatureService,
-        receivingService: receivingService,
-        pickingService: pickingService,
-        dispatchService: dispatchService,
-        slaService: slaService,
-        financeService: financeService,
-        logisticsService: logisticsService,
-        cameraService: cameraService,
-        gatepassService: gatepassService,
-      ),
+      home: LoginScreen(db: db),
       debugShowCheckedModeBanner: false,
-    );
-  }
-}
-
-class MainNavigationScreen extends StatefulWidget {
-  final InventoryService inventoryService;
-  final LocationService locationService;
-  final TemperatureService temperatureService;
-  final ReceivingService receivingService;
-  final PickingService pickingService;
-  final DispatchService dispatchService;
-  final SLAService slaService;
-  final FinanceService financeService;
-  final LogisticsService logisticsService;
-  final CameraAIService cameraService;
-  final GatepassBarcodeService gatepassService;
-
-  const MainNavigationScreen({
-    super.key,
-    required this.inventoryService,
-    required this.locationService,
-    required this.temperatureService,
-    required this.receivingService,
-    required this.pickingService,
-    required this.dispatchService,
-    required this.slaService,
-    required this.financeService,
-    required this.logisticsService,
-    required this.cameraService,
-    required this.gatepassService,
-  });
-
-  @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
-}
-
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
-
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-    _screens = [
-      InventoryDashboard(
-        inventoryService: widget.inventoryService,
-        locationService: widget.locationService,
-      ),
-      FinanceDashboard(financeService: widget.financeService),
-      LogisticsDashboard(logisticsService: widget.logisticsService),
-      CameraCountingScreen(
-        cameraService: widget.cameraService,
-        gatepassService: widget.gatepassService,
-      ),
-      GatepassScreen(
-        gatepassService: widget.gatepassService,
-        inventoryService: widget.inventoryService,
-      ),
-      BarcodeScannerScreen(barcodeService: widget.gatepassService),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.inventory_2), label: 'Inventory'),
-          NavigationDestination(icon: Icon(Icons.account_balance), label: 'Finance'),
-          NavigationDestination(icon: Icon(Icons.local_shipping), label: 'Logistics'),
-          NavigationDestination(icon: Icon(Icons.videocam), label: 'AI Camera'),
-          NavigationDestination(icon: Icon(Icons.receipt_long), label: 'Gatepass'),
-          NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: 'Barcode'),
-        ],
-      ),
     );
   }
 }

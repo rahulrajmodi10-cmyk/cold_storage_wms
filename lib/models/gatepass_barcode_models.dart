@@ -1,5 +1,10 @@
 // lib/models/gatepass_barcode_models.dart
 
+import 'package:json_annotation/json_annotation.dart';
+
+part 'gatepass_barcode_models.g.dart';
+
+@JsonSerializable(fieldRename: FieldRename.snake)
 class GatepassType {
   final int? id;
   final String code;
@@ -31,43 +36,11 @@ class GatepassType {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'code': code,
-      'name': name,
-      'description': description,
-      'workflow_type': workflowType,
-      'requires_vehicle': requiresVehicle,
-      'requires_driver': requiresDriver,
-      'requires_security_check': requiresSecurityCheck,
-      'validity_hours': validityHours,
-      'color_code': colorCode,
-      'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory GatepassType.fromMap(Map<String, dynamic> m) {
-    return GatepassType(
-      id: m['id'] as int?,
-      code: m['code'] as String,
-      name: m['name'] as String,
-      description: m['description'] as String?,
-      workflowType: m['workflow_type'] as String?,
-      requiresVehicle: m['requires_vehicle'] as int? ?? 1,
-      requiresDriver: m['requires_driver'] as int? ?? 1,
-      requiresSecurityCheck: m['requires_security_check'] as int? ?? 1,
-      validityHours: m['validity_hours'] as int? ?? 24,
-      colorCode: m['color_code'] as String?,
-      isActive: m['is_active'] as int? ?? 1,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory GatepassType.fromJson(Map<String, dynamic> json) => _$GatepassTypeFromJson(json);
+  Map<String, dynamic> toJson() => _$GatepassTypeToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Gatepass {
   final int? id;
   final String gatepassNumber;
@@ -192,117 +165,11 @@ class Gatepass {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'gatepass_number': gatepassNumber,
-      'gatepass_type_id': gatepassTypeId,
-      'reference_type': referenceType,
-      'reference_id': referenceId,
-      'party_id': partyId,
-      'status': status,
-      'priority': priority,
-      'vehicle_id': vehicleId,
-      'vehicle_number': vehicleNumber,
-      'vehicle_type': vehicleType,
-      'driver_name': driverName,
-      'driver_phone': driverPhone,
-      'driver_license': driverLicense,
-      'driver_photo_path': driverPhotoPath,
-      'requested_date': requestedDate,
-      'approved_date': approvedDate,
-      'valid_from': validFrom,
-      'valid_to': validTo,
-      'actual_entry_time': actualEntryTime,
-      'actual_exit_time': actualExitTime,
-      'entry_gate_id': entryGateId,
-      'exit_gate_id': exitGateId,
-      'origin_location': originLocation,
-      'destination_location': destinationLocation,
-      'security_officer_id': securityOfficerId,
-      'security_check_status': securityCheckStatus,
-      'security_notes': securityNotes,
-      'seal_number': sealNumber,
-      'seal_intact': sealIntact,
-      'qr_code_data': qrCodeData,
-      'qr_code_image_path': qrCodeImagePath,
-      'qr_generated_at': qrGeneratedAt,
-      'total_items': totalItems,
-      'total_quantity': totalQuantity,
-      'total_weight': totalWeight,
-      'total_packages': totalPackages,
-      'verified_by': verifiedBy,
-      'verified_at': verifiedAt,
-      'verification_method': verificationMethod,
-      'discrepancy_notes': discrepancyNotes,
-      'approved_by': approvedBy,
-      'approved_at': approvedAt,
-      'rejection_reason': rejectionReason,
-      'completed_by': completedBy,
-      'completed_at': completedAt,
-      'completion_notes': completionNotes,
-      'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory Gatepass.fromMap(Map<String, dynamic> m) {
-    return Gatepass(
-      id: m['id'] as int?,
-      gatepassNumber: m['gatepass_number'] as String,
-      gatepassTypeId: m['gatepass_type_id'] as int,
-      referenceType: m['reference_type'] as String?,
-      referenceId: m['reference_id'] as int?,
-      partyId: m['party_id'] as int?,
-      status: m['status'] as String? ?? 'DRAFT',
-      priority: m['priority'] as String? ?? 'NORMAL',
-      vehicleId: m['vehicle_id'] as int?,
-      vehicleNumber: m['vehicle_number'] as String?,
-      vehicleType: m['vehicle_type'] as String?,
-      driverName: m['driver_name'] as String?,
-      driverPhone: m['driver_phone'] as String?,
-      driverLicense: m['driver_license'] as String?,
-      driverPhotoPath: m['driver_photo_path'] as String?,
-      requestedDate: m['requested_date'] as int?,
-      approvedDate: m['approved_date'] as int?,
-      validFrom: m['valid_from'] as int?,
-      validTo: m['valid_to'] as int?,
-      actualEntryTime: m['actual_entry_time'] as int?,
-      actualExitTime: m['actual_exit_time'] as int?,
-      entryGateId: m['entry_gate_id'] as int?,
-      exitGateId: m['exit_gate_id'] as int?,
-      originLocation: m['origin_location'] as String?,
-      destinationLocation: m['destination_location'] as String?,
-      securityOfficerId: m['security_officer_id'] as int?,
-      securityCheckStatus: m['security_check_status'] as String?,
-      securityNotes: m['security_notes'] as String?,
-      sealNumber: m['seal_number'] as String?,
-      sealIntact: m['seal_intact'] as int? ?? 1,
-      qrCodeData: m['qr_code_data'] as String?,
-      qrCodeImagePath: m['qr_code_image_path'] as String?,
-      qrGeneratedAt: m['qr_generated_at'] as int?,
-      totalItems: m['total_items'] as int? ?? 0,
-      totalQuantity: (m['total_quantity'] as num?)?.toDouble() ?? 0,
-      totalWeight: (m['total_weight'] as num?)?.toDouble() ?? 0,
-      totalPackages: m['total_packages'] as int? ?? 0,
-      verifiedBy: m['verified_by'] as int?,
-      verifiedAt: m['verified_at'] as int?,
-      verificationMethod: m['verification_method'] as String?,
-      discrepancyNotes: m['discrepancy_notes'] as String?,
-      approvedBy: m['approved_by'] as int?,
-      approvedAt: m['approved_at'] as int?,
-      rejectionReason: m['rejection_reason'] as String?,
-      completedBy: m['completed_by'] as int?,
-      completedAt: m['completed_at'] as int?,
-      completionNotes: m['completion_notes'] as String?,
-      createdBy: m['created_by'] as int?,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory Gatepass.fromJson(Map<String, dynamic> json) => _$GatepassFromJson(json);
+  Map<String, dynamic> toJson() => _$GatepassToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class GatepassItem {
   final int? id;
   final int gatepassId;
@@ -350,59 +217,11 @@ class GatepassItem {
     this.verificationNotes,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'gatepass_id': gatepassId,
-      'item_id': itemId,
-      'description': description,
-      'hsn_code': hsnCode,
-      'quantity': quantity,
-      'unit': unit,
-      'weight_per_unit': weightPerUnit,
-      'total_weight': totalWeight,
-      'packages': packages,
-      'package_type': packageType,
-      'temperature_required': temperatureRequired,
-      'min_temp': minTemp,
-      'max_temp': maxTemp,
-      'batch_number': batchNumber,
-      'expiry_date': expiryDate,
-      'verified_quantity': verifiedQuantity,
-      'verified_weight': verifiedWeight,
-      'verified_packages': verifiedPackages,
-      'verification_status': verificationStatus,
-      'verification_notes': verificationNotes,
-    };
-  }
-
-  factory GatepassItem.fromMap(Map<String, dynamic> m) {
-    return GatepassItem(
-      id: m['id'] as int?,
-      gatepassId: m['gatepass_id'] as int,
-      itemId: m['item_id'] as int?,
-      description: m['description'] as String?,
-      hsnCode: m['hsn_code'] as String?,
-      quantity: (m['quantity'] as num?)?.toDouble() ?? 0,
-      unit: m['unit'] as String?,
-      weightPerUnit: (m['weight_per_unit'] as num?)?.toDouble(),
-      totalWeight: (m['total_weight'] as num?)?.toDouble(),
-      packages: m['packages'] as int? ?? 1,
-      packageType: m['package_type'] as String?,
-      temperatureRequired: m['temperature_required'] as int? ?? 0,
-      minTemp: (m['min_temp'] as num?)?.toDouble(),
-      maxTemp: (m['max_temp'] as num?)?.toDouble(),
-      batchNumber: m['batch_number'] as String?,
-      expiryDate: m['expiry_date'] as int?,
-      verifiedQuantity: (m['verified_quantity'] as num?)?.toDouble() ?? 0,
-      verifiedWeight: (m['verified_weight'] as num?)?.toDouble() ?? 0,
-      verifiedPackages: m['verified_packages'] as int? ?? 0,
-      verificationStatus: m['verification_status'] as String? ?? 'PENDING',
-      verificationNotes: m['verification_notes'] as String?,
-    );
-  }
+  factory GatepassItem.fromJson(Map<String, dynamic> json) => _$GatepassItemFromJson(json);
+  Map<String, dynamic> toJson() => _$GatepassItemToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class SecurityGate {
   final int? id;
   final String code;
@@ -432,41 +251,11 @@ class SecurityGate {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'code': code,
-      'name': name,
-      'gate_type': gateType,
-      'location_description': locationDescription,
-      'latitude': latitude,
-      'longitude': longitude,
-      'camera_id': cameraId,
-      'barrier_type': barrierType,
-      'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory SecurityGate.fromMap(Map<String, dynamic> m) {
-    return SecurityGate(
-      id: m['id'] as int?,
-      code: m['code'] as String,
-      name: m['name'] as String,
-      gateType: m['gate_type'] as String?,
-      locationDescription: m['location_description'] as String?,
-      latitude: (m['latitude'] as num?)?.toDouble(),
-      longitude: (m['longitude'] as num?)?.toDouble(),
-      cameraId: m['camera_id'] as int?,
-      barrierType: m['barrier_type'] as String?,
-      isActive: m['is_active'] as int? ?? 1,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory SecurityGate.fromJson(Map<String, dynamic> json) => _$SecurityGateFromJson(json);
+  Map<String, dynamic> toJson() => _$SecurityGateToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class GatepassVehicleLog {
   final int? id;
   final int gatepassId;
@@ -500,45 +289,11 @@ class GatepassVehicleLog {
     this.notes,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'gatepass_id': gatepassId,
-      'gate_id': gateId,
-      'log_type': logType,
-      'vehicle_number': vehicleNumber,
-      'driver_name': driverName,
-      'driver_verified': driverVerified,
-      'seal_number': sealNumber,
-      'seal_verified': sealVerified,
-      'seal_intact': sealIntact,
-      'photos': photos,
-      'officer_id': officerId,
-      'timestamp': timestamp,
-      'notes': notes,
-    };
-  }
-
-  factory GatepassVehicleLog.fromMap(Map<String, dynamic> m) {
-    return GatepassVehicleLog(
-      id: m['id'] as int?,
-      gatepassId: m['gatepass_id'] as int,
-      gateId: m['gate_id'] as int,
-      logType: m['log_type'] as String,
-      vehicleNumber: m['vehicle_number'] as String?,
-      driverName: m['driver_name'] as String?,
-      driverVerified: m['driver_verified'] as int? ?? 0,
-      sealNumber: m['seal_number'] as String?,
-      sealVerified: m['seal_verified'] as int? ?? 0,
-      sealIntact: m['seal_intact'] as int? ?? 1,
-      photos: m['photos'] as String?,
-      officerId: m['officer_id'] as int?,
-      timestamp: m['timestamp'] as int,
-      notes: m['notes'] as String?,
-    );
-  }
+  factory GatepassVehicleLog.fromJson(Map<String, dynamic> json) => _$GatepassVehicleLogFromJson(json);
+  Map<String, dynamic> toJson() => _$GatepassVehicleLogToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class GatepassApproval {
   final int? id;
   final int gatepassId;
@@ -562,35 +317,11 @@ class GatepassApproval {
     this.delegatedTo,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'gatepass_id': gatepassId,
-      'level': level,
-      'approver_role': approverRole,
-      'approver_id': approverId,
-      'status': status,
-      'action_at': actionAt,
-      'comments': comments,
-      'delegated_to': delegatedTo,
-    };
-  }
-
-  factory GatepassApproval.fromMap(Map<String, dynamic> m) {
-    return GatepassApproval(
-      id: m['id'] as int?,
-      gatepassId: m['gatepass_id'] as int,
-      level: m['level'] as int,
-      approverRole: m['approver_role'] as String?,
-      approverId: m['approver_id'] as int?,
-      status: m['status'] as String? ?? 'PENDING',
-      actionAt: m['action_at'] as int?,
-      comments: m['comments'] as String?,
-      delegatedTo: m['delegated_to'] as int?,
-    );
-  }
+  factory GatepassApproval.fromJson(Map<String, dynamic> json) => _$GatepassApprovalFromJson(json);
+  Map<String, dynamic> toJson() => _$GatepassApprovalToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class DispatchSchedule {
   final int? id;
   final String scheduleNumber;
@@ -632,53 +363,11 @@ class DispatchSchedule {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'schedule_number': scheduleNumber,
-      'schedule_date': scheduleDate,
-      'shift': shift,
-      'gatepass_id': gatepassId,
-      'shipment_id': shipmentId,
-      'vehicle_id': vehicleId,
-      'driver_id': driverId,
-      'loading_bay_id': loadingBayId,
-      'scheduled_start': scheduledStart,
-      'scheduled_end': scheduledEnd,
-      'actual_start': actualStart,
-      'actual_end': actualEnd,
-      'status': status,
-      'priority': priority,
-      'assigned_by': assignedBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory DispatchSchedule.fromMap(Map<String, dynamic> m) {
-    return DispatchSchedule(
-      id: m['id'] as int?,
-      scheduleNumber: m['schedule_number'] as String,
-      scheduleDate: m['schedule_date'] as int,
-      shift: m['shift'] as String?,
-      gatepassId: m['gatepass_id'] as int?,
-      shipmentId: m['shipment_id'] as int?,
-      vehicleId: m['vehicle_id'] as int?,
-      driverId: m['driver_id'] as int?,
-      loadingBayId: m['loading_bay_id'] as int?,
-      scheduledStart: m['scheduled_start'] as int?,
-      scheduledEnd: m['scheduled_end'] as int?,
-      actualStart: m['actual_start'] as int?,
-      actualEnd: m['actual_end'] as int?,
-      status: m['status'] as String? ?? 'SCHEDULED',
-      priority: m['priority'] as int? ?? 0,
-      assignedBy: m['assigned_by'] as int?,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory DispatchSchedule.fromJson(Map<String, dynamic> json) => _$DispatchScheduleFromJson(json);
+  Map<String, dynamic> toJson() => _$DispatchScheduleToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class LoadingBay {
   final int? id;
   final String code;
@@ -712,49 +401,15 @@ class LoadingBay {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'code': code,
-      'name': name,
-      'bay_type': bayType,
-      'dock_level': dockLevel,
-      'max_vehicle_length': maxVehicleLength,
-      'max_vehicle_weight': maxVehicleWeight,
-      'temperature_controlled': temperatureControlled,
-      'min_temp': minTemp,
-      'max_temp': maxTemp,
-      'camera_id': cameraId,
-      'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory LoadingBay.fromMap(Map<String, dynamic> m) {
-    return LoadingBay(
-      id: m['id'] as int?,
-      code: m['code'] as String,
-      name: m['name'] as String,
-      bayType: m['bay_type'] as String?,
-      dockLevel: m['dock_level'] as int? ?? 0,
-      maxVehicleLength: (m['max_vehicle_length'] as num?)?.toDouble(),
-      maxVehicleWeight: (m['max_vehicle_weight'] as num?)?.toDouble(),
-      temperatureControlled: m['temperature_controlled'] as int? ?? 0,
-      minTemp: (m['min_temp'] as num?)?.toDouble(),
-      maxTemp: (m['max_temp'] as num?)?.toDouble(),
-      cameraId: m['camera_id'] as int?,
-      isActive: m['is_active'] as int? ?? 1,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory LoadingBay.fromJson(Map<String, dynamic> json) => _$LoadingBayFromJson(json);
+  Map<String, dynamic> toJson() => _$LoadingBayToJson(this);
 }
 
 // ============================================
 // Barcode/QR Code Models
 // ============================================
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class BarcodeDefinition {
   final int? id;
   final String code;
@@ -792,49 +447,11 @@ class BarcodeDefinition {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'code': code,
-      'name': name,
-      'symbology': symbology,
-      'prefix': prefix,
-      'suffix': suffix,
-      'format_template': formatTemplate,
-      'width_mm': widthMm,
-      'height_mm': heightMm,
-      'module_width': moduleWidth,
-      'include_text': includeText,
-      'font_size': fontSize,
-      'error_correction': errorCorrection,
-      'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory BarcodeDefinition.fromMap(Map<String, dynamic> m) {
-    return BarcodeDefinition(
-      id: m['id'] as int?,
-      code: m['code'] as String,
-      name: m['name'] as String,
-      symbology: m['symbology'] as String,
-      prefix: m['prefix'] as String?,
-      suffix: m['suffix'] as String?,
-      formatTemplate: m['format_template'] as String?,
-      widthMm: (m['width_mm'] as num?)?.toDouble(),
-      heightMm: (m['height_mm'] as num?)?.toDouble(),
-      moduleWidth: (m['module_width'] as num?)?.toDouble(),
-      includeText: m['include_text'] as int? ?? 1,
-      fontSize: m['font_size'] as int?,
-      errorCorrection: m['error_correction'] as String?,
-      isActive: m['is_active'] as int? ?? 1,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory BarcodeDefinition.fromJson(Map<String, dynamic> json) => _$BarcodeDefinitionFromJson(json);
+  Map<String, dynamic> toJson() => _$BarcodeDefinitionToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class Barcode {
   final int? id;
   final String barcodeValue;
@@ -868,45 +485,11 @@ class Barcode {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'barcode_value': barcodeValue,
-      'barcode_type_id': barcodeTypeId,
-      'entity_type': entityType,
-      'entity_id': entityId,
-      'label_data': labelData,
-      'image_path': imagePath,
-      'print_count': printCount,
-      'last_printed_at': lastPrintedAt,
-      'printed_by': printedBy,
-      'status': status,
-      'expires_at': expiresAt,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory Barcode.fromMap(Map<String, dynamic> m) {
-    return Barcode(
-      id: m['id'] as int?,
-      barcodeValue: m['barcode_value'] as String,
-      barcodeTypeId: m['barcode_type_id'] as int,
-      entityType: m['entity_type'] as String,
-      entityId: m['entity_id'] as int,
-      labelData: m['label_data'] as String?,
-      imagePath: m['image_path'] as String?,
-      printCount: m['print_count'] as int? ?? 0,
-      lastPrintedAt: m['last_printed_at'] as int?,
-      printedBy: m['printed_by'] as int?,
-      status: m['status'] as String? ?? 'ACTIVE',
-      expiresAt: m['expires_at'] as int?,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory Barcode.fromJson(Map<String, dynamic> json) => _$BarcodeFromJson(json);
+  Map<String, dynamic> toJson() => _$BarcodeToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class BarcodeScan {
   final int? id;
   final int? scanSessionId;
@@ -948,53 +531,11 @@ class BarcodeScan {
     this.createdAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'scan_session_id': scanSessionId,
-      'barcode_value': barcodeValue,
-      'barcode_id': barcodeId,
-      'entity_type': entityType,
-      'entity_id': entityId,
-      'scan_type': scanType,
-      'location_id': locationId,
-      'scanned_by': scannedBy,
-      'device_id': deviceId,
-      'latitude': latitude,
-      'longitude': longitude,
-      'quantity': quantity,
-      'unit': unit,
-      'status': status,
-      'error_message': errorMessage,
-      'timestamp': timestamp,
-      'created_at': createdAt,
-    };
-  }
-
-  factory BarcodeScan.fromMap(Map<String, dynamic> m) {
-    return BarcodeScan(
-      id: m['id'] as int?,
-      scanSessionId: m['scan_session_id'] as int?,
-      barcodeValue: m['barcode_value'] as String,
-      barcodeId: m['barcode_id'] as int?,
-      entityType: m['entity_type'] as String?,
-      entityId: m['entity_id'] as int?,
-      scanType: m['scan_type'] as String?,
-      locationId: m['location_id'] as int?,
-      scannedBy: m['scanned_by'] as int?,
-      deviceId: m['device_id'] as String?,
-      latitude: (m['latitude'] as num?)?.toDouble(),
-      longitude: (m['longitude'] as num?)?.toDouble(),
-      quantity: (m['quantity'] as num?)?.toDouble() ?? 1,
-      unit: m['unit'] as String?,
-      status: m['status'] as String? ?? 'SUCCESS',
-      errorMessage: m['error_message'] as String?,
-      timestamp: m['timestamp'] as int,
-      createdAt: m['created_at'] as int?,
-    );
-  }
+  factory BarcodeScan.fromJson(Map<String, dynamic> json) => _$BarcodeScanFromJson(json);
+  Map<String, dynamic> toJson() => _$BarcodeScanToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class BatchScanSession {
   final int? id;
   final String sessionNumber;
@@ -1034,51 +575,11 @@ class BatchScanSession {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'session_number': sessionNumber,
-      'session_type': sessionType,
-      'reference_type': referenceType,
-      'reference_id': referenceId,
-      'location_id': locationId,
-      'operator_id': operatorId,
-      'status': status,
-      'total_expected': totalExpected,
-      'total_scanned': totalScanned,
-      'total_matched': totalMatched,
-      'total_mismatched': totalMismatched,
-      'started_at': startedAt,
-      'completed_at': completedAt,
-      'notes': notes,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory BatchScanSession.fromMap(Map<String, dynamic> m) {
-    return BatchScanSession(
-      id: m['id'] as int?,
-      sessionNumber: m['session_number'] as String,
-      sessionType: m['session_type'] as String?,
-      referenceType: m['reference_type'] as String?,
-      referenceId: m['reference_id'] as int?,
-      locationId: m['location_id'] as int?,
-      operatorId: m['operator_id'] as int?,
-      status: m['status'] as String? ?? 'IN_PROGRESS',
-      totalExpected: m['total_expected'] as int? ?? 0,
-      totalScanned: m['total_scanned'] as int? ?? 0,
-      totalMatched: m['total_matched'] as int? ?? 0,
-      totalMismatched: m['total_mismatched'] as int? ?? 0,
-      startedAt: m['started_at'] as int?,
-      completedAt: m['completed_at'] as int?,
-      notes: m['notes'] as String?,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory BatchScanSession.fromJson(Map<String, dynamic> json) => _$BatchScanSessionFromJson(json);
+  Map<String, dynamic> toJson() => _$BatchScanSessionToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class BatchScanItem {
   final int? id;
   final int sessionId;
@@ -1110,43 +611,11 @@ class BatchScanItem {
     this.verifiedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'session_id': sessionId,
-      'barcode_value': barcodeValue,
-      'barcode_id': barcodeId,
-      'item_id': itemId,
-      'expected_quantity': expectedQuantity,
-      'scanned_quantity': scannedQuantity,
-      'matched': matched,
-      'mismatch_reason': mismatchReason,
-      'status': status,
-      'scanned_at': scannedAt,
-      'verified_by': verifiedBy,
-      'verified_at': verifiedAt,
-    };
-  }
-
-  factory BatchScanItem.fromMap(Map<String, dynamic> m) {
-    return BatchScanItem(
-      id: m['id'] as int?,
-      sessionId: m['session_id'] as int,
-      barcodeValue: m['barcode_value'] as String?,
-      barcodeId: m['barcode_id'] as int?,
-      itemId: m['item_id'] as int?,
-      expectedQuantity: (m['expected_quantity'] as num?)?.toDouble() ?? 0,
-      scannedQuantity: (m['scanned_quantity'] as num?)?.toDouble() ?? 0,
-      matched: m['matched'] as int? ?? 0,
-      mismatchReason: m['mismatch_reason'] as String?,
-      status: m['status'] as String? ?? 'PENDING',
-      scannedAt: m['scanned_at'] as int?,
-      verifiedBy: m['verified_by'] as int?,
-      verifiedAt: m['verified_at'] as int?,
-    );
-  }
+  factory BatchScanItem.fromJson(Map<String, dynamic> json) => _$BatchScanItemFromJson(json);
+  Map<String, dynamic> toJson() => _$BatchScanItemToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class LabelPrintJob {
   final int? id;
   final String jobNumber;
@@ -1190,55 +659,11 @@ class LabelPrintJob {
     this.completedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'job_number': jobNumber,
-      'barcode_definition_id': barcodeDefinitionId,
-      'entity_type': entityType,
-      'entity_ids': entityIds,
-      'label_data_json': labelDataJson,
-      'copies': copies,
-      'printer_name': printerName,
-      'printer_type': printerType,
-      'label_width_mm': labelWidthMm,
-      'label_height_mm': labelHeightMm,
-      'status': status,
-      'printed_count': printedCount,
-      'failed_count': failedCount,
-      'error_log': errorLog,
-      'requested_by': requestedBy,
-      'requested_at': requestedAt,
-      'started_at': startedAt,
-      'completed_at': completedAt,
-    };
-  }
-
-  factory LabelPrintJob.fromMap(Map<String, dynamic> m) {
-    return LabelPrintJob(
-      id: m['id'] as int?,
-      jobNumber: m['job_number'] as String,
-      barcodeDefinitionId: m['barcode_definition_id'] as int,
-      entityType: m['entity_type'] as String,
-      entityIds: m['entity_ids'] as String?,
-      labelDataJson: m['label_data_json'] as String?,
-      copies: m['copies'] as int? ?? 1,
-      printerName: m['printer_name'] as String?,
-      printerType: m['printer_type'] as String?,
-      labelWidthMm: (m['label_width_mm'] as num?)?.toDouble(),
-      labelHeightMm: (m['label_height_mm'] as num?)?.toDouble(),
-      status: m['status'] as String? ?? 'QUEUED',
-      printedCount: m['printed_count'] as int? ?? 0,
-      failedCount: m['failed_count'] as int? ?? 0,
-      errorLog: m['error_log'] as String?,
-      requestedBy: m['requested_by'] as int?,
-      requestedAt: m['requested_at'] as int?,
-      startedAt: m['started_at'] as int?,
-      completedAt: m['completed_at'] as int?,
-    );
-  }
+  factory LabelPrintJob.fromJson(Map<String, dynamic> json) => _$LabelPrintJobFromJson(json);
+  Map<String, dynamic> toJson() => _$LabelPrintJobToJson(this);
 }
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class PrinterConfig {
   final int? id;
   final String name;
@@ -1282,51 +707,6 @@ class PrinterConfig {
     this.updatedAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'printer_type': printerType,
-      'connection_type': connectionType,
-      'ip_address': ipAddress,
-      'port': port,
-      'usb_vid_pid': usbVidPid,
-      'bluetooth_mac': bluetoothMac,
-      'serial_port': serialPort,
-      'baud_rate': baudRate,
-      'paper_width_mm': paperWidthMm,
-      'paper_height_mm': paperHeightMm,
-      'print_speed': printSpeed,
-      'print_density': printDensity,
-      'is_default': isDefault,
-      'is_active': isActive,
-      'test_print_command': testPrintCommand,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
-    };
-  }
-
-  factory PrinterConfig.fromMap(Map<String, dynamic> m) {
-    return PrinterConfig(
-      id: m['id'] as int?,
-      name: m['name'] as String,
-      printerType: m['printer_type'] as String?,
-      connectionType: m['connection_type'] as String?,
-      ipAddress: m['ip_address'] as String?,
-      port: m['port'] as int?,
-      usbVidPid: m['usb_vid_pid'] as String?,
-      bluetoothMac: m['bluetooth_mac'] as String?,
-      serialPort: m['serial_port'] as String?,
-      baudRate: m['baud_rate'] as int?,
-      paperWidthMm: (m['paper_width_mm'] as num?)?.toDouble(),
-      paperHeightMm: (m['paper_height_mm'] as num?)?.toDouble(),
-      printSpeed: m['print_speed'] as int?,
-      printDensity: m['print_density'] as int?,
-      isDefault: m['is_default'] as int? ?? 0,
-      isActive: m['is_active'] as int? ?? 1,
-      testPrintCommand: m['test_print_command'] as String?,
-      createdAt: m['created_at'] as int?,
-      updatedAt: m['updated_at'] as int?,
-    );
-  }
+  factory PrinterConfig.fromJson(Map<String, dynamic> json) => _$PrinterConfigFromJson(json);
+  Map<String, dynamic> toJson() => _$PrinterConfigToJson(this);
 }
