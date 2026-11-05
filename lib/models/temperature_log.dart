@@ -24,6 +24,7 @@ class TemperatureLog {
     required this.sensorId,
   });
 
-  factory TemperatureLog.fromJson(Map<String, dynamic> json) => _$TemperatureLogFromJson(json);
+  factory TemperatureLog.fromJson(Map<String, dynamic> json) =>
+      _$TemperatureLogFromJson(json);
   Map<String, dynamic> toJson() => _$TemperatureLogToJson(this);
 }

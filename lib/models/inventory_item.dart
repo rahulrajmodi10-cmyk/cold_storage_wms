@@ -40,6 +40,7 @@ class InventoryItem {
     this.updatedAt,
   });
 
-  factory InventoryItem.fromJson(Map<String, dynamic> json) => _$InventoryItemFromJson(json);
+  factory InventoryItem.fromJson(Map<String, dynamic> json) =>
+      _$InventoryItemFromJson(json);
   Map<String, dynamic> toJson() => _$InventoryItemToJson(this);
 }

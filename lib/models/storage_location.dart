@@ -26,6 +26,7 @@ class StorageLocation {
 
   String get displayName => '$rackId-$shelfId-$binId';
 
-  factory StorageLocation.fromJson(Map<String, dynamic> json) => _$StorageLocationFromJson(json);
+  factory StorageLocation.fromJson(Map<String, dynamic> json) =>
+      _$StorageLocationFromJson(json);
   Map<String, dynamic> toJson() => _$StorageLocationToJson(this);
 }

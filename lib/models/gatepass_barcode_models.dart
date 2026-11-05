@@ -36,7 +36,8 @@ class GatepassType {
     this.updatedAt,
   });
 
-  factory GatepassType.fromJson(Map<String, dynamic> json) => _$GatepassTypeFromJson(json);
+  factory GatepassType.fromJson(Map<String, dynamic> json) =>
+      _$GatepassTypeFromJson(json);
   Map<String, dynamic> toJson() => _$GatepassTypeToJson(this);
 }
 
@@ -45,10 +46,12 @@ class Gatepass {
   final int? id;
   final String gatepassNumber;
   final int gatepassTypeId;
-  final String? referenceType; // SALES_ORDER, PURCHASE_ORDER, TRANSFER, RETURN, SCRAP, OTHER
+  final String?
+      referenceType; // SALES_ORDER, PURCHASE_ORDER, TRANSFER, RETURN, SCRAP, OTHER
   final int? referenceId;
   final int? partyId;
-  final String status; // DRAFT, SUBMITTED, APPROVED, REJECTED, ACTIVE, COMPLETED, CANCELLED, EXPIRED
+  final String
+      status; // DRAFT, SUBMITTED, APPROVED, REJECTED, ACTIVE, COMPLETED, CANCELLED, EXPIRED
   final String priority; // LOW, NORMAL, HIGH, URGENT
 
   // Vehicle Details
@@ -165,7 +168,8 @@ class Gatepass {
     this.updatedAt,
   });
 
-  factory Gatepass.fromJson(Map<String, dynamic> json) => _$GatepassFromJson(json);
+  factory Gatepass.fromJson(Map<String, dynamic> json) =>
+      _$GatepassFromJson(json);
   Map<String, dynamic> toJson() => _$GatepassToJson(this);
 }
 
@@ -217,7 +221,8 @@ class GatepassItem {
     this.verificationNotes,
   });
 
-  factory GatepassItem.fromJson(Map<String, dynamic> json) => _$GatepassItemFromJson(json);
+  factory GatepassItem.fromJson(Map<String, dynamic> json) =>
+      _$GatepassItemFromJson(json);
   Map<String, dynamic> toJson() => _$GatepassItemToJson(this);
 }
 
@@ -251,7 +256,8 @@ class SecurityGate {
     this.updatedAt,
   });
 
-  factory SecurityGate.fromJson(Map<String, dynamic> json) => _$SecurityGateFromJson(json);
+  factory SecurityGate.fromJson(Map<String, dynamic> json) =>
+      _$SecurityGateFromJson(json);
   Map<String, dynamic> toJson() => _$SecurityGateToJson(this);
 }
 
@@ -289,7 +295,8 @@ class GatepassVehicleLog {
     this.notes,
   });
 
-  factory GatepassVehicleLog.fromJson(Map<String, dynamic> json) => _$GatepassVehicleLogFromJson(json);
+  factory GatepassVehicleLog.fromJson(Map<String, dynamic> json) =>
+      _$GatepassVehicleLogFromJson(json);
   Map<String, dynamic> toJson() => _$GatepassVehicleLogToJson(this);
 }
 
@@ -317,7 +324,8 @@ class GatepassApproval {
     this.delegatedTo,
   });
 
-  factory GatepassApproval.fromJson(Map<String, dynamic> json) => _$GatepassApprovalFromJson(json);
+  factory GatepassApproval.fromJson(Map<String, dynamic> json) =>
+      _$GatepassApprovalFromJson(json);
   Map<String, dynamic> toJson() => _$GatepassApprovalToJson(this);
 }
 
@@ -363,7 +371,8 @@ class DispatchSchedule {
     this.updatedAt,
   });
 
-  factory DispatchSchedule.fromJson(Map<String, dynamic> json) => _$DispatchScheduleFromJson(json);
+  factory DispatchSchedule.fromJson(Map<String, dynamic> json) =>
+      _$DispatchScheduleFromJson(json);
   Map<String, dynamic> toJson() => _$DispatchScheduleToJson(this);
 }
 
@@ -401,7 +410,8 @@ class LoadingBay {
     this.updatedAt,
   });
 
-  factory LoadingBay.fromJson(Map<String, dynamic> json) => _$LoadingBayFromJson(json);
+  factory LoadingBay.fromJson(Map<String, dynamic> json) =>
+      _$LoadingBayFromJson(json);
   Map<String, dynamic> toJson() => _$LoadingBayToJson(this);
 }
 
@@ -447,7 +457,8 @@ class BarcodeDefinition {
     this.updatedAt,
   });
 
-  factory BarcodeDefinition.fromJson(Map<String, dynamic> json) => _$BarcodeDefinitionFromJson(json);
+  factory BarcodeDefinition.fromJson(Map<String, dynamic> json) =>
+      _$BarcodeDefinitionFromJson(json);
   Map<String, dynamic> toJson() => _$BarcodeDefinitionToJson(this);
 }
 
@@ -456,7 +467,8 @@ class Barcode {
   final int? id;
   final String barcodeValue;
   final int barcodeTypeId;
-  final String entityType; // ITEM, GATEPASS, SHIPMENT, LOCATION, PALLET, BATCH, VEHICLE
+  final String
+      entityType; // ITEM, GATEPASS, SHIPMENT, LOCATION, PALLET, BATCH, VEHICLE
   final int entityId;
   final String? labelData; // JSON
   final String? imagePath;
@@ -485,7 +497,8 @@ class Barcode {
     this.updatedAt,
   });
 
-  factory Barcode.fromJson(Map<String, dynamic> json) => _$BarcodeFromJson(json);
+  factory Barcode.fromJson(Map<String, dynamic> json) =>
+      _$BarcodeFromJson(json);
   Map<String, dynamic> toJson() => _$BarcodeToJson(this);
 }
 
@@ -497,7 +510,8 @@ class BarcodeScan {
   final int? barcodeId;
   final String? entityType;
   final int? entityId;
-  final String? scanType; // RECEIVING, PICKING, PACKING, DISPATCH, TRANSFER, CYCLE_COUNT, GATEPASS_VERIFY
+  final String?
+      scanType; // RECEIVING, PICKING, PACKING, DISPATCH, TRANSFER, CYCLE_COUNT, GATEPASS_VERIFY
   final int? locationId;
   final int? scannedBy;
   final String? deviceId;
@@ -531,7 +545,8 @@ class BarcodeScan {
     this.createdAt,
   });
 
-  factory BarcodeScan.fromJson(Map<String, dynamic> json) => _$BarcodeScanFromJson(json);
+  factory BarcodeScan.fromJson(Map<String, dynamic> json) =>
+      _$BarcodeScanFromJson(json);
   Map<String, dynamic> toJson() => _$BarcodeScanToJson(this);
 }
 
@@ -539,7 +554,8 @@ class BarcodeScan {
 class BatchScanSession {
   final int? id;
   final String sessionNumber;
-  final String? sessionType; // RECEIVING, DISPATCH, TRANSFER, INVENTORY, GATEPASS
+  final String?
+      sessionType; // RECEIVING, DISPATCH, TRANSFER, INVENTORY, GATEPASS
   final String? referenceType;
   final int? referenceId;
   final int? locationId;
@@ -575,7 +591,8 @@ class BatchScanSession {
     this.updatedAt,
   });
 
-  factory BatchScanSession.fromJson(Map<String, dynamic> json) => _$BatchScanSessionFromJson(json);
+  factory BatchScanSession.fromJson(Map<String, dynamic> json) =>
+      _$BatchScanSessionFromJson(json);
   Map<String, dynamic> toJson() => _$BatchScanSessionToJson(this);
 }
 
@@ -611,7 +628,8 @@ class BatchScanItem {
     this.verifiedAt,
   });
 
-  factory BatchScanItem.fromJson(Map<String, dynamic> json) => _$BatchScanItemFromJson(json);
+  factory BatchScanItem.fromJson(Map<String, dynamic> json) =>
+      _$BatchScanItemFromJson(json);
   Map<String, dynamic> toJson() => _$BatchScanItemToJson(this);
 }
 
@@ -659,7 +677,8 @@ class LabelPrintJob {
     this.completedAt,
   });
 
-  factory LabelPrintJob.fromJson(Map<String, dynamic> json) => _$LabelPrintJobFromJson(json);
+  factory LabelPrintJob.fromJson(Map<String, dynamic> json) =>
+      _$LabelPrintJobFromJson(json);
   Map<String, dynamic> toJson() => _$LabelPrintJobToJson(this);
 }
 
@@ -667,7 +686,8 @@ class LabelPrintJob {
 class PrinterConfig {
   final int? id;
   final String name;
-  final String? printerType; // ZEBRA_ZPL, DATAMAX_DPL, SATO_SBPL, EPSON_ESCPOS, GENERIC
+  final String?
+      printerType; // ZEBRA_ZPL, DATAMAX_DPL, SATO_SBPL, EPSON_ESCPOS, GENERIC
   final String? connectionType; // USB, NETWORK, BLUETOOTH, SERIAL
   final String? ipAddress;
   final int? port;
@@ -707,6 +727,7 @@ class PrinterConfig {
     this.updatedAt,
   });
 
-  factory PrinterConfig.fromJson(Map<String, dynamic> json) => _$PrinterConfigFromJson(json);
+  factory PrinterConfig.fromJson(Map<String, dynamic> json) =>
+      _$PrinterConfigFromJson(json);
   Map<String, dynamic> toJson() => _$PrinterConfigToJson(this);
 }

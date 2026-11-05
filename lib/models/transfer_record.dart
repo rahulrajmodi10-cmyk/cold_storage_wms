@@ -26,6 +26,7 @@ class TransferRecord {
     required this.reason,
   });
 
-  factory TransferRecord.fromJson(Map<String, dynamic> json) => _$TransferRecordFromJson(json);
+  factory TransferRecord.fromJson(Map<String, dynamic> json) =>
+      _$TransferRecordFromJson(json);
   Map<String, dynamic> toJson() => _$TransferRecordToJson(this);
 }
