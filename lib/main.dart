@@ -990,7 +990,8 @@ Future<void> _runMigration001(Database db) async {
       detail TEXT,
       timestamp INTEGER,
       entity_type TEXT,
-      entity_id INTEGER
+      entity_id INTEGER,
+      acknowledged INTEGER DEFAULT 0
     )
   ''');
   await db.execute('''

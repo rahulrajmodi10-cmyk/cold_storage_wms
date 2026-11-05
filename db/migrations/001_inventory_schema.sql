@@ -12,7 +12,8 @@ CREATE TABLE audit_log(
   detail TEXT,
   timestamp INTEGER,
   entity_type TEXT,
-  entity_id INTEGER
+  entity_id INTEGER,
+  acknowledged INTEGER DEFAULT 0
 );
 INSERT INTO audit_log (id, user_id, action, detail, timestamp)
 SELECT id, user_id, action, detail, timestamp FROM audit_log_old;
