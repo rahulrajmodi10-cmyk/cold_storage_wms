@@ -1,11 +1,9 @@
 // lib/models/logistics_models.dart
 
-import 'package:json_annotation/json_annotation.dart';
+import 'base_model.dart';
 
-part 'logistics_models.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Carrier {
+class Carrier with BaseModel {
+  @override
   final int? id;
   final String name;
   final String? code;
@@ -18,7 +16,9 @@ class Carrier {
   final String? licenseNumber;
   final double rating;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Carrier({
@@ -38,12 +38,45 @@ class Carrier {
     this.updatedAt,
   });
 
-  factory Carrier.fromJson(Map<String, dynamic> json) => _$CarrierFromJson(json);
-  Map<String, dynamic> toJson() => _$CarrierToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'name': name,
+      'code': code,
+      'contact_person': contactPerson,
+      'phone': phone,
+      'email': email,
+      'address': address,
+      'gstin': gstin,
+      'pan': pan,
+      'license_number': licenseNumber,
+      'rating': rating,
+      'is_active': isActive,
+    };
+  }
+
+  factory Carrier.fromMap(Map<String, dynamic> m) {
+    return Carrier(
+      id: m['id'] as int?,
+      name: m['name'] as String,
+      code: m['code'] as String?,
+      contactPerson: m['contact_person'] as String?,
+      phone: m['phone'] as String?,
+      email: m['email'] as String?,
+      address: m['address'] as String?,
+      gstin: m['gstin'] as String?,
+      pan: m['pan'] as String?,
+      licenseNumber: m['license_number'] as String?,
+      rating: (m['rating'] as num?)?.toDouble() ?? 0,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Vehicle {
+class Vehicle with BaseModel {
+  @override
   final int? id;
   final int? carrierId;
   final String registrationNumber;
@@ -63,7 +96,9 @@ class Vehicle {
   final String? driverLicense;
   final String status; // AVAILABLE, IN_TRANSIT, MAINTENANCE, RETIRED
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Vehicle({
@@ -90,12 +125,59 @@ class Vehicle {
     this.updatedAt,
   });
 
-  factory Vehicle.fromJson(Map<String, dynamic> json) => _$VehicleFromJson(json);
-  Map<String, dynamic> toJson() => _$VehicleToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'carrier_id': carrierId,
+      'registration_number': registrationNumber,
+      'vehicle_type': vehicleType,
+      'capacity_weight': capacityWeight,
+      'capacity_volume': capacityVolume,
+      'capacity_pallets': capacityPallets,
+      'temperature_controlled': temperatureControlled,
+      'min_temp': minTemp,
+      'max_temp': maxTemp,
+      'gps_device_id': gpsDeviceId,
+      'insurance_expiry': insuranceExpiry,
+      'fitness_expiry': fitnessExpiry,
+      'permit_expiry': permitExpiry,
+      'driver_name': driverName,
+      'driver_phone': driverPhone,
+      'driver_license': driverLicense,
+      'status': status,
+      'is_active': isActive,
+    };
+  }
+
+  factory Vehicle.fromMap(Map<String, dynamic> m) {
+    return Vehicle(
+      id: m['id'] as int?,
+      carrierId: m['carrier_id'] as int?,
+      registrationNumber: m['registration_number'] as String,
+      vehicleType: m['vehicle_type'] as String?,
+      capacityWeight: (m['capacity_weight'] as num?)?.toDouble(),
+      capacityVolume: (m['capacity_volume'] as num?)?.toDouble(),
+      capacityPallets: m['capacity_pallets'] as int?,
+      temperatureControlled: m['temperature_controlled'] as int? ?? 0,
+      minTemp: (m['min_temp'] as num?)?.toDouble(),
+      maxTemp: (m['max_temp'] as num?)?.toDouble(),
+      gpsDeviceId: m['gps_device_id'] as String?,
+      insuranceExpiry: m['insurance_expiry'] as int?,
+      fitnessExpiry: m['fitness_expiry'] as int?,
+      permitExpiry: m['permit_expiry'] as int?,
+      driverName: m['driver_name'] as String?,
+      driverPhone: m['driver_phone'] as String?,
+      driverLicense: m['driver_license'] as String?,
+      status: m['status'] as String? ?? 'AVAILABLE',
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Route {
+class Route with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -106,7 +188,9 @@ class Route {
   final double tollCharges;
   final String? routeDescription;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Route({
@@ -124,12 +208,41 @@ class Route {
     this.updatedAt,
   });
 
-  factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
-  Map<String, dynamic> toJson() => _$RouteToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'code': code,
+      'name': name,
+      'origin': origin,
+      'destination': destination,
+      'distance_km': distanceKm,
+      'estimated_duration_minutes': estimatedDurationMinutes,
+      'toll_charges': tollCharges,
+      'route_description': routeDescription,
+      'is_active': isActive,
+    };
+  }
+
+  factory Route.fromMap(Map<String, dynamic> m) {
+    return Route(
+      id: m['id'] as int?,
+      code: m['code'] as String,
+      name: m['name'] as String,
+      origin: m['origin'] as String,
+      destination: m['destination'] as String,
+      distanceKm: (m['distance_km'] as num?)?.toDouble(),
+      estimatedDurationMinutes: m['estimated_duration_minutes'] as int?,
+      tollCharges: (m['toll_charges'] as num?)?.toDouble() ?? 0,
+      routeDescription: m['route_description'] as String?,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class RouteStop {
+class RouteStop with BaseModel {
+  @override
   final int? id;
   final int routeId;
   final int stopOrder;
@@ -140,6 +253,10 @@ class RouteStop {
   final int? estimatedArrival;
   final int? estimatedDeparture;
   final String? stopType; // PICKUP, DELIVERY, BOTH
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   RouteStop({
     this.id,
@@ -152,14 +269,45 @@ class RouteStop {
     this.estimatedArrival,
     this.estimatedDeparture,
     this.stopType,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory RouteStop.fromJson(Map<String, dynamic> json) => _$RouteStopFromJson(json);
-  Map<String, dynamic> toJson() => _$RouteStopToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'route_id': routeId,
+      'stop_order': stopOrder,
+      'location_name': locationName,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'estimated_arrival': estimatedArrival,
+      'estimated_departure': estimatedDeparture,
+      'stop_type': stopType,
+    };
+  }
+
+  factory RouteStop.fromMap(Map<String, dynamic> m) {
+    return RouteStop(
+      id: m['id'] as int?,
+      routeId: m['route_id'] as int,
+      stopOrder: m['stop_order'] as int,
+      locationName: m['location_name'] as String,
+      address: m['address'] as String?,
+      latitude: (m['latitude'] as num?)?.toDouble(),
+      longitude: (m['longitude'] as num?)?.toDouble(),
+      estimatedArrival: m['estimated_arrival'] as int?,
+      estimatedDeparture: m['estimated_departure'] as int?,
+      stopType: m['stop_type'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Shipment {
+class Shipment with BaseModel {
+  @override
   final int? id;
   final String shipmentNumber;
   final int shipmentDate;
@@ -194,7 +342,9 @@ class Shipment {
   final String? podReceivedBy;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Shipment({
@@ -236,12 +386,89 @@ class Shipment {
     this.updatedAt,
   });
 
-  factory Shipment.fromJson(Map<String, dynamic> json) => _$ShipmentFromJson(json);
-  Map<String, dynamic> toJson() => _$ShipmentToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'shipment_number': shipmentNumber,
+      'shipment_date': shipmentDate,
+      'reference_type': referenceType,
+      'reference_id': referenceId,
+      'carrier_id': carrierId,
+      'vehicle_id': vehicleId,
+      'route_id': routeId,
+      'driver_name': driverName,
+      'driver_phone': driverPhone,
+      'origin_address': originAddress,
+      'destination_address': destinationAddress,
+      'origin_lat': originLat,
+      'origin_lng': originLng,
+      'dest_lat': destLat,
+      'dest_lng': destLng,
+      'status': status,
+      'total_weight': totalWeight,
+      'total_volume': totalVolume,
+      'total_packages': totalPackages,
+      'freight_charges': freightCharges,
+      'additional_charges': additionalCharges,
+      'total_freight': totalFreight,
+      'loading_start_time': loadingStartTime,
+      'loading_end_time': loadingEndTime,
+      'departure_time': departureTime,
+      'arrival_time': arrivalTime,
+      'unloading_start_time': unloadingStartTime,
+      'unloading_end_time': unloadingEndTime,
+      'proof_of_delivery': proofOfDelivery,
+      'pod_timestamp': podTimestamp,
+      'pod_received_by': podReceivedBy,
+      'narration': narration,
+      'created_by': createdBy,
+    };
+  }
+
+  factory Shipment.fromMap(Map<String, dynamic> m) {
+    return Shipment(
+      id: m['id'] as int?,
+      shipmentNumber: m['shipment_number'] as String,
+      shipmentDate: m['shipment_date'] as int,
+      referenceType: m['reference_type'] as String?,
+      referenceId: m['reference_id'] as int?,
+      carrierId: m['carrier_id'] as int?,
+      vehicleId: m['vehicle_id'] as int?,
+      routeId: m['route_id'] as int?,
+      driverName: m['driver_name'] as String?,
+      driverPhone: m['driver_phone'] as String?,
+      originAddress: m['origin_address'] as String?,
+      destinationAddress: m['destination_address'] as String?,
+      originLat: (m['origin_lat'] as num?)?.toDouble(),
+      originLng: (m['origin_lng'] as num?)?.toDouble(),
+      destLat: (m['dest_lat'] as num?)?.toDouble(),
+      destLng: (m['dest_lng'] as num?)?.toDouble(),
+      status: m['status'] as String? ?? 'PLANNED',
+      totalWeight: (m['total_weight'] as num?)?.toDouble() ?? 0,
+      totalVolume: (m['total_volume'] as num?)?.toDouble() ?? 0,
+      totalPackages: m['total_packages'] as int? ?? 0,
+      freightCharges: (m['freight_charges'] as num?)?.toDouble() ?? 0,
+      additionalCharges: (m['additional_charges'] as num?)?.toDouble() ?? 0,
+      totalFreight: (m['total_freight'] as num?)?.toDouble() ?? 0,
+      loadingStartTime: m['loading_start_time'] as int?,
+      loadingEndTime: m['loading_end_time'] as int?,
+      departureTime: m['departure_time'] as int?,
+      arrivalTime: m['arrival_time'] as int?,
+      unloadingStartTime: m['unloading_start_time'] as int?,
+      unloadingEndTime: m['unloading_end_time'] as int?,
+      proofOfDelivery: m['proof_of_delivery'] as String?,
+      podTimestamp: m['pod_timestamp'] as int?,
+      podReceivedBy: m['pod_received_by'] as String?,
+      narration: m['narration'] as String?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ShipmentItem {
+class ShipmentItem with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final int? itemId;
@@ -256,6 +483,10 @@ class ShipmentItem {
   final double? maxTemp;
   final double loadedQuantity;
   final double deliveredQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   ShipmentItem({
     this.id,
@@ -272,14 +503,53 @@ class ShipmentItem {
     this.maxTemp,
     this.loadedQuantity = 0,
     this.deliveredQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory ShipmentItem.fromJson(Map<String, dynamic> json) => _$ShipmentItemFromJson(json);
-  Map<String, dynamic> toJson() => _$ShipmentItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'shipment_id': shipmentId,
+      'item_id': itemId,
+      'description': description,
+      'quantity': quantity,
+      'unit': unit,
+      'weight': weight,
+      'volume': volume,
+      'packages': packages,
+      'temperature_required': temperatureRequired,
+      'min_temp': minTemp,
+      'max_temp': maxTemp,
+      'loaded_quantity': loadedQuantity,
+      'delivered_quantity': deliveredQuantity,
+    };
+  }
+
+  factory ShipmentItem.fromMap(Map<String, dynamic> m) {
+    return ShipmentItem(
+      id: m['id'] as int?,
+      shipmentId: m['shipment_id'] as int,
+      itemId: m['item_id'] as int?,
+      description: m['description'] as String?,
+      quantity: (m['quantity'] as num?)?.toDouble() ?? 0,
+      unit: m['unit'] as String?,
+      weight: (m['weight'] as num?)?.toDouble(),
+      volume: (m['volume'] as num?)?.toDouble(),
+      packages: m['packages'] as int? ?? 1,
+      temperatureRequired: m['temperature_required'] as int? ?? 0,
+      minTemp: (m['min_temp'] as num?)?.toDouble(),
+      maxTemp: (m['max_temp'] as num?)?.toDouble(),
+      loadedQuantity: (m['loaded_quantity'] as num?)?.toDouble() ?? 0,
+      deliveredQuantity: (m['delivered_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ShipmentTracking {
+class ShipmentTracking with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final double? latitude;
@@ -294,6 +564,10 @@ class ShipmentTracking {
   final double? signalStrength;
   final int timestamp;
   final String? source; // GPS, MANUAL, DRIVER_APP
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   ShipmentTracking({
     this.id,
@@ -310,14 +584,53 @@ class ShipmentTracking {
     this.signalStrength,
     required this.timestamp,
     this.source,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory ShipmentTracking.fromJson(Map<String, dynamic> json) => _$ShipmentTrackingFromJson(json);
-  Map<String, dynamic> toJson() => _$ShipmentTrackingToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'shipment_id': shipmentId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'address': address,
+      'speed': speed,
+      'heading': heading,
+      'status': status,
+      'temperature': temperature,
+      'humidity': humidity,
+      'battery_level': batteryLevel,
+      'signal_strength': signalStrength,
+      'timestamp': timestamp,
+      'source': source,
+    };
+  }
+
+  factory ShipmentTracking.fromMap(Map<String, dynamic> m) {
+    return ShipmentTracking(
+      id: m['id'] as int?,
+      shipmentId: m['shipment_id'] as int,
+      latitude: (m['latitude'] as num?)?.toDouble(),
+      longitude: (m['longitude'] as num?)?.toDouble(),
+      address: m['address'] as String?,
+      speed: (m['speed'] as num?)?.toDouble(),
+      heading: (m['heading'] as num?)?.toDouble(),
+      status: m['status'] as String?,
+      temperature: (m['temperature'] as num?)?.toDouble(),
+      humidity: (m['humidity'] as num?)?.toDouble(),
+      batteryLevel: (m['battery_level'] as num?)?.toDouble(),
+      signalStrength: (m['signal_strength'] as num?)?.toDouble(),
+      timestamp: m['timestamp'] as int,
+      source: m['source'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class LoadPlan {
+class LoadPlan with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final int vehicleId;
@@ -333,7 +646,9 @@ class LoadPlan {
   final int? approvedBy;
   final int? approvedAt;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   LoadPlan({
@@ -356,12 +671,51 @@ class LoadPlan {
     this.updatedAt,
   });
 
-  factory LoadPlan.fromJson(Map<String, dynamic> json) => _$LoadPlanFromJson(json);
-  Map<String, dynamic> toJson() => _$LoadPlanToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'shipment_id': shipmentId,
+      'vehicle_id': vehicleId,
+      'plan_date': planDate,
+      'total_weight': totalWeight,
+      'total_volume': totalVolume,
+      'total_packages': totalPackages,
+      'weight_utilization': weightUtilization,
+      'volume_utilization': volumeUtilization,
+      'pallet_count': palletCount,
+      'loading_sequence': loadingSequence,
+      'status': status,
+      'approved_by': approvedBy,
+      'approved_at': approvedAt,
+      'created_by': createdBy,
+    };
+  }
+
+  factory LoadPlan.fromMap(Map<String, dynamic> m) {
+    return LoadPlan(
+      id: m['id'] as int?,
+      shipmentId: m['shipment_id'] as int,
+      vehicleId: m['vehicle_id'] as int,
+      planDate: m['plan_date'] as int,
+      totalWeight: (m['total_weight'] as num?)?.toDouble() ?? 0,
+      totalVolume: (m['total_volume'] as num?)?.toDouble() ?? 0,
+      totalPackages: m['total_packages'] as int? ?? 0,
+      weightUtilization: (m['weight_utilization'] as num?)?.toDouble() ?? 0,
+      volumeUtilization: (m['volume_utilization'] as num?)?.toDouble() ?? 0,
+      palletCount: m['pallet_count'] as int? ?? 0,
+      loadingSequence: m['loading_sequence'] as String?,
+      status: m['status'] as String? ?? 'DRAFT',
+      approvedBy: m['approved_by'] as int?,
+      approvedAt: m['approved_at'] as int?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class LoadPlanItem {
+class LoadPlanItem with BaseModel {
+  @override
   final int? id;
   final int loadPlanId;
   final int shipmentItemId;
@@ -372,6 +726,10 @@ class LoadPlanItem {
   final int stackable;
   final int fragile;
   final String? temperatureZone;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   LoadPlanItem({
     this.id,
@@ -384,14 +742,45 @@ class LoadPlanItem {
     this.stackable = 1,
     this.fragile = 0,
     this.temperatureZone,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory LoadPlanItem.fromJson(Map<String, dynamic> json) => _$LoadPlanItemFromJson(json);
-  Map<String, dynamic> toJson() => _$LoadPlanItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'load_plan_id': loadPlanId,
+      'shipment_item_id': shipmentItemId,
+      'load_order': loadOrder,
+      'position_x': positionX,
+      'position_y': positionY,
+      'position_z': positionZ,
+      'stackable': stackable,
+      'fragile': fragile,
+      'temperature_zone': temperatureZone,
+    };
+  }
+
+  factory LoadPlanItem.fromMap(Map<String, dynamic> m) {
+    return LoadPlanItem(
+      id: m['id'] as int?,
+      loadPlanId: m['load_plan_id'] as int,
+      shipmentItemId: m['shipment_item_id'] as int,
+      loadOrder: m['load_order'] as int?,
+      positionX: (m['position_x'] as num?)?.toDouble(),
+      positionY: (m['position_y'] as num?)?.toDouble(),
+      positionZ: (m['position_z'] as num?)?.toDouble(),
+      stackable: m['stackable'] as int? ?? 1,
+      fragile: m['fragile'] as int? ?? 0,
+      temperatureZone: m['temperature_zone'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class FreightRate {
+class FreightRate with BaseModel {
+  @override
   final int? id;
   final int? carrierId;
   final int? routeId;
@@ -405,7 +794,9 @@ class FreightRate {
   final int? effectiveFrom;
   final int? effectiveTo;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   FreightRate({
@@ -426,12 +817,47 @@ class FreightRate {
     this.updatedAt,
   });
 
-  factory FreightRate.fromJson(Map<String, dynamic> json) => _$FreightRateFromJson(json);
-  Map<String, dynamic> toJson() => _$FreightRateToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'carrier_id': carrierId,
+      'route_id': routeId,
+      'vehicle_type': vehicleType,
+      'rate_type': rateType,
+      'base_rate': baseRate,
+      'min_charge': minCharge,
+      'fuel_surcharge_percent': fuelSurchargePercent,
+      'toll_included': tollIncluded,
+      'gst_rate': gstRate,
+      'effective_from': effectiveFrom,
+      'effective_to': effectiveTo,
+      'is_active': isActive,
+    };
+  }
+
+  factory FreightRate.fromMap(Map<String, dynamic> m) {
+    return FreightRate(
+      id: m['id'] as int?,
+      carrierId: m['carrier_id'] as int?,
+      routeId: m['route_id'] as int?,
+      vehicleType: m['vehicle_type'] as String?,
+      rateType: m['rate_type'] as String,
+      baseRate: (m['base_rate'] as num?)?.toDouble() ?? 0,
+      minCharge: (m['min_charge'] as num?)?.toDouble() ?? 0,
+      fuelSurchargePercent: (m['fuel_surcharge_percent'] as num?)?.toDouble() ?? 0,
+      tollIncluded: m['toll_included'] as int? ?? 0,
+      gstRate: (m['gst_rate'] as num?)?.toDouble() ?? 0,
+      effectiveFrom: m['effective_from'] as int?,
+      effectiveTo: m['effective_to'] as int?,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class FreightBill {
+class FreightBill with BaseModel {
+  @override
   final int? id;
   final String billNumber;
   final int billDate;
@@ -456,7 +882,9 @@ class FreightBill {
   final int? paidDate;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   FreightBill({
@@ -488,12 +916,69 @@ class FreightBill {
     this.updatedAt,
   });
 
-  factory FreightBill.fromJson(Map<String, dynamic> json) => _$FreightBillFromJson(json);
-  Map<String, dynamic> toJson() => _$FreightBillToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'bill_number': billNumber,
+      'bill_date': billDate,
+      'carrier_id': carrierId,
+      'shipment_id': shipmentId,
+      'route_id': routeId,
+      'vehicle_id': vehicleId,
+      'distance_km': distanceKm,
+      'weight_charged': weightCharged,
+      'rate_applied': rateApplied,
+      'base_freight': baseFreight,
+      'fuel_surcharge': fuelSurcharge,
+      'toll_charges': tollCharges,
+      'other_charges': otherCharges,
+      'cgst_amount': cgstAmount,
+      'sgst_amount': sgstAmount,
+      'igst_amount': igstAmount,
+      'total_amount': totalAmount,
+      'status': status,
+      'verified_by': verifiedBy,
+      'verified_at': verifiedAt,
+      'paid_date': paidDate,
+      'narration': narration,
+      'created_by': createdBy,
+    };
+  }
+
+  factory FreightBill.fromMap(Map<String, dynamic> m) {
+    return FreightBill(
+      id: m['id'] as int?,
+      billNumber: m['bill_number'] as String,
+      billDate: m['bill_date'] as int,
+      carrierId: m['carrier_id'] as int,
+      shipmentId: m['shipment_id'] as int?,
+      routeId: m['route_id'] as int?,
+      vehicleId: m['vehicle_id'] as int?,
+      distanceKm: (m['distance_km'] as num?)?.toDouble(),
+      weightCharged: (m['weight_charged'] as num?)?.toDouble(),
+      rateApplied: (m['rate_applied'] as num?)?.toDouble(),
+      baseFreight: (m['base_freight'] as num?)?.toDouble() ?? 0,
+      fuelSurcharge: (m['fuel_surcharge'] as num?)?.toDouble() ?? 0,
+      tollCharges: (m['toll_charges'] as num?)?.toDouble() ?? 0,
+      otherCharges: (m['other_charges'] as num?)?.toDouble() ?? 0,
+      cgstAmount: (m['cgst_amount'] as num?)?.toDouble() ?? 0,
+      sgstAmount: (m['sgst_amount'] as num?)?.toDouble() ?? 0,
+      igstAmount: (m['igst_amount'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      status: m['status'] as String? ?? 'DRAFT',
+      verifiedBy: m['verified_by'] as int?,
+      verifiedAt: m['verified_at'] as int?,
+      paidDate: m['paid_date'] as int?,
+      narration: m['narration'] as String?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class VehicleMaintenance {
+class VehicleMaintenance with BaseModel {
+  @override
   final int? id;
   final int vehicleId;
   final String? maintenanceType; // PREVENTIVE, BREAKDOWN, ACCIDENT, INSPECTION
@@ -505,7 +990,9 @@ class VehicleMaintenance {
   final String? serviceProvider;
   final String status; // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   VehicleMaintenance({
@@ -524,6 +1011,37 @@ class VehicleMaintenance {
     this.updatedAt,
   });
 
-  factory VehicleMaintenance.fromJson(Map<String, dynamic> json) => _$VehicleMaintenanceFromJson(json);
-  Map<String, dynamic> toJson() => _$VehicleMaintenanceToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'vehicle_id': vehicleId,
+      'maintenance_type': maintenanceType,
+      'description': description,
+      'cost': cost,
+      'service_date': serviceDate,
+      'next_due_date': nextDueDate,
+      'odometer_reading': odometerReading,
+      'service_provider': serviceProvider,
+      'status': status,
+      'created_by': createdBy,
+    };
+  }
+
+  factory VehicleMaintenance.fromMap(Map<String, dynamic> m) {
+    return VehicleMaintenance(
+      id: m['id'] as int?,
+      vehicleId: m['vehicle_id'] as int,
+      maintenanceType: m['maintenance_type'] as String?,
+      description: m['description'] as String?,
+      cost: (m['cost'] as num?)?.toDouble() ?? 0,
+      serviceDate: m['service_date'] as int?,
+      nextDueDate: m['next_due_date'] as int?,
+      odometerReading: m['odometer_reading'] as int?,
+      serviceProvider: m['service_provider'] as String?,
+      status: m['status'] as String? ?? 'SCHEDULED',
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }

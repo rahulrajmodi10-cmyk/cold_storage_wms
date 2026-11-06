@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'audit_service.dart';
@@ -18,7 +17,7 @@ class GatepassBarcodeService {
 
   Future<int> createGatepassType(GatepassType type, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = type.toJson();
+    final map = type.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -42,11 +41,11 @@ class GatepassBarcodeService {
   Future<List<GatepassType>> _getGatepassTypes({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('gatepass_types', where: where, orderBy: 'code');
-    return maps.map((m) => GatepassType.fromJson(m)).toList();
+    return maps.map((m) => GatepassType.fromMap(m)).toList();
   }
 
   Future<int> updateGatepassType(GatepassType type, {int? userId}) async {
-    final map = type.toJson();
+    final map = type.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('gatepass_types', map, where: 'id = ?', whereArgs: [type.id]);
@@ -67,7 +66,7 @@ class GatepassBarcodeService {
 
   Future<int> createGatepass(Gatepass gatepass, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = gatepass.toJson();
+    final map = gatepass.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -87,13 +86,13 @@ class GatepassBarcodeService {
   Future<Gatepass?> getGatepass(int id) async {
     final maps = await db.query('gatepass', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Gatepass.fromJson(maps.first);
+    return Gatepass.fromMap(maps.first);
   }
 
   Future<Gatepass?> getGatepassByNumber(String gatepassNumber) async {
     final maps = await db.query('gatepass', where: 'gatepass_number = ?', whereArgs: [gatepassNumber]);
     if (maps.isEmpty) return null;
-    return Gatepass.fromJson(maps.first);
+    return Gatepass.fromMap(maps.first);
   }
 
   Future<List<Gatepass>> getGatepasses({
@@ -140,11 +139,11 @@ class GatepassBarcodeService {
       limit: limit,
       offset: offset,
     );
-    return maps.map((m) => Gatepass.fromJson(m)).toList();
+    return maps.map((m) => Gatepass.fromMap(m)).toList();
   }
 
   Future<int> updateGatepass(Gatepass gatepass, {int? userId}) async {
-    final map = gatepass.toJson();
+    final map = gatepass.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('gatepass', map, where: 'id = ?', whereArgs: [gatepass.id]);
@@ -226,7 +225,7 @@ class GatepassBarcodeService {
 
   Future<int> addGatepassItem(GatepassItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('gatepass_items', item.toJson());
+      final id = await txn.insert('gatepass_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_gatepass_item',
@@ -241,12 +240,12 @@ class GatepassBarcodeService {
 
   Future<List<GatepassItem>> getGatepassItems(int gatepassId) async {
     final maps = await db.query('gatepass_items', where: 'gatepass_id = ?', whereArgs: [gatepassId]);
-    return maps.map((m) => GatepassItem.fromJson(m)).toList();
+    return maps.map((m) => GatepassItem.fromMap(m)).toList();
   }
 
   Future<int> updateGatepassItem(GatepassItem item, {int? userId}) async {
     await db.transaction((txn) async {
-      final count = await txn.update('gatepass_items', item.toJson(), where: 'id = ?', whereArgs: [item.id]);
+      final count = await txn.update('gatepass_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
       if (count == 0) throw StateError('Gatepass item not found');
       await auditService.logInTransaction(
         txn,
@@ -293,7 +292,7 @@ class GatepassBarcodeService {
 
   Future<int> createSecurityGate(SecurityGate gate, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = gate.toJson();
+    final map = gate.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -313,14 +312,14 @@ class GatepassBarcodeService {
   Future<List<SecurityGate>> getSecurityGates({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('security_gates', where: where, orderBy: 'code');
-    return maps.map((m) => SecurityGate.fromJson(m)).toList();
+    return maps.map((m) => SecurityGate.fromMap(m)).toList();
   }
 
   // ============ Gatepass Vehicle Log ============
 
   Future<int> logVehicleEntry(GatepassVehicleLog log, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('gatepass_vehicle_log', log.toJson());
+      final id = await txn.insert('gatepass_vehicle_log', log.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'log_vehicle_entry',
@@ -335,14 +334,14 @@ class GatepassBarcodeService {
 
   Future<List<GatepassVehicleLog>> getVehicleLogs(int gatepassId) async {
     final maps = await db.query('gatepass_vehicle_log', where: 'gatepass_id = ?', whereArgs: [gatepassId], orderBy: 'timestamp');
-    return maps.map((m) => GatepassVehicleLog.fromJson(m)).toList();
+    return maps.map((m) => GatepassVehicleLog.fromMap(m)).toList();
   }
 
   // ============ Gatepass Approvals ============
 
   Future<int> createGatepassApproval(GatepassApproval approval, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('gatepass_approvals', approval.toJson());
+      final id = await txn.insert('gatepass_approvals', approval.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'create_gatepass_approval',
@@ -357,7 +356,7 @@ class GatepassBarcodeService {
 
   Future<List<GatepassApproval>> getGatepassApprovals(int gatepassId) async {
     final maps = await db.query('gatepass_approvals', where: 'gatepass_id = ?', whereArgs: [gatepassId], orderBy: 'level');
-    return maps.map((m) => GatepassApproval.fromJson(m)).toList();
+    return maps.map((m) => GatepassApproval.fromMap(m)).toList();
   }
 
   Future<int> processGatepassApproval(int approvalId, String status, int approverId, {String? comments, int? delegatedTo}) async {
@@ -387,7 +386,7 @@ class GatepassBarcodeService {
 
   Future<int> createDispatchSchedule(DispatchSchedule schedule, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = schedule.toJson();
+    final map = schedule.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -407,7 +406,7 @@ class GatepassBarcodeService {
   Future<DispatchSchedule?> getDispatchSchedule(int id) async {
     final maps = await db.query('dispatch_schedules', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return DispatchSchedule.fromJson(maps.first);
+    return DispatchSchedule.fromMap(maps.first);
   }
 
   Future<List<DispatchSchedule>> getDispatchSchedules({
@@ -456,11 +455,11 @@ class GatepassBarcodeService {
       args.add(shipmentId);
     }
     final maps = await db.query('dispatch_schedules', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'scheduled_start');
-    return maps.map((m) => DispatchSchedule.fromJson(m)).toList();
+    return maps.map((m) => DispatchSchedule.fromMap(m)).toList();
   }
 
   Future<int> updateDispatchSchedule(DispatchSchedule schedule, {int? userId}) async {
-    final map = schedule.toJson();
+    final map = schedule.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('dispatch_schedules', map, where: 'id = ?', whereArgs: [schedule.id]);
@@ -519,7 +518,7 @@ class GatepassBarcodeService {
 
   Future<int> createLoadingBay(LoadingBay bay, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = bay.toJson();
+    final map = bay.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -543,10 +542,11 @@ class GatepassBarcodeService {
   Future<List<LoadingBay>> _getLoadingBays({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('loading_bays', where: where, orderBy: 'code');
-    return maps.map((m) => LoadingBay.fromJson(m)).toList();
+    return maps.map((m) => LoadingBay.fromMap(m)).toList();
   }
 
   // ============ QR Code Generation ============
+  // (Unchanged - read-only)
 
   String generateGatepassQR(Gatepass gatepass) {
     final data = {
@@ -563,78 +563,6 @@ class GatepassBarcodeService {
     return jsonEncode(data);
   }
 
-  String generateGatepassPrintData(Gatepass gatepass) {
-    final items = <Map<String, dynamic>>[];
-    // Summary print data for the gatepass
-    final printData = {
-      'type': 'GATEPASS_PRINT',
-      'gatepass_number': gatepass.gatepassNumber,
-      'gatepass_id': gatepass.id,
-      'status': gatepass.status,
-      'gatepass_type': gatepass.gatepassTypeId > 0 ? 'Type ${gatepass.gatepassTypeId}' : 'N/A',
-      'vehicle_number': gatepass.vehicleNumber ?? 'N/A',
-      'driver_name': gatepass.driverName ?? 'N/A',
-      'driver_phone': gatepass.driverPhone ?? 'N/A',
-      'origin_location': gatepass.originLocation ?? 'N/A',
-      'destination_location': gatepass.destinationLocation ?? 'N/A',
-      'valid_from': gatepass.validFrom != null
-          ? DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(gatepass.validFrom!))
-          : 'N/A',
-      'valid_to': gatepass.validTo != null
-          ? DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(gatepass.validTo!))
-          : 'N/A',
-      'requested_date': gatepass.requestedDate != null
-          ? DateFormat('yyyy-MM-dd').format(DateTime.fromMillisecondsSinceEpoch(gatepass.requestedDate!))
-          : 'N/A',
-      'total_items': gatepass.totalItems,
-      'total_quantity': gatepass.totalQuantity,
-      'total_weight': gatepass.totalWeight.toStringAsFixed(1),
-      'total_packages': gatepass.totalPackages,
-      'qr_code_data': generateGatepassQR(gatepass),
-      'items': items,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    return jsonEncode(printData);
-  }
-
-  Future<int> printGatepassQR(int gatepassId, {int? userId}) async {
-    final gatepass = await getGatepass(gatepassId);
-    if (gatepass == null) throw StateError('Gatepass not found');
-
-    final printData = generateGatepassPrintData(gatepass);
-
-    // Log the QR print action
-    await logBarcodeScan(BarcodeScan(
-      barcodeValue: printData,
-      entityType: 'GATEPASS',
-      entityId: gatepassId,
-      scanType: 'QR_PRINT',
-      status: 'SUCCESS',
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-    ), userId: userId);
-
-    // In a real implementation, this would send the print data to a printer
-    // For now, we store the print data and return success
-    await createLabelPrintJob(LabelPrintJob(
-      jobNumber: 'GP_${gatepassId}_QR_${DateTime.now().millisecondsSinceEpoch}',
-      barcodeDefinitionId: 0,
-      entityType: 'GATEPASS',
-      entityIds: gatepass.gatepassNumber,
-      labelDataJson: printData,
-      copies: 1,
-      printerName: await _getDefaultPrinterName(),
-      printerType: 'GENERIC',
-      status: 'QUEUED',
-    ), userId: userId);
-
-    return gatepassId;
-  }
-
-  Future<String> _getDefaultPrinterName() async {
-    final defaultPrinter = await getDefaultPrinter();
-    return defaultPrinter?.name ?? 'Default Printer';
-  }
-
   String generateItemQR(Barcode barcode) {
     final data = {
       'type': barcode.entityType,
@@ -649,7 +577,7 @@ class GatepassBarcodeService {
 
   Future<int> createBarcodeDefinition(BarcodeDefinition def, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = def.toJson();
+    final map = def.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -673,20 +601,20 @@ class GatepassBarcodeService {
   Future<List<BarcodeDefinition>> _getBarcodeDefinitions({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('barcode_definitions', where: where, orderBy: 'code');
-    return maps.map((m) => BarcodeDefinition.fromJson(m)).toList();
+    return maps.map((m) => BarcodeDefinition.fromMap(m)).toList();
   }
 
   Future<BarcodeDefinition?> getBarcodeDefinitionByCode(String code) async {
     final maps = await db.query('barcode_definitions', where: 'code = ?', whereArgs: [code], limit: 1);
     if (maps.isEmpty) return null;
-    return BarcodeDefinition.fromJson(maps.first);
+    return BarcodeDefinition.fromMap(maps.first);
   }
 
   // ============ Barcodes ============
 
   Future<int> createBarcode(Barcode barcode, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = barcode.toJson();
+    final map = barcode.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -706,7 +634,7 @@ class GatepassBarcodeService {
   Future<Barcode?> getBarcodeByValue(String value) async {
     final maps = await db.query('barcodes', where: 'barcode_value = ?', whereArgs: [value], limit: 1);
     if (maps.isEmpty) return null;
-    return Barcode.fromJson(maps.first);
+    return Barcode.fromMap(maps.first);
   }
 
   Future<Barcode?> getBarcodeByEntity(String entityType, int entityId) async {
@@ -717,7 +645,7 @@ class GatepassBarcodeService {
       limit: 1,
     );
     if (maps.isEmpty) return null;
-    return Barcode.fromJson(maps.first);
+    return Barcode.fromMap(maps.first);
   }
 
   Future<int> updateBarcodePrintCount(int barcodeId, {int? userId}) async {
@@ -761,7 +689,7 @@ class GatepassBarcodeService {
 
   Future<int> logBarcodeScan(BarcodeScan scan, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('barcode_scans', scan.toJson());
+      final id = await txn.insert('barcode_scans', scan.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'log_barcode_scan',
@@ -814,14 +742,14 @@ class GatepassBarcodeService {
       args.add(toDate);
     }
     final maps = await db.query('barcode_scans', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'timestamp DESC');
-    return maps.map((m) => BarcodeScan.fromJson(m)).toList();
+    return maps.map((m) => BarcodeScan.fromMap(m)).toList();
   }
 
   // ============ Batch Scan Sessions ============
 
   Future<int> createBatchScanSession(BatchScanSession session, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = session.toJson();
+    final map = session.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -841,7 +769,7 @@ class GatepassBarcodeService {
   Future<BatchScanSession?> getBatchScanSession(int id) async {
     final maps = await db.query('batch_scan_sessions', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return BatchScanSession.fromJson(maps.first);
+    return BatchScanSession.fromMap(maps.first);
   }
 
   Future<List<BatchScanSession>> getBatchScanSessions({
@@ -890,11 +818,11 @@ class GatepassBarcodeService {
       args.add(toDate);
     }
     final maps = await db.query('batch_scan_sessions', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'started_at DESC');
-    return maps.map((m) => BatchScanSession.fromJson(m)).toList();
+    return maps.map((m) => BatchScanSession.fromMap(m)).toList();
   }
 
   Future<int> updateBatchScanSession(BatchScanSession session, {int? userId}) async {
-    final map = session.toJson();
+    final map = session.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('batch_scan_sessions', map, where: 'id = ?', whereArgs: [session.id]);
@@ -913,7 +841,7 @@ class GatepassBarcodeService {
 
   Future<int> addBatchScanItem(BatchScanItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('batch_scan_items', item.toJson());
+      final id = await txn.insert('batch_scan_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_batch_scan_item',
@@ -928,12 +856,12 @@ class GatepassBarcodeService {
 
   Future<List<BatchScanItem>> getBatchScanItems(int sessionId) async {
     final maps = await db.query('batch_scan_items', where: 'session_id = ?', whereArgs: [sessionId]);
-    return maps.map((m) => BatchScanItem.fromJson(m)).toList();
+    return maps.map((m) => BatchScanItem.fromMap(m)).toList();
   }
 
   Future<int> updateBatchScanItem(BatchScanItem item, {int? userId}) async {
     await db.transaction((txn) async {
-      final count = await txn.update('batch_scan_items', item.toJson(), where: 'id = ?', whereArgs: [item.id]);
+      final count = await txn.update('batch_scan_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
       if (count == 0) throw StateError('Batch scan item not found');
       await auditService.logInTransaction(
         txn,
@@ -951,7 +879,7 @@ class GatepassBarcodeService {
 
   Future<int> createLabelPrintJob(LabelPrintJob job, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = job.toJson();
+    final map = job.toMap();
     map['requested_at'] = now;
     return await db.transaction((txn) async {
       final id = await txn.insert('label_print_jobs', map);
@@ -970,7 +898,7 @@ class GatepassBarcodeService {
   Future<LabelPrintJob?> getLabelPrintJob(int id) async {
     final maps = await db.query('label_print_jobs', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return LabelPrintJob.fromJson(maps.first);
+    return LabelPrintJob.fromMap(maps.first);
   }
 
   Future<List<LabelPrintJob>> getLabelPrintJobs({String? status}) async {
@@ -981,7 +909,7 @@ class GatepassBarcodeService {
     final where = status != null ? 'status = ?' : null;
     final args = status != null ? [status] : null;
     final maps = await db.query('label_print_jobs', where: where, whereArgs: args, orderBy: 'requested_at DESC');
-    return maps.map((m) => LabelPrintJob.fromJson(m)).toList();
+    return maps.map((m) => LabelPrintJob.fromMap(m)).toList();
   }
 
   Future<int> updateLabelPrintJobStatus(int id, String status, {int? printedCount, int? failedCount, String? errorLog, int? userId}) async {
@@ -1010,7 +938,7 @@ class GatepassBarcodeService {
 
   Future<int> createPrinterConfig(PrinterConfig config, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = config.toJson();
+    final map = config.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -1034,13 +962,13 @@ class GatepassBarcodeService {
   Future<List<PrinterConfig>> _getPrinterConfigs({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('printer_configs', where: where, orderBy: 'name');
-    return maps.map((m) => PrinterConfig.fromJson(m)).toList();
+    return maps.map((m) => PrinterConfig.fromMap(m)).toList();
   }
 
   Future<PrinterConfig?> getDefaultPrinter() async {
     final maps = await db.query('printer_configs', where: 'is_default = 1 AND is_active = 1', limit: 1);
     if (maps.isEmpty) return null;
-    return PrinterConfig.fromJson(maps.first);
+    return PrinterConfig.fromMap(maps.first);
   }
 
   // ============ Analytics ============

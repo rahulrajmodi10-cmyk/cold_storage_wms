@@ -2,13 +2,39 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/logistics_service.dart';
+import '../services/carrier_vehicle_service.dart';
+import '../services/shipment_service.dart';
+import '../services/freight_service.dart';
+import '../services/logistics_analytics_service.dart';
 import '../models/logistics_models.dart';
 
 class LogisticsDashboard extends StatefulWidget {
-  final LogisticsService logisticsService;
+  final CarrierService carrierService;
+  final VehicleService vehicleService;
+  final ShipmentService shipmentService;
+  final ShipmentItemService shipmentItemService;
+  final ShipmentTrackingService shipmentTrackingService;
+  final FreightRateService freightRateService;
+  final FreightBillService freightBillService;
+  final LoadPlanService loadPlanService;
+  final LoadPlanItemService loadPlanItemService;
+  final VehicleMaintenanceService vehicleMaintenanceService;
+  final LogisticsAnalyticsService logisticsAnalyticsService;
 
-  const LogisticsDashboard({super.key, required this.logisticsService});
+  const LogisticsDashboard({
+    super.key,
+    required this.carrierService,
+    required this.vehicleService,
+    required this.shipmentService,
+    required this.shipmentItemService,
+    required this.shipmentTrackingService,
+    required this.freightRateService,
+    required this.freightBillService,
+    required this.loadPlanService,
+    required this.loadPlanItemService,
+    required this.vehicleMaintenanceService,
+    required this.logisticsAnalyticsService,
+  });
 
   @override
   State<LogisticsDashboard> createState() => _LogisticsDashboardState();
@@ -58,11 +84,11 @@ class _LogisticsDashboardState extends State<LogisticsDashboard> {
     }
 
     final results = await Future.wait([
-      widget.logisticsService.getShipmentSummary(fromDate, toDate),
-      widget.logisticsService.getCarrierPerformance(fromDate, toDate),
-      widget.logisticsService.getVehicleUtilization(fromDate, toDate),
-      widget.logisticsService.getVehicles(),
-      widget.logisticsService.getShipments(status: 'IN_TRANSIT', limit: 10),
+      widget.logisticsAnalyticsService.getShipmentSummary(fromDate, toDate),
+      widget.logisticsAnalyticsService.getCarrierPerformance(fromDate, toDate),
+      widget.logisticsAnalyticsService.getVehicleUtilization(fromDate, toDate),
+      widget.vehicleService.getVehicles(),
+      widget.shipmentService.getShipments(status: 'IN_TRANSIT', limit: 10),
     ]);
 
     setState(() {
@@ -213,7 +239,7 @@ class _LogisticsDashboardState extends State<LogisticsDashboard> {
                   final s = _activeShipments[index];
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: _getStatusColor(s.status).withOpacity(0.2),
+                      backgroundColor: _getStatusColor(s.status).withValues(alpha: 0.2),
                       child: Icon(Icons.local_shipping, color: _getStatusColor(s.status)),
                     ),
                     title: Text(s.shipmentNumber, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -278,7 +304,7 @@ class _LogisticsDashboardState extends State<LogisticsDashboard> {
   Widget _buildVehicleStatusItem(String label, int count, Color color, IconData icon) {
     return Column(
       children: [
-        CircleAvatar(backgroundColor: color.withOpacity(0.2), child: Icon(icon, color: color)),
+        CircleAvatar(backgroundColor: color.withValues(alpha: 0.2), child: Icon(icon, color: color)),
         const SizedBox(height: 8),
         Text(count.toString(), style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
         Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),

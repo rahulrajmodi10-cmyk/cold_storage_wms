@@ -3,63 +3,23 @@
 
 BEGIN TRANSACTION;
 
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE,
-  password_hash TEXT,
-  role TEXT,
-  face_embedding BLOB
-);
-
--- Audit log table (with acknowledged column for alert functionality)
-CREATE TABLE IF NOT EXISTS audit_log (
+-- Extend audit_log to include entity_type and entity_id
+ALTER TABLE audit_log RENAME TO audit_log_old;
+CREATE TABLE audit_log(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,
   action TEXT,
   detail TEXT,
   timestamp INTEGER,
   entity_type TEXT,
-  entity_id INTEGER,
-  acknowledged INTEGER DEFAULT 0
+  entity_id INTEGER
 );
-
--- Face embeddings
-CREATE TABLE IF NOT EXISTS face_embeddings (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER,
-  embedding BLOB,
-  created_at INTEGER
-);
-
--- Settings
-CREATE TABLE IF NOT EXISTS settings (
-  key TEXT PRIMARY KEY,
-  value TEXT
-);
-
--- OTPs table
-CREATE TABLE IF NOT EXISTS otps (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  phone TEXT,
-  code TEXT,
-  expires_at INTEGER,
-  verified INTEGER DEFAULT 0
-);
-
--- Alerts table
-CREATE TABLE IF NOT EXISTS alert (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  type TEXT,
-  severity TEXT,
-  message TEXT,
-  target_id INTEGER,
-  acknowledged INTEGER DEFAULT 0,
-  created_at INTEGER
-);
+INSERT INTO audit_log (id, user_id, action, detail, timestamp)
+SELECT id, user_id, action, detail, timestamp FROM audit_log_old;
+DROP TABLE audit_log_old;
 
 -- Inventory item
-CREATE TABLE IF NOT EXISTS inventory_item (
+CREATE TABLE IF NOT EXISTS inventory_item(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   sku TEXT UNIQUE,
   name TEXT,
@@ -78,7 +38,7 @@ CREATE TABLE IF NOT EXISTS inventory_item (
 );
 
 -- Storage locations
-CREATE TABLE IF NOT EXISTS storage_location (
+CREATE TABLE IF NOT EXISTS storage_location(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   rack_id TEXT,
   shelf_id TEXT,
@@ -89,7 +49,7 @@ CREATE TABLE IF NOT EXISTS storage_location (
 );
 
 -- Temperature log
-CREATE TABLE IF NOT EXISTS temperature_log (
+CREATE TABLE IF NOT EXISTS temperature_log(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   item_id INTEGER,
   location_id INTEGER,
@@ -100,7 +60,7 @@ CREATE TABLE IF NOT EXISTS temperature_log (
 );
 
 -- Transfer record
-CREATE TABLE IF NOT EXISTS transfer_record (
+CREATE TABLE IF NOT EXISTS transfer_record(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   item_id INTEGER,
   from_location INTEGER,

@@ -17,7 +17,7 @@ class CameraAIService {
 
   Future<int> createCamera(CameraDevice camera, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = camera.toJson();
+    final map = camera.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -37,7 +37,7 @@ class CameraAIService {
   Future<CameraDevice?> getCamera(int id) async {
     final maps = await db.query('camera_devices', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return CameraDevice.fromJson(maps.first);
+    return CameraDevice.fromMap(maps.first);
   }
 
   Future<List<CameraDevice>> getCameras({bool activeOnly = true, int? locationId}) async {
@@ -55,11 +55,11 @@ class CameraAIService {
       args.add(locationId);
     }
     final maps = await db.query('camera_devices', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'name');
-    return maps.map((m) => CameraDevice.fromJson(m)).toList();
+    return maps.map((m) => CameraDevice.fromMap(m)).toList();
   }
 
   Future<int> updateCamera(CameraDevice camera, {int? userId}) async {
-    final map = camera.toJson();
+    final map = camera.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('camera_devices', map, where: 'id = ?', whereArgs: [camera.id]);
@@ -98,7 +98,7 @@ class CameraAIService {
 
   Future<int> createCountingSession(CountingSession session, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = session.toJson();
+    final map = session.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -118,13 +118,13 @@ class CameraAIService {
   Future<CountingSession?> getCountingSession(int id) async {
     final maps = await db.query('counting_sessions', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return CountingSession.fromJson(maps.first);
+    return CountingSession.fromMap(maps.first);
   }
 
   Future<CountingSession?> getCountingSessionByNumber(String sessionNumber) async {
     final maps = await db.query('counting_sessions', where: 'session_number = ?', whereArgs: [sessionNumber]);
     if (maps.isEmpty) return null;
-    return CountingSession.fromJson(maps.first);
+    return CountingSession.fromMap(maps.first);
   }
 
   Future<List<CountingSession>> getCountingSessions({
@@ -180,11 +180,11 @@ class CameraAIService {
       args.add(toDate);
     }
     final maps = await db.query('counting_sessions', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'start_time DESC');
-    return maps.map((m) => CountingSession.fromJson(m)).toList();
+    return maps.map((m) => CountingSession.fromMap(m)).toList();
   }
 
   Future<int> updateCountingSession(CountingSession session, {int? userId}) async {
-    final map = session.toJson();
+    final map = session.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('counting_sessions', map, where: 'id = ?', whereArgs: [session.id]);
@@ -253,7 +253,7 @@ class CameraAIService {
 
   Future<int> addDetectionEvent(DetectionEvent event, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('detection_events', event.toJson());
+      final id = await txn.insert('detection_events', event.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_detection_event',
@@ -270,7 +270,7 @@ class CameraAIService {
     if (events.isEmpty) return 0;
     await db.transaction((txn) async {
       for (final event in events) {
-        await txn.insert('detection_events', event.toJson());
+        await txn.insert('detection_events', event.toMap());
       }
       await auditService.logInTransaction(
         txn,
@@ -286,7 +286,7 @@ class CameraAIService {
 
   Future<List<DetectionEvent>> getDetectionEvents(int sessionId) async {
     final maps = await db.query('detection_events', where: 'session_id = ?', whereArgs: [sessionId], orderBy: 'frame_timestamp');
-    return maps.map((m) => DetectionEvent.fromJson(m)).toList();
+    return maps.map((m) => DetectionEvent.fromMap(m)).toList();
   }
 
   Future<int> updateDetectionEventCounted(int eventId, int countTimestamp, String direction, {int? userId}) async {
@@ -329,7 +329,7 @@ class CameraAIService {
 
   Future<int> createVerification(CountVerification verification, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = verification.toJson();
+    final map = verification.toMap();
     map['created_at'] = now;
     return await db.transaction((txn) async {
       final id = await txn.insert('count_verifications', map);
@@ -347,7 +347,7 @@ class CameraAIService {
 
   Future<List<CountVerification>> getVerifications(int sessionId) async {
     final maps = await db.query('count_verifications', where: 'session_id = ?', whereArgs: [sessionId]);
-    return maps.map((m) => CountVerification.fromJson(m)).toList();
+    return maps.map((m) => CountVerification.fromMap(m)).toList();
   }
 
   Future<int> updateVerificationStatus(int verificationId, String status, {String? notes, String? evidenceImages, int? userId}) async {
@@ -376,7 +376,7 @@ class CameraAIService {
 
   Future<int> createCalibration(CameraCalibration calibration, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = calibration.toJson();
+    final map = calibration.toMap();
     map['calibrated_at'] = now;
     return await db.transaction((txn) async {
       final id = await txn.insert('camera_calibrations', map);
@@ -397,7 +397,7 @@ class CameraAIService {
     final args = <dynamic>[cameraId];
     if (activeOnly) where.add('is_active = 1');
     final maps = await db.query('camera_calibrations', where: where.join(' AND '), whereArgs: args, orderBy: 'calibrated_at DESC');
-    return maps.map((m) => CameraCalibration.fromJson(m)).toList();
+    return maps.map((m) => CameraCalibration.fromMap(m)).toList();
   }
 
   Future<CameraCalibration?> getActiveCalibration(int cameraId, String type) async {
@@ -409,14 +409,14 @@ class CameraAIService {
       limit: 1,
     );
     if (maps.isEmpty) return null;
-    return CameraCalibration.fromJson(maps.first);
+    return CameraCalibration.fromMap(maps.first);
   }
 
   // ============ ML Models ============
 
   Future<int> createMLModel(MLModel model, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = model.toJson();
+    final map = model.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -436,12 +436,12 @@ class CameraAIService {
   Future<MLModel?> getActiveMLModel() async {
     final maps = await db.query('ml_models', where: 'is_active = 1', orderBy: 'deployed_at DESC', limit: 1);
     if (maps.isEmpty) return null;
-    return MLModel.fromJson(maps.first);
+    return MLModel.fromMap(maps.first);
   }
 
   Future<List<MLModel>> getMLModels() async {
     final maps = await db.query('ml_models', orderBy: 'name, version');
-    return maps.map((m) => MLModel.fromJson(m)).toList();
+    return maps.map((m) => MLModel.fromMap(m)).toList();
   }
 
   Future<int> deployMLModel(int modelId, {int? userId}) async {
@@ -468,7 +468,7 @@ class CameraAIService {
 
   Future<int> createAlert(CameraAlert alert, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = alert.toJson();
+    final map = alert.toMap();
     map['created_at'] = now;
     return await db.transaction((txn) async {
       final id = await txn.insert('camera_alerts', map);
@@ -509,7 +509,7 @@ class CameraAIService {
       args.add(resolved);
     }
     final maps = await db.query('camera_alerts', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'created_at DESC');
-    return maps.map((m) => CameraAlert.fromJson(m)).toList();
+    return maps.map((m) => CameraAlert.fromMap(m)).toList();
   }
 
   Future<int> acknowledgeAlert(int alertId, int acknowledgedBy, {int? userId}) async {
@@ -554,265 +554,24 @@ class CameraAIService {
 
   // ============ AI Counting Logic (Integration with TFLite) ============
 
-  /// Preprocess frame data for TFLite input
-  /// Resizes to model input dimensions and normalizes pixel values
-  TypedList _preprocessFrame(Uint8List frameData, int cameraWidth, int cameraHeight,
-      {int targetWidth = 300, int targetHeight = 300}) {
-    // Convert Uint8List to List<int> if needed
-    final data = frameData.toList();
-
-    // For RGB888 format: already interleaved R,G,R,G...
-    // For YUV420sp: would need to convert to RGB first
-    // Here we assume RGB888 and just resize/normalize
-
-    // Normalize to 0-1 range (divide by 255)
-    final normalized = data.map((byte) => byte / 255.0).toList();
-
-    // We'll return the normalized data; actual resizing happens in TFLite
-    return Uint8List.fromList(normalized.map((v) => (v * 255).toInt()).toList());
-  }
-
-  /// Run TFLite inference on preprocessed frame data
-  Future<List<dynamic>> _runTfliteInference(TfliteRuntime runtime, TypedList inputData,
-      String modelPath) async {
-    // Load the TFLite model from assets
-    await runtime.loadModelFromAsset(modelPath);
-
-    // Get input details
-    runtime.getInputShape();
-    final inputIndex = runtime.getInputIndex();
-
-    // Set input tensor
-    runtime.setInputAt(inputIndex, inputData);
-
-    // Run inference
-    runtime.invoke();
-
-    // Get output details
-    final outputCount = runtime.getOutputCount();
-    final results = <List<dynamic>>[];
-
-    for (int i = 0; i < outputCount; i++) {
-      final outputShape = runtime.getOutputShape(i);
-      final outputSize = outputShape.fold(1, (prod, dim) => prod * dim);
-      final outputData = runtime.getOutputFloat(i);
-      results.add(outputData.sublist(0, outputSize));
-    }
-
-    return results;
-  }
-
-  /// Post-process TFLite detections: apply NMS, confidence filtering, track objects
-  List<DetectionResult> _postProcessDetections(List<dynamic> tfliteOutputs,
-      {double confidenceThreshold = 0.5}) {
-    // Extract boxes, classes, scores from TFLite output
-    // Format depends on the specific model (pallet_counter.tflite)
-    // This is a simplified post-processing for object detection
-
-    final outputs = tfliteOutputs;
-    if (outputs.isEmpty) return [];
-
-    // Typical SSD/MobileNet SSD output format:
-    // outputs[0] = boxes [num_detections, 4] - ymin, xmin, ymax, xmax
-    // outputs[1] = classes [num_detections, 1]
-    // outputs[2] = scores [num_detections, 1]
-
-    final boxes = outputs[0] as List<dynamic>;
-    final classes = outputs[1] as List<dynamic>;
-    final scores = outputs[2] as List<dynamic>;
-
-    final numDetections = boxes.length;
-
-    // Apply confidence threshold and collect valid detections
-    final validDetections = <DetectionResult>[];
-
-    for (int i = 0; i < numDetections; i++) {
-      final score = scores[i] as num;
-      if (score < confidenceThreshold) continue;
-
-      final className = classes[i] as String?;
-      final bbox = boxes[i] as List<num>;
-
-      // Convert normalized bbox [ymin, xmin, ymax, xmax] to [x, y, width, height]
-      final bboxX = (bbox[1] as num).toDouble();
-      final bboxY = (bbox[0] as num).toDouble();
-      final bboxWidth = (bbox[3] - bbox[1]) as num;
-      final bboxHeight = (bbox[2] - bbox[0]) as num;
-
-      validDetections.add(DetectionResult(
-        trackId: i,
-        className: className ?? 'unknown',
-        confidence: score.toDouble(),
-        bboxX: bboxX,
-        bboxY: bboxY,
-        bboxWidth: bboxWidth.toDouble(),
-        bboxHeight: bboxHeight.toDouble(),
-      ));
-    }
-
-    // Simple non-maximum suppression: remove overlapping boxes with same class
-    final suppressed = _nonMaxSuppression(validDetections, confidenceThreshold);
-
-    return suppressed;
-  }
-
-  /// Simple Non-Maximum Suppression to filter overlapping detections
-  List<DetectionResult> _nonMaxSuppression(List<DetectionResult> detections,
-      double confidenceThreshold) {
-    if (detections.length <= 1) return detections;
-
-    // Sort by confidence descending
-    final sorted = List<DetectionResult>.from(detections)
-      ..sort((a, b) => b.confidence.compareTo(a.confidence));
-
-    final result = <DetectionResult>[];
-    final taken = <int>{};
-
-    for (int i = 0; i < sorted.length; i++) {
-      if (taken.contains(i)) continue;
-      result.add(sorted[i]);
-      taken.add(i);
-
-      // Suppress overlapping detections with same class
-      for (int j = i + 1; j < sorted.length; j++) {
-        if (taken.contains(j)) continue;
-
-        // Calculate overlap (IoU simplified)
-        final i1 = sorted[i];
-        final i2 = sorted[j];
-
-        // Skip if different classes
-        if (i1.className != i2.className) continue;
-
-        // Bbox overlap check
-        final x1 = i1.bboxX;
-        final x2 = i2.bboxX;
-        final y1 = i1.bboxY;
-        final y2 = i2.bboxY;
-        final xOverlap = (x1 > x2 ? x1 - x2 : x2 - x1).clamp(0, 1);
-        final yOverlap = (y1 > y2 ? y1 - y2 : y2 - y1).clamp(0, 1);
-        final overlapArea = xOverlap * yOverlap;
-
-        final area1 = (i1.bboxWidth * i1.bboxHeight);
-        final area2 = (i2.bboxWidth * i2.bboxHeight);
-        final unionArea = area1 + area2 - overlapArea;
-
-        if (unionArea > 0 && overlapArea / unionArea > 0.5) {
-          taken.add(j);
-        }
-      }
-    }
-
-    return result;
-  }
-
-  /// Save detection events to database
-  Future<void> _saveDetectionEvents(List<DetectionResult> detections, int sessionId,
-      int cameraId, DateTime timestamp) async {
-    for (final detection in detections) {
-      final event = DetectionEvent(
-        sessionId: sessionId,
-        frameTimestamp: timestamp.millisecondsSinceEpoch,
-        trackId: detection.trackId,
-        className: detection.className,
-        confidence: detection.confidence,
-        bboxX: detection.bboxX,
-        bboxY: detection.bboxY,
-        bboxWidth: detection.bboxWidth,
-        bboxHeight: detection.bboxHeight,
-        direction: null,
-        counted: 0,
-        countTimestamp: timestamp.millisecondsSinceEpoch,
-        imagePath: null,
-        createdAt: timestamp.millisecondsSinceEpoch,
-      );
-
-      await db.transaction((txn) async {
-        await txn.insert('detection_events', event.toJson());
-        await auditService.logInTransaction(
-          txn,
-          action: 'add_detection_event',
-          detail: 'Added detection event for session $sessionId (${detection.className}, ${detection.confidence.toStringAsFixed(2)})',
-          entityType: 'detection_events',
-          entityId: event.id,
-        );
-      });
-    }
-  }
-
-  /// Mock detection results when TFLite model is not available
-  List<DetectionResult> _mockTfliteOutput(CameraDevice camera, CountingSession session) {
-    // Return mock detections for demonstration when model not available
-    return [
-      DetectionResult(
-        trackId: 1,
-        className: 'pallet',
-        confidence: 0.87,
-        bboxX: 0.15,
-        bboxY: 0.25,
-        bboxWidth: 0.45,
-        bboxHeight: 0.55,
-      ),
-      DetectionResult(
-        trackId: 2,
-        className: 'box',
-        confidence: 0.63,
-        bboxX: 0.55,
-        bboxY: 0.35,
-        bboxWidth: 0.25,
-        bboxHeight: 0.35,
-      ),
-    ];
-  }
-
   /// Process a frame from camera and return detection results
-  /// Uses TFLite for object detection with fallback to mock results
+  /// This is a placeholder - actual implementation would use tflite_flutter
   Future<List<DetectionResult>> processFrame({
     required CameraDevice camera,
     required Uint8List frameData,
     required int frameTimestamp,
     required CountingSession session,
   }) async {
-    // Try TFLite inference first
-    try {
-      // Get model path from camera config
-      final modelPath = camera.modelPath ?? 'assets/models/pallet_counter.tflite';
+    // TODO: Implement actual TFLite inference
+    // This would:
+    // 1. Preprocess frame (resize, normalize)
+    // 2. Run inference with TFLite model
+    // 3. Post-process (NMS, confidence filtering)
+    // 4. Track objects across frames
+    // 5. Count objects crossing count line
+    // 6. Save detection events to database
 
-      // Check if TFLite runtime is available
-      final TfliteRuntime runtime = TfliteRuntime();
-
-      // Preprocess frame data
-      final preprocessed = _preprocessFrame(
-        frameData,
-        camera.resolutionWidth,
-        camera.resolutionHeight,
-        targetWidth: 300,
-        targetHeight: 300,
-      );
-
-      // Run inference
-      final tfliteOutputs = await _runTfliteInference(runtime, preprocessed, modelPath);
-
-      // Post-process detections
-      final detections = _postProcessDetections(tfliteOutputs, confidenceThreshold: camera.confidenceThreshold);
-
-      // Save detection events
-      if (detections.isNotEmpty) {
-        await _saveDetectionEvents(detections, session.id ?? 0, camera.id ?? 0, DateTime.now());
-      }
-
-      return detections;
-    } catch (e) {
-      // Fall back to mock results if TFLite fails (model not found, etc.)
-      // This ensures the app doesn't crash when model is unavailable
-      final mockDetections = _mockTfliteOutput(camera, session);
-
-      if (mockDetections.isNotEmpty) {
-        await _saveDetectionEvents(mockDetections, session.id ?? 0, camera.id ?? 0, DateTime.now());
-      }
-
-      return mockDetections;
-    }
+    return [];
   }
 
   /// Start a counting session for a gatepass/shipment

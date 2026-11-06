@@ -18,7 +18,7 @@ class LocationService {
     }
 
     return await db.transaction((txn) async {
-      final id = await txn.insert('storage_location', loc.toJson());
+      final id = await txn.insert('storage_location', loc.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'create_location',
@@ -34,14 +34,14 @@ class LocationService {
   Future<StorageLocation?> getLocation(int id) async {
     final maps = await db.query('storage_location', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return StorageLocation.fromJson(maps.first);
+    return StorageLocation.fromMap(maps.first);
   }
 
   Future<List<StorageLocation>> listLocations({String? zone}) async {
     final where = zone != null ? 'zone = ?' : null;
     final args = zone != null ? [zone] : null;
     final maps = await db.query('storage_location', where: where, whereArgs: args);
-    return maps.map((m) => StorageLocation.fromJson(m)).toList();
+    return maps.map((m) => StorageLocation.fromMap(m)).toList();
   }
 
   Future<void> updateLocation(StorageLocation loc, {int? userId}) async {
@@ -54,7 +54,7 @@ class LocationService {
     await db.transaction((txn) async {
       final count = await txn.update(
         'storage_location',
-        loc.toJson(),
+        loc.toMap(),
         where: 'id = ?',
         whereArgs: [loc.id],
       );

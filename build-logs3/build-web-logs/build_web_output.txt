@@ -1,0 +1,443 @@
+[  +23 ms] executing: uname -m
+[   +5 ms] Exit code 0 from: uname -m
+[        ] x86_64
+[   +9 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +8 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[  +35 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[  +13 ms] Skipping pub get: version match.
+[ +144 ms] Found plugin workmanager at /home/runner/.pub-cache/hosted/pub.dev/workmanager-0.5.2/
+[   +7 ms] Found plugin tflite_flutter at /home/runner/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4/
+[   +9 ms] Found plugin sqflite at /home/runner/.pub-cache/hosted/pub.dev/sqflite-2.4.2/
+[   +2 ms] Found plugin sqflite_darwin at /home/runner/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
+[   +1 ms] Found plugin sqflite_android at /home/runner/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/
+[   +1 ms] Found plugin shared_preferences at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/
+[   +1 ms] Found plugin shared_preferences_windows at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +4 ms] Found plugin path_provider_windows at /home/runner/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[   +1 ms] Found plugin path_provider_linux at /home/runner/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +2 ms] Found plugin shared_preferences_foundation at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[   +1 ms] Found plugin shared_preferences_android at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23/
+[   +1 ms] Found plugin share_plus at /home/runner/.pub-cache/hosted/pub.dev/share_plus-12.0.2/
+[   +5 ms] Found plugin url_launcher_windows at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +3 ms] Found plugin url_launcher_web at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[   +1 ms] Found plugin url_launcher_linux at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +3 ms] Found plugin path_provider at /home/runner/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[   +1 ms] Found plugin path_provider_foundation at /home/runner/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[   +1 ms] Found plugin path_provider_android at /home/runner/.pub-cache/hosted/pub.dev/path_provider_android-2.2.23/
+[   +7 ms] Found plugin printing at /home/runner/.pub-cache/hosted/pub.dev/printing-5.14.3/
+[  +14 ms] Found plugin permission_handler at /home/runner/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[   +1 ms] Found plugin permission_handler_windows at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.2/
+[   +2 ms] Found plugin permission_handler_html at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.4+1/
+[   +1 ms] Found plugin permission_handler_apple at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.2/
+[   +1 ms] Found plugin permission_handler_android at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[   +1 ms] Found plugin open_filex at /home/runner/.pub-cache/hosted/pub.dev/open_filex-4.7.0/
+[   +1 ms] Found plugin mobile_scanner at /home/runner/.pub-cache/hosted/pub.dev/mobile_scanner-4.0.1/
+[   +5 ms] Found plugin google_maps_flutter at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter-2.14.2/
+[   +1 ms] Found plugin google_maps_flutter_web at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.14+3/
+[   +4 ms] Found plugin google_maps_flutter_ios at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.17.4/
+[   +1 ms] Found plugin google_maps_flutter_android at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.19.8/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.34/
+[   +1 ms] Found plugin pointer_interceptor at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor-0.10.1+2/
+[   +1 ms] Found plugin pointer_interceptor_web at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_web-0.10.3/
+[   +2 ms] Found plugin pointer_interceptor_ios at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_ios-0.10.1+1/
+[   +1 ms] Found plugin flutter_keyboard_visibility at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_windows at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_web at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0/
+[   +2 ms] Found plugin flutter_keyboard_visibility_macos at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0/
+[   +2 ms] Found plugin flutter_local_notifications at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
+[   +4 ms] Found plugin file_picker at /home/runner/.pub-cache/hosted/pub.dev/file_picker-8.3.7/
+[   +3 ms] Found plugin camera at /home/runner/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[   +1 ms] Found plugin camera_web at /home/runner/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/runner/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.23+2/
+[   +1 ms] Found plugin camera_android at /home/runner/.pub-cache/hosted/pub.dev/camera_android-0.10.10+17/
+[        ] Found plugin barcode_scan2 at /home/runner/.pub-cache/hosted/pub.dev/barcode_scan2-4.7.2/
+[  +74 ms] Found plugin workmanager at /home/runner/.pub-cache/hosted/pub.dev/workmanager-0.5.2/
+[   +2 ms] Found plugin tflite_flutter at /home/runner/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4/
+[   +6 ms] Found plugin sqflite at /home/runner/.pub-cache/hosted/pub.dev/sqflite-2.4.2/
+[   +1 ms] Found plugin sqflite_darwin at /home/runner/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
+[        ] Found plugin sqflite_android at /home/runner/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/
+[        ] Found plugin shared_preferences at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/
+[   +1 ms] Found plugin shared_preferences_windows at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/runner/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/runner/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23/
+[        ] Found plugin share_plus at /home/runner/.pub-cache/hosted/pub.dev/share_plus-12.0.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] Found plugin url_launcher_linux at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin path_provider at /home/runner/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/runner/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] Found plugin path_provider_android at /home/runner/.pub-cache/hosted/pub.dev/path_provider_android-2.2.23/
+[   +4 ms] Found plugin printing at /home/runner/.pub-cache/hosted/pub.dev/printing-5.14.3/
+[   +5 ms] Found plugin permission_handler at /home/runner/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[        ] Found plugin permission_handler_windows at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.2/
+[   +1 ms] Found plugin permission_handler_html at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.4+1/
+[        ] Found plugin permission_handler_apple at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.2/
+[        ] Found plugin permission_handler_android at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[        ] Found plugin open_filex at /home/runner/.pub-cache/hosted/pub.dev/open_filex-4.7.0/
+[        ] Found plugin mobile_scanner at /home/runner/.pub-cache/hosted/pub.dev/mobile_scanner-4.0.1/
+[   +3 ms] Found plugin google_maps_flutter at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter-2.14.2/
+[        ] Found plugin google_maps_flutter_web at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.14+3/
+[   +3 ms] Found plugin google_maps_flutter_ios at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.17.4/
+[   +1 ms] Found plugin google_maps_flutter_android at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.19.8/
+[   +1 ms] Found plugin flutter_plugin_android_lifecycle at /home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.34/
+[   +1 ms] Found plugin pointer_interceptor at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor-0.10.1+2/
+[        ] Found plugin pointer_interceptor_web at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_web-0.10.3/
+[   +1 ms] Found plugin pointer_interceptor_ios at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_ios-0.10.1+1/
+[        ] Found plugin flutter_keyboard_visibility at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0/
+[        ] Found plugin flutter_keyboard_visibility_windows at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_web at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0/
+[        ] Found plugin flutter_keyboard_visibility_macos at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0/
+[        ] Found plugin flutter_keyboard_visibility_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0/
+[   +1 ms] Found plugin flutter_local_notifications at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
+[   +2 ms] Found plugin file_picker at /home/runner/.pub-cache/hosted/pub.dev/file_picker-8.3.7/
+[   +1 ms] Found plugin camera at /home/runner/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/runner/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/runner/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.23+2/
+[        ] Found plugin camera_android at /home/runner/.pub-cache/hosted/pub.dev/camera_android-0.10.10+17/
+[        ] Found plugin barcode_scan2 at /home/runner/.pub-cache/hosted/pub.dev/barcode_scan2-4.7.2/
+[  +13 ms] Skipping generating web_plugin_registrant.dart because it is up-to-date.
+[  +56 ms] Found plugin workmanager at /home/runner/.pub-cache/hosted/pub.dev/workmanager-0.5.2/
+[   +1 ms] Found plugin tflite_flutter at /home/runner/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4/
+[   +4 ms] Found plugin sqflite at /home/runner/.pub-cache/hosted/pub.dev/sqflite-2.4.2/
+[   +1 ms] Found plugin sqflite_darwin at /home/runner/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
+[        ] Found plugin sqflite_android at /home/runner/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/
+[        ] Found plugin shared_preferences at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/
+[        ] Found plugin shared_preferences_windows at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/runner/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/runner/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23/
+[        ] Found plugin share_plus at /home/runner/.pub-cache/hosted/pub.dev/share_plus-12.0.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] Found plugin url_launcher_linux at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin path_provider at /home/runner/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/runner/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] Found plugin path_provider_android at /home/runner/.pub-cache/hosted/pub.dev/path_provider_android-2.2.23/
+[   +3 ms] Found plugin printing at /home/runner/.pub-cache/hosted/pub.dev/printing-5.14.3/
+[   +5 ms] Found plugin permission_handler at /home/runner/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[        ] Found plugin permission_handler_windows at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.2/
+[   +1 ms] Found plugin permission_handler_html at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.4+1/
+[        ] Found plugin permission_handler_apple at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.2/
+[        ] Found plugin permission_handler_android at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[        ] Found plugin open_filex at /home/runner/.pub-cache/hosted/pub.dev/open_filex-4.7.0/
+[        ] Found plugin mobile_scanner at /home/runner/.pub-cache/hosted/pub.dev/mobile_scanner-4.0.1/
+[   +2 ms] Found plugin google_maps_flutter at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter-2.14.2/
+[        ] Found plugin google_maps_flutter_web at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.14+3/
+[   +2 ms] Found plugin google_maps_flutter_ios at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.17.4/
+[        ] Found plugin google_maps_flutter_android at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.19.8/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.34/
+[   +1 ms] Found plugin pointer_interceptor at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor-0.10.1+2/
+[   +1 ms] Found plugin pointer_interceptor_web at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_web-0.10.3/
+[   +1 ms] Found plugin pointer_interceptor_ios at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_ios-0.10.1+1/
+[        ] Found plugin flutter_keyboard_visibility at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0/
+[        ] Found plugin flutter_keyboard_visibility_windows at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_web at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0/
+[        ] Found plugin flutter_keyboard_visibility_macos at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0/
+[        ] Found plugin flutter_keyboard_visibility_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0/
+[   +1 ms] Found plugin flutter_local_notifications at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
+[   +2 ms] Found plugin file_picker at /home/runner/.pub-cache/hosted/pub.dev/file_picker-8.3.7/
+[   +2 ms] Found plugin camera at /home/runner/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/runner/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/runner/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.23+2/
+[        ] Found plugin camera_android at /home/runner/.pub-cache/hosted/pub.dev/camera_android-0.10.10+17/
+[        ] Found plugin barcode_scan2 at /home/runner/.pub-cache/hosted/pub.dev/barcode_scan2-4.7.2/
+[   +9 ms] Generating /home/runner/work/cold_storage_wms/cold_storage_wms/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+[   +1 ms] Skipping generating GeneratedPluginRegistrant.java because it is up-to-date.
+[  +68 ms] Found plugin workmanager at /home/runner/.pub-cache/hosted/pub.dev/workmanager-0.5.2/
+[   +1 ms] Found plugin tflite_flutter at /home/runner/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4/
+[   +4 ms] Found plugin sqflite at /home/runner/.pub-cache/hosted/pub.dev/sqflite-2.4.2/
+[   +1 ms] Found plugin sqflite_darwin at /home/runner/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
+[        ] Found plugin sqflite_android at /home/runner/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/
+[        ] Found plugin shared_preferences at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/
+[        ] Found plugin shared_preferences_windows at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[   +1 ms] Found plugin path_provider_windows at /home/runner/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[   +1 ms] Found plugin shared_preferences_web at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/runner/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[   +1 ms] Found plugin shared_preferences_foundation at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23/
+[        ] Found plugin share_plus at /home/runner/.pub-cache/hosted/pub.dev/share_plus-12.0.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] Found plugin url_launcher_linux at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin path_provider at /home/runner/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/runner/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[   +1 ms] Found plugin path_provider_android at /home/runner/.pub-cache/hosted/pub.dev/path_provider_android-2.2.23/
+[   +3 ms] Found plugin printing at /home/runner/.pub-cache/hosted/pub.dev/printing-5.14.3/
+[   +6 ms] Found plugin permission_handler at /home/runner/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[        ] Found plugin permission_handler_windows at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.2/
+[   +1 ms] Found plugin permission_handler_html at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.4+1/
+[        ] Found plugin permission_handler_apple at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.2/
+[        ] Found plugin permission_handler_android at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[        ] Found plugin open_filex at /home/runner/.pub-cache/hosted/pub.dev/open_filex-4.7.0/
+[        ] Found plugin mobile_scanner at /home/runner/.pub-cache/hosted/pub.dev/mobile_scanner-4.0.1/
+[   +2 ms] Found plugin google_maps_flutter at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter-2.14.2/
+[        ] Found plugin google_maps_flutter_web at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.14+3/
+[   +3 ms] Found plugin google_maps_flutter_ios at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.17.4/
+[        ] Found plugin google_maps_flutter_android at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.19.8/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.34/
+[   +1 ms] Found plugin pointer_interceptor at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor-0.10.1+2/
+[        ] Found plugin pointer_interceptor_web at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_web-0.10.3/
+[   +1 ms] Found plugin pointer_interceptor_ios at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_ios-0.10.1+1/
+[        ] Found plugin flutter_keyboard_visibility at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0/
+[        ] Found plugin flutter_keyboard_visibility_windows at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_web at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_macos at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0/
+[        ] Found plugin flutter_keyboard_visibility_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0/
+[   +1 ms] Found plugin flutter_local_notifications at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
+[   +2 ms] Found plugin file_picker at /home/runner/.pub-cache/hosted/pub.dev/file_picker-8.3.7/
+[   +1 ms] Found plugin camera at /home/runner/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/runner/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/runner/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.23+2/
+[        ] Found plugin camera_android at /home/runner/.pub-cache/hosted/pub.dev/camera_android-0.10.10+17/
+[        ] Found plugin barcode_scan2 at /home/runner/.pub-cache/hosted/pub.dev/barcode_scan2-4.7.2/
+[   +1 ms] generated_plugin_registrant.dart not found. Skipping.
+[   +1 ms] Compiling lib/main.dart for the Web...
+[   +5 ms] Initializing file store
+[  +25 ms] invalidated build due to missing files: /home/runner/work/cold_storage_wms/cold_storage_wms/web/*/index.html, /home/runner/work/cold_storage_wms/cold_storage_wms/web/flutter_bootstrap.js
+[   +1 ms] web_entrypoint: Starting due to {InvalidatedReasonKind.outputSetAddition: The following outputs were added to the output set: /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/main.dart, InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/packages/flutter_tools/lib/src/build_system/targets/web.dart}
+[        ] Skipping target: gen_localizations
+[   +1 ms] web_templated_files: Starting due to {InvalidatedReasonKind.buildKeyChanged: The target build key changed., InvalidatedReasonKind.outputSetAddition: The following outputs were added to the output set: /home/runner/work/cold_storage_wms/cold_storage_wms/build/web/*/index.html,/home/runner/work/cold_storage_wms/cold_storage_wms/build/web/flutter_bootstrap.js, InvalidatedReasonKind.inputMissing: The following inputs were missing: /home/runner/work/cold_storage_wms/cold_storage_wms/web/*/index.html,/home/runner/work/cold_storage_wms/cold_storage_wms/web/flutter_bootstrap.js, InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/engine.stamp}
+[        ] web_static_assets: Starting due to {InvalidatedReasonKind.inputChanged: The following inputs have updated contents: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/engine.stamp, InvalidatedReasonKind.outputSetAddition: The following outputs were added to the output set: /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/flutter.js,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/chromium/canvaskit.js,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/chromium/canvaskit.wasm,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/chromium/canvaskit.js.symbols,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm_heavy.js.symbols,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/canvaskit.js,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm.js,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/canvaskit.wasm,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm.wasm,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm.js.symbols,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm_heavy.wasm,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/canvaskit.js.symbols,/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/canvaskit/skwasm_heavy.js}
+[  +22 ms] web_static_assets: Complete
+[  +19 ms] web_templated_files: Complete
+[  +40 ms] Found plugin workmanager at /home/runner/.pub-cache/hosted/pub.dev/workmanager-0.5.2/
+[   +1 ms] Found plugin tflite_flutter at /home/runner/.pub-cache/hosted/pub.dev/tflite_flutter-0.10.4/
+[   +4 ms] Found plugin sqflite at /home/runner/.pub-cache/hosted/pub.dev/sqflite-2.4.2/
+[   +1 ms] Found plugin sqflite_darwin at /home/runner/.pub-cache/hosted/pub.dev/sqflite_darwin-2.4.2/
+[        ] Found plugin sqflite_android at /home/runner/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+2/
+[        ] Found plugin shared_preferences at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5/
+[        ] Found plugin shared_preferences_windows at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_windows-2.4.1/
+[        ] Found plugin path_provider_windows at /home/runner/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0/
+[        ] Found plugin shared_preferences_web at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_web-2.4.3/
+[   +1 ms] Found plugin shared_preferences_linux at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_linux-2.4.1/
+[        ] Found plugin path_provider_linux at /home/runner/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+[        ] Found plugin shared_preferences_foundation at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6/
+[        ] Found plugin shared_preferences_android at /home/runner/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23/
+[        ] Found plugin share_plus at /home/runner/.pub-cache/hosted/pub.dev/share_plus-12.0.2/
+[   +1 ms] Found plugin url_launcher_windows at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_windows-3.1.5/
+[   +1 ms] Found plugin url_launcher_web at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_web-2.4.1/
+[        ] Found plugin url_launcher_linux at /home/runner/.pub-cache/hosted/pub.dev/url_launcher_linux-3.2.2/
+[   +1 ms] Found plugin path_provider at /home/runner/.pub-cache/hosted/pub.dev/path_provider-2.1.5/
+[        ] Found plugin path_provider_foundation at /home/runner/.pub-cache/hosted/pub.dev/path_provider_foundation-2.5.1/
+[        ] Found plugin path_provider_android at /home/runner/.pub-cache/hosted/pub.dev/path_provider_android-2.2.23/
+[   +2 ms] Found plugin printing at /home/runner/.pub-cache/hosted/pub.dev/printing-5.14.3/
+[   +4 ms] Found plugin permission_handler at /home/runner/.pub-cache/hosted/pub.dev/permission_handler-11.4.0/
+[        ] Found plugin permission_handler_windows at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_windows-0.2.2/
+[        ] Found plugin permission_handler_html at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_html-0.1.4+1/
+[        ] Found plugin permission_handler_apple at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_apple-9.6.2/
+[        ] Found plugin permission_handler_android at /home/runner/.pub-cache/hosted/pub.dev/permission_handler_android-12.1.0/
+[        ] Found plugin open_filex at /home/runner/.pub-cache/hosted/pub.dev/open_filex-4.7.0/
+[        ] Found plugin mobile_scanner at /home/runner/.pub-cache/hosted/pub.dev/mobile_scanner-4.0.1/
+[   +3 ms] Found plugin google_maps_flutter at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter-2.14.2/
+[        ] Found plugin google_maps_flutter_web at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_web-0.5.14+3/
+[   +2 ms] Found plugin google_maps_flutter_ios at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_ios-2.17.4/
+[        ] Found plugin google_maps_flutter_android at /home/runner/.pub-cache/hosted/pub.dev/google_maps_flutter_android-2.19.8/
+[        ] Found plugin flutter_plugin_android_lifecycle at /home/runner/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.34/
+[   +1 ms] Found plugin pointer_interceptor at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor-0.10.1+2/
+[        ] Found plugin pointer_interceptor_web at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_web-0.10.3/
+[   +1 ms] Found plugin pointer_interceptor_ios at /home/runner/.pub-cache/hosted/pub.dev/pointer_interceptor_ios-0.10.1+1/
+[        ] Found plugin flutter_keyboard_visibility at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility-6.0.0/
+[        ] Found plugin flutter_keyboard_visibility_windows at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_windows-1.0.0/
+[   +1 ms] Found plugin flutter_keyboard_visibility_web at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_web-2.0.0/
+[        ] Found plugin flutter_keyboard_visibility_macos at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_macos-1.0.0/
+[        ] Found plugin flutter_keyboard_visibility_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_keyboard_visibility_linux-1.0.0/
+[   +1 ms] Found plugin flutter_local_notifications at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications-17.2.4/
+[   +1 ms] Found plugin flutter_local_notifications_linux at /home/runner/.pub-cache/hosted/pub.dev/flutter_local_notifications_linux-4.0.1/
+[   +2 ms] Found plugin file_picker at /home/runner/.pub-cache/hosted/pub.dev/file_picker-8.3.7/
+[   +2 ms] Found plugin camera at /home/runner/.pub-cache/hosted/pub.dev/camera-0.10.6/
+[        ] Found plugin camera_web at /home/runner/.pub-cache/hosted/pub.dev/camera_web-0.3.5+3/
+[   +1 ms] Found plugin camera_avfoundation at /home/runner/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.23+2/
+[        ] Found plugin camera_android at /home/runner/.pub-cache/hosted/pub.dev/camera_android-0.10.10+17/
+[        ] Found plugin barcode_scan2 at /home/runner/.pub-cache/hosted/pub.dev/barcode_scan2-4.7.2/
+[   +2 ms] web_entrypoint: Complete
+[        ] dart2js: Starting due to {}
+[   +6 ms] executing: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/dart-sdk/bin/dart compile js --platform-binaries=/opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/flutter_web_sdk/kernel --invoker=flutter_tool -Ddart.vm.product=true -DFLUTTER_VERSION=3.35.4 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=d693b4b9db -DFLUTTER_ENGINE_REVISION=c298091351 -DFLUTTER_DART_VERSION=3.9.2 -DFLUTTER_WEB_USE_SKIA=true -DFLUTTER_WEB_USE_SKWASM=false -DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/c29809135135e262a912cf583b2c90deb9ded610/ --native-null-assertions --no-source-maps -O4 --minify -o /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/app.dill --packages=/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/package_config.json --cfe-only /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/main.dart
+[   +1 ms] dart2wasm: Starting due to {}
+[   +1 ms] executing: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/dart-sdk/bin/dart compile wasm --packages=/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/package_config.json --extra-compiler-option=--platform=/opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/flutter_web_sdk/kernel/dart2wasm_platform.dill -Ddart.vm.profile=false -Ddart.vm.product=true --extra-compiler-option=--delete-tostring-package-uri=dart:ui --extra-compiler-option=--delete-tostring-package-uri=package:flutter --extra-compiler-option=--import-shared-memory --extra-compiler-option=--shared-memory-max-pages=32768 -DFLUTTER_VERSION=3.35.4 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=d693b4b9db -DFLUTTER_ENGINE_REVISION=c298091351 -DFLUTTER_DART_VERSION=3.9.2 -DFLUTTER_WEB_USE_SKIA=false -DFLUTTER_WEB_USE_SKWASM=true -DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/c29809135135e262a912cf583b2c90deb9ded610/ --extra-compiler-option=--depfile=/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/dart2wasm.d -O2 --strip-wasm --no-source-maps --minify --extra-compiler-option=--dry-run -o /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/main.dart.wasm /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/main.dart
+[+12757 ms] Found incompatibilities with WebAssembly.
+
+            package:flutter_keyboard_visibility_web/flutter_keyboard_visibility_web.dart 1:1 - dart:html unsupported (0)
+            package:mobile_scanner/mobile_scanner_web_plugin.dart 2:1 - dart:html unsupported (0)
+            package:mobile_scanner/src/web/base.dart 1:1 - dart:html unsupported (0)
+            package:mobile_scanner/src/web/jsqr.dart 5:1 - dart:html unsupported (0)
+            package:mobile_scanner/src/web/zxing.dart 2:1 - dart:html unsupported (0)
+            package:mobile_scanner/src/web/base.dart 4:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+            package:mobile_scanner/src/web/base.dart 5:1 - JS interop library 'package:js/js_util.dart' can't be imported when compiling to Wasm. (2)
+            package:mobile_scanner/src/web/jsqr.dart 8:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+            package:mobile_scanner/src/web/zxing.dart 6:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+            package:mobile_scanner/src/web/media.dart 7:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+[   +1 ms] Wasm dry run findings:
+[   +1 ms] Found incompatibilities with WebAssembly.
+
+           package:flutter_keyboard_visibility_web/flutter_keyboard_visibility_web.dart 1:1 - dart:html unsupported (0)
+           package:mobile_scanner/mobile_scanner_web_plugin.dart 2:1 - dart:html unsupported (0)
+           package:mobile_scanner/src/web/base.dart 1:1 - dart:html unsupported (0)
+           package:mobile_scanner/src/web/jsqr.dart 5:1 - dart:html unsupported (0)
+           package:mobile_scanner/src/web/zxing.dart 2:1 - dart:html unsupported (0)
+           package:mobile_scanner/src/web/base.dart 4:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+           package:mobile_scanner/src/web/base.dart 5:1 - JS interop library 'package:js/js_util.dart' can't be imported when compiling to Wasm. (2)
+           package:mobile_scanner/src/web/jsqr.dart 8:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+           package:mobile_scanner/src/web/zxing.dart 6:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+           package:mobile_scanner/src/web/media.dart 7:1 - JS interop library 'package:js/js.dart' can't be imported when compiling to Wasm. (2)
+
+[        ] Consider addressing these issues to enable wasm builds. See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm
+
+[        ] Use --no-wasm-dry-run to disable these warnings.
+[        ] dart2wasm: Complete
+[+2205 ms] ../../../.pub-cache/hosted/pub.dev/image-4.11.0/lib/src/formats/png_decoder.dart:377:39:
+           Error: The method 'decodeLazy' isn't defined for the type 'ZLibDecoder'.
+            - 'ZLibDecoder' is from 'package:archive/src/codecs/zlib_decoder.dart' ('../../../.pub-cache/hosted/pub.dev/archive-4.0.9/lib/src/codecs/zlib_decoder.dart').
+               final input = const ZLibDecoder().decodeLazy(InputMemoryStream(imageData));
+                                                 ^^^^^^^^^^
+           Error: Compilation failed.
+[   +2 ms] Persisting file store
+[   +2 ms] Done persisting file store
+[   +2 ms] Target dart2js failed: ProcessException: Process exited abnormally with exit code 1:
+           ../../../.pub-cache/hosted/pub.dev/image-4.11.0/lib/src/formats/png_decoder.dart:377:39:
+           Error: The method 'decodeLazy' isn't defined for the type 'ZLibDecoder'.
+            - 'ZLibDecoder' is from 'package:archive/src/codecs/zlib_decoder.dart' ('../../../.pub-cache/hosted/pub.dev/archive-4.0.9/lib/src/codecs/zlib_decoder.dart').
+               final input = const ZLibDecoder().decodeLazy(InputMemoryStream(imageData));
+                                                 ^^^^^^^^^^
+           Error: Compilation failed.
+             Command: /opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/dart-sdk/bin/dart compile js --platform-binaries=/opt/hostedtoolcache/flutter/stable-3.35.4-x64/flutter/bin/cache/flutter_web_sdk/kernel --invoker=flutter_tool -Ddart.vm.product=true -DFLUTTER_VERSION=3.35.4 -DFLUTTER_CHANNEL=stable -DFLUTTER_GIT_URL=https://github.com/flutter/flutter.git -DFLUTTER_FRAMEWORK_REVISION=d693b4b9db -DFLUTTER_ENGINE_REVISION=c298091351 -DFLUTTER_DART_VERSION=3.9.2 -DFLUTTER_WEB_USE_SKIA=true -DFLUTTER_WEB_USE_SKWASM=false -DFLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/c29809135135e262a912cf583b2c90deb9ded610/ --native-null-assertions --no-source-maps -O4 --minify -o /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/app.dill --packages=/home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/package_config.json --cfe-only /home/runner/work/cold_storage_wms/cold_storage_wms/.dart_tool/flutter_build/791325014d1ecf52eb582b8134b4c21a/main.dart
+           #0      RunResult.throwException (package:flutter_tools/src/base/process.dart:118:5)
+           #1      _DefaultProcessUtils.run (package:flutter_tools/src/base/process.dart:344:19)
+           <asynchronous suspension>
+           #2      Dart2JSTarget.build (package:flutter_tools/src/build_system/targets/web.dart:204:5)
+           <asynchronous suspension>
+           #3      _BuildInstance._invokeInternal (package:flutter_tools/src/build_system/build_system.dart:873:9)
+           <asynchronous suspension>
+           #4      Future.wait.<anonymous closure> (dart:async/future.dart:525:21)
+           <asynchronous suspension>
+           #5      _BuildInstance.invokeTarget (package:flutter_tools/src/build_system/build_system.dart:811:32)
+           <asynchronous suspension>
+           #6      Future.wait.<anonymous closure> (dart:async/future.dart:525:21)
+           <asynchronous suspension>
+           #7      _BuildInstance.invokeTarget (package:flutter_tools/src/build_system/build_system.dart:811:32)
+           <asynchronous suspension>
+           #8      FlutterBuildSystem.build (package:flutter_tools/src/build_system/build_system.dart:631:16)
+           <asynchronous suspension>
+           #9      WebBuilder.buildWeb (package:flutter_tools/src/web/compile.dart:90:34)
+           <asynchronous suspension>
+           #10     BuildWebCommand.runCommand (package:flutter_tools/src/commands/build_web.dart:282:5)
+           <asynchronous suspension>
+           #11     FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1581:27)
+           <asynchronous suspension>
+           #12     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #13     CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #14     FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:503:9)
+           <asynchronous suspension>
+           #15     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #16     FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:438:5)
+           <asynchronous suspension>
+           #17     run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:98:11)
+           <asynchronous suspension>
+           #18     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #19     main (package:flutter_tools/executable.dart:101:3)
+           <asynchronous suspension>
+
+[   +2 ms] Compiling lib/main.dart for the Web... (completed in 15.2s)
+[        ] "flutter web" took 15,922ms.
+[   +9 ms] Error: Failed to compile application for the Web.
+[        ] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34:3)
+           #1      WebBuilder.buildWeb (package:flutter_tools/src/web/compile.dart:132:7)
+           <asynchronous suspension>
+           #2      BuildWebCommand.runCommand (package:flutter_tools/src/commands/build_web.dart:282:5)
+           <asynchronous suspension>
+           #3      FlutterCommand.run.<anonymous closure> (package:flutter_tools/src/runner/flutter_command.dart:1581:27)
+           <asynchronous suspension>
+           #4      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #5      CommandRunner.runCommand (package:args/command_runner.dart:212:13)
+           <asynchronous suspension>
+           #6      FlutterCommandRunner.runCommand.<anonymous closure> (package:flutter_tools/src/runner/flutter_command_runner.dart:503:9)
+           <asynchronous suspension>
+           #7      AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #8      FlutterCommandRunner.runCommand (package:flutter_tools/src/runner/flutter_command_runner.dart:438:5)
+           <asynchronous suspension>
+           #9      run.<anonymous closure>.<anonymous closure> (package:flutter_tools/runner.dart:98:11)
+           <asynchronous suspension>
+           #10     AppContext.run.<anonymous closure> (package:flutter_tools/src/base/context.dart:154:19)
+           <asynchronous suspension>
+           #11     main (package:flutter_tools/executable.dart:101:3)
+           <asynchronous suspension>
+
+
+[        ] Running 1 shutdown hook
+[        ] Shutdown hooks complete
+[        ] exiting with code 1

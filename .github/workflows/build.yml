@@ -21,16 +21,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.35.4'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ flutter-version }}-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
-            flutter-deps-${{ flutter-version }}-
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
@@ -65,16 +64,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.35.4'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ flutter-version }}-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
-            flutter-deps-${{ flutter-version }}-
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
@@ -106,25 +104,19 @@ jobs:
     needs: [analyze, test]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
       - name: Install dependencies for sqflite_common_ffi
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.35.4'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ flutter-version }}-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
-            flutter-deps-${{ flutter-version }}-
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
@@ -140,7 +132,7 @@ jobs:
       - name: Generate local.properties
         run: |
           echo "=== Generating android/local.properties ==="
-          echo "flutter.sdk=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
+          echo "flutterRoot=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
           echo "sdk.dir=${ANDROID_HOME:-/usr/lib/android-sdk}" >> android/local.properties
           echo "=== local.properties contents ==="
           cat android/local.properties
@@ -157,7 +149,6 @@ jobs:
           fi
       - name: Build APK (release)
         run: |
-          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -168,7 +159,6 @@ jobs:
           echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
       - name: Build App Bundle (release)
         run: |
-          set -o pipefail
           echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build appbundle --release ==="
           flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
@@ -254,16 +244,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.35.4'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ flutter-version }}-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
-            flutter-deps-${{ flutter-version }}-
             flutter-deps-
       - name: Verify pubspec.lock exists
         run: ls -la pubspec.lock
@@ -290,7 +279,6 @@ jobs:
           fi
       - name: Build Web (release)
         run: |
-          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -365,16 +353,15 @@ jobs:
           sudo apt-get install -y libsqlite3-dev clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.35.4'
           channel: 'stable'
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-          key: flutter-deps-${{ flutter-version }}-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+          key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
-            flutter-deps-${{ flutter-version }}-
             flutter-deps-
       - name: Get dependencies (Linux/macOS)
         if: runner.os != 'Windows'
@@ -444,7 +431,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 30
         run: |
-          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -455,7 +441,6 @@ jobs:
         if: matrix.os == 'macos-latest'
         timeout-minutes: 30
         run: |
-          set -o pipefail
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Working directory: $(pwd) ==="
@@ -551,8 +536,7 @@ jobs:
           Write-Host "=== All files anywhere in build/ ==="
           if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
         shell: powershell
-      - name: Verify Desktop artifacts before upload (Linux/macOS)
-        if: runner.os != 'Windows'
+      - name: Verify Desktop artifacts before upload
         run: |
           echo "=== Verifying Desktop artifacts exist before upload ==="
           if [ "${{ runner.os }}" == "Linux" ]; then
@@ -569,24 +553,14 @@ jobs:
             fi
             echo "macOS desktop build found:"
             ls -la build/macos/
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            if [ ! -d "build/windows" ] || [ -z "$(ls -A build/windows 2>/dev/null)" ]; then
+              echo "ERROR: No Windows desktop build found!"
+              exit 1
+            fi
+            echo "Windows desktop build found:"
+            ls -la build/windows/
           fi
-        shell: bash
-      - name: Verify Desktop artifacts before upload (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          Write-Host "=== Verifying Desktop artifacts exist before upload ==="
-          if (-not (Test-Path "build/windows")) {
-            Write-Host "ERROR: No Windows desktop build found!"
-            exit 1
-          }
-          $files = Get-ChildItem build/windows/ -Recurse -File -ErrorAction SilentlyContinue
-          if (-not $files) {
-            Write-Host "ERROR: No Windows desktop build files found!"
-            exit 1
-          }
-          Write-Host "Windows desktop build found:"
-          Get-ChildItem build/windows/ -Recurse -File | Select-Object -First 20 | Format-Table -AutoSize
-        shell: powershell
       - name: Upload Desktop artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -647,7 +621,7 @@ jobs:
             adb install app-release-arm64-v8a.apk
             ```
           files: |
-            artifacts/apks/**/*.apk
-            artifacts/apks/**/*.aab
+            artifacts/apks/*.apk
+            artifacts/apks/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

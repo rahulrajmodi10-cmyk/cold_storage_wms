@@ -1,15 +1,10 @@
 // lib/main.dart
 
-import 'dart:io';
-import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
-import 'screens/login_screen.dart';
+import 'package:get_it/get_it.dart';
 import 'screens/inventory_dashboard.dart';
 import 'screens/item_form.dart';
 import 'screens/finance_dashboard.dart';
@@ -24,2234 +19,138 @@ import 'services/receiving_service.dart';
 import 'services/picking_service.dart';
 import 'services/dispatch_service.dart';
 import 'services/sla_service.dart';
-import 'services/finance_service.dart';
-import 'services/logistics_service.dart';
+import 'services/chart_of_accounts_service.dart';
+import 'services/party_service.dart';
+import 'services/tax_rate_service.dart';
+import 'services/invoice_service.dart';
+import 'services/payment_service.dart';
+import 'services/accounts_receivable_payable_service.dart';
+import 'services/journal_entry_service.dart';
+import 'services/gst_return_service.dart';
+import 'services/purchase_order_service.dart';
+import 'services/sales_order_service.dart';
+import 'services/financial_report_service.dart';
+import 'services/carrier_vehicle_service.dart';
+import 'services/route_service.dart';
+import 'services/shipment_service.dart';
+import 'services/freight_service.dart';
+import 'services/logistics_analytics_service.dart';
+import 'services/gatepass_service.dart';
+import 'services/gatepass_item_service.dart';
+import 'services/security_gate_service.dart';
+import 'services/gatepass_vehicle_log_service.dart';
+import 'services/gatepass_approval_service.dart';
+import 'services/dispatch_schedule_service.dart';
+import 'services/loading_bay_service.dart';
+import 'services/gatepass_type_service.dart';
+import 'services/barcode_definition_service.dart';
+import 'services/barcode_service.dart';
+import 'services/barcode_scan_service.dart';
+import 'services/batch_scan_session_service.dart';
+import 'services/batch_scan_item_service.dart';
+import 'services/label_print_service.dart';
+import 'services/printer_config_service.dart';
+import 'services/gatepass_analytics_service.dart';
 import 'services/camera_ai_service.dart';
-import 'services/gatepass_barcode_service.dart';
-import 'package:crypto/crypto.dart';
-import 'package:collection/collection.dart';
+import 'db/migrations/migration_registry.dart';
+
+final getIt = GetIt.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Only initialize sqflite_ffi on desktop platforms (Windows, Linux, macOS)
-  // On Android/iOS, use the native sqflite implementation
-  // Use const check to avoid R8/minification issues
-  final bool isDesktop = !Platform.isAndroid && !Platform.isIOS;
-  if (isDesktop) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  } else {
-    // Explicitly ensure native sqflite factory is used on mobile
-    // This prevents accidental FFI usage on Android/iOS
-    // sqflite native factory is the default on mobile platforms
-  }
+  sqfliteFfiInit();
+  databaseFactory = databaseFactoryFfi;
 
   final db = await _initDatabase();
-  runApp(ColdStorageWMS(db: db));
+  _setupServiceLocator(db);
+  runApp(const ColdStorageWMS());
 }
 
 Future<Database> _initDatabase() async {
   final path = join(await getDatabasesPath(), 'wms.db');
   return await openDatabase(
     path,
-    version: 6,
+    version: MigrationRegistry.currentVersion,
     onCreate: (db, version) async {
-      // Run all migrations in order
-      await _runMigration001(db);
-      await _runMigration002(db);
-      await _runMigration003(db);
-      await _runMigration004(db);
-      await _runMigration005(db);
-      // Seed demo data
-      await _seedDemoData(db);
+      await MigrationRegistry.runMigrationsUpTo(db, version);
     },
     onUpgrade: (db, oldVersion, newVersion) async {
-      if (oldVersion < 2) {
-        await _runMigration002(db);
-      }
-      if (oldVersion < 3) {
-        await _runMigration003(db);
-      }
-      if (oldVersion < 4) {
-        await _runMigration004(db);
-      }
-      if (oldVersion < 5) {
-        await _runMigration005(db);
-      }
-      if (oldVersion < 6) {
-        // Migration 006: Seed demo data if tables are empty (self-healing for existing installs)
-        final userCount = sqflite.Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users'));
-        if (userCount == 0) {
-          await _seedDemoData(db);
-        }
-      }
+      await MigrationRegistry.runMigrationsFromTo(db, oldVersion, newVersion);
     },
   );
 }
 
-// Generate PBKDF2-HMAC-SHA256 hash for a password
-// Returns a hash string in format: iterations:salt_base64:hash_base64
-String _generatePasswordHash(String password, {int iterations = 10000}) {
-  final rng = Random.secure();
-  final salt = List.generate(16, (_) => rng.nextInt(256));
-  final saltBytes = Uint8List.fromList(salt);
+void _setupServiceLocator(Database db) {
+  // Register database
+  getIt.registerSingleton<Database>(db);
 
-  final key = pbkdf2(
-    Hmac(sha256, utf8.encode(password)),
-    saltBytes,
-    iterations: iterations,
-    keyLength: 32,
-  );
+  // Register services as singletons
+  getIt.registerSingleton<InventoryService>(InventoryService(db));
+  getIt.registerSingleton<LocationService>(LocationService(db));
+  getIt.registerSingleton<TemperatureService>(TemperatureService(db));
+  getIt.registerSingleton<ReceivingService>(ReceivingService(db));
+  getIt.registerSingleton<PickingService>(PickingService(db));
+  getIt.registerSingleton<DispatchService>(DispatchService(db));
+  getIt.registerSingleton<SLAService>(SLAService(db, interval: const Duration(minutes: 1)));
 
-  return '$iterations:${base64.encode(saltBytes)}:${base64.encode(key)}';
-}
+  // Finance services (decomposed from FinanceService)
+  getIt.registerSingleton<ChartOfAccountsService>(ChartOfAccountsService(db));
+  getIt.registerSingleton<PartyService>(PartyService(db));
+  getIt.registerSingleton<TaxRateService>(TaxRateService(db));
+  getIt.registerSingleton<InvoiceService>(InvoiceService(db));
+  getIt.registerSingleton<InvoiceItemService>(InvoiceItemService(db));
+  getIt.registerSingleton<PaymentService>(PaymentService(db));
+  getIt.registerSingleton<AccountsReceivableService>(AccountsReceivableService(db));
+  getIt.registerSingleton<AccountsPayableService>(AccountsPayableService(db));
+  getIt.registerSingleton<JournalEntryService>(JournalEntryService(db));
+  getIt.registerSingleton<JournalEntryLineService>(JournalEntryLineService(db));
+  getIt.registerSingleton<GSTReturnService>(GSTReturnService(db));
+  getIt.registerSingleton<PurchaseOrderService>(PurchaseOrderService(db));
+  getIt.registerSingleton<PurchaseOrderItemService>(PurchaseOrderItemService(db));
+  getIt.registerSingleton<SalesOrderService>(SalesOrderService(db));
+  getIt.registerSingleton<SalesOrderItemService>(SalesOrderItemService(db));
+  getIt.registerSingleton<FinancialReportService>(FinancialReportService(db));
 
-Future<void> _seedDemoData(DatabaseExecutor db) async {
-  final now = DateTime.now().millisecondsSinceEpoch;
-  final yesterday = now - 86400000;
-  final lastWeek = now - 604800000;
-  final nextWeek = now + 604800000;
+  // Logistics services (decomposed from LogisticsService)
+  getIt.registerSingleton<CarrierService>(CarrierService(db));
+  getIt.registerSingleton<VehicleService>(VehicleService(db));
+  getIt.registerSingleton<RouteService>(RouteService(db));
+  getIt.registerSingleton<RouteStopService>(RouteStopService(db));
+  getIt.registerSingleton<ShipmentService>(ShipmentService(db));
+  getIt.registerSingleton<ShipmentItemService>(ShipmentItemService(db));
+  getIt.registerSingleton<ShipmentTrackingService>(ShipmentTrackingService(db));
+  getIt.registerSingleton<FreightRateService>(FreightRateService(db));
+  getIt.registerSingleton<FreightBillService>(FreightBillService(db));
+  getIt.registerSingleton<LoadPlanService>(LoadPlanService(db));
+  getIt.registerSingleton<LoadPlanItemService>(LoadPlanItemService(db));
+  getIt.registerSingleton<VehicleMaintenanceService>(VehicleMaintenanceService(db));
+  getIt.registerSingleton<LogisticsAnalyticsService>(LogisticsAnalyticsService(db));
 
-  // Helper to generate consistent PBKDF2 hash using fixed salt
-  String generateHash(String password, String saltStr) {
-    final salt = base64.decode(saltStr);
-    final key = pbkdf2(
-      Hmac(sha256, utf8.encode(password)),
-      salt,
-      iterations: 10000,
-      keyLength: 32,
-    );
-    return '10000:$saltStr:${base64.encode(key)}';
-  }
+  // Gatepass services (decomposed from GatepassBarcodeService)
+  getIt.registerSingleton<GatepassTypeService>(GatepassTypeService(db));
+  getIt.registerSingleton<GatepassService>(GatepassService(db));
+  getIt.registerSingleton<GatepassItemService>(GatepassItemService(db));
+  getIt.registerSingleton<SecurityGateService>(SecurityGateService(db));
+  getIt.registerSingleton<GatepassVehicleLogService>(GatepassVehicleLogService(db));
+  getIt.registerSingleton<GatepassApprovalService>(GatepassApprovalService(db));
+  getIt.registerSingleton<DispatchScheduleService>(DispatchScheduleService(db));
+  getIt.registerSingleton<LoadingBayService>(LoadingBayService(db));
 
-  // Seed users with properly hashed passwords
-  // Fixed salts for reproducible demo hashes
-  await db.insert('users', {
-      'username': 'admin',
-      'password_hash': generateHash('admin123', base64.encode(Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]))),
-      'role': 'ADMIN',
-    });
-    await db.insert('users', {
-      'username': 'operator',
-      'password_hash': generateHash('operator123', base64.encode(Uint8List.fromList([16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))),
-      'role': 'OPERATOR',
-    });
-    await db.insert('users', {
-      'username': 'manager',
-      'password_hash': generateHash('manager123', base64.encode(Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]))),
-      'role': 'MANAGER',
-    });
+  // Barcode services (decomposed from GatepassBarcodeService)
+  getIt.registerSingleton<BarcodeDefinitionService>(BarcodeDefinitionService(db));
+  getIt.registerSingleton<BarcodeService>(BarcodeService(db));
+  getIt.registerSingleton<BarcodeScanService>(BarcodeScanService(db));
+  getIt.registerSingleton<BatchScanSessionService>(BatchScanSessionService(db));
+  getIt.registerSingleton<BatchScanItemService>(BatchScanItemService(db));
+  getIt.registerSingleton<LabelPrintJobService>(LabelPrintJobService(db));
+  getIt.registerSingleton<PrinterConfigService>(PrinterConfigService(db));
+  getIt.registerSingleton<GatepassAnalyticsService>(GatepassAnalyticsService(db));
 
-    // Seed storage locations
-    await db.insert('storage_location', {
-      'rack_id': 'R01',
-      'shelf_id': 'S01',
-      'bin_id': 'B01',
-      'zone': 'CHILLED',
-      'capacity': 1000,
-      'current_utilization': 250,
-    });
-    await db.insert('storage_location', {
-      'rack_id': 'R01',
-      'shelf_id': 'S02',
-      'bin_id': 'B01',
-      'zone': 'FROZEN',
-      'capacity': 800,
-      'current_utilization': 150,
-    });
-    await db.insert('storage_location', {
-      'rack_id': 'R02',
-      'shelf_id': 'S01',
-      'bin_id': 'B01',
-      'zone': 'AMBIENT',
-      'capacity': 1200,
-      'current_utilization': 300,
-    });
-    await db.insert('storage_location', {
-      'rack_id': 'R02',
-      'shelf_id': 'S02',
-      'bin_id': 'B01',
-      'zone': 'CHILLED',
-      'capacity': 1000,
-      'current_utilization': 400,
-    });
-    await db.insert('storage_location', {
-      'rack_id': 'R03',
-      'shelf_id': 'S01',
-      'bin_id': 'B01',
-      'zone': 'FROZEN',
-      'capacity': 600,
-      'current_utilization': 100,
-    });
-
-    // Seed inventory items
-    await db.insert('inventory_item', {
-      'sku': 'PROD-001',
-      'name': 'Fresh Apples',
-      'category': 'Produce',
-      'quantity': 100,
-      'unit': 'kg',
-      'location_id': 1,
-      'expiry_date': nextWeek,
-      'min_temp': 1.0,
-      'max_temp': 4.0,
-      'current_temp': 3.2,
-      'humidity': 85,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'PROD-002',
-      'name': 'Organic Carrots',
-      'category': 'Produce',
-      'quantity': 150,
-      'unit': 'kg',
-      'location_id': 1,
-      'expiry_date': nextWeek,
-      'min_temp': 1.0,
-      'max_temp': 4.0,
-      'current_temp': 2.8,
-      'humidity': 90,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'MEAT-001',
-      'name': 'Chicken Breast',
-      'category': 'Meat',
-      'quantity': 50,
-      'unit': 'kg',
-      'location_id': 2,
-      'expiry_date': nextWeek,
-      'min_temp': -2.0,
-      'max_temp': 0.0,
-      'current_temp': -1.5,
-      'humidity': 75,
-      'status': 'IN_STOCK',
-      'created_at': yesterday,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'MEAT-002',
-      'name': 'Ground Beef',
-      'category': 'Meat',
-      'quantity': 75,
-      'unit': 'kg',
-      'location_id': 2,
-      'expiry_date': nextWeek,
-      'min_temp': -2.0,
-      'max_temp': 0.0,
-      'current_temp': -1.0,
-      'humidity': 70,
-      'status': 'IN_STOCK',
-      'created_at': yesterday,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'DAIRY-001',
-      'name': 'Whole Milk',
-      'category': 'Dairy',
-      'quantity': 200,
-      'unit': 'L',
-      'location_id': 1,
-      'expiry_date': nextWeek,
-      'min_temp': 1.0,
-      'max_temp': 4.0,
-      'current_temp': 3.5,
-      'humidity': 80,
-      'status': 'IN_STOCK',
-      'created_at': yesterday,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'DAIRY-002',
-      'name': 'Greek Yogurt',
-      'category': 'Dairy',
-      'quantity': 120,
-      'unit': 'pcs',
-      'location_id': 1,
-      'expiry_date': nextWeek,
-      'min_temp': 1.0,
-      'max_temp': 4.0,
-      'current_temp': 3.0,
-      'humidity': 80,
-      'status': 'IN_STOCK',
-      'created_at': yesterday,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'FROZ-001',
-      'name': 'Frozen Peas',
-      'category': 'Frozen',
-      'quantity': 300,
-      'unit': 'kg',
-      'location_id': 5,
-      'expiry_date': nextWeek,
-      'min_temp': -20.0,
-      'max_temp': -15.0,
-      'current_temp': -18.0,
-      'humidity': 60,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'FROZ-002',
-      'name': 'Ice Cream',
-      'category': 'Frozen',
-      'quantity': 80,
-      'unit': 'pcs',
-      'location_id': 5,
-      'expiry_date': nextWeek,
-      'min_temp': -25.0,
-      'max_temp': -18.0,
-      'current_temp': -20.0,
-      'humidity': 55,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'AMB-001',
-      'name': 'Canned Tomatoes',
-      'category': 'Other',
-      'quantity': 500,
-      'unit': 'cans',
-      'location_id': 3,
-      'expiry_date': nextWeek + 2592000000,
-      'min_temp': 15.0,
-      'max_temp': 25.0,
-      'current_temp': 22.0,
-      'humidity': 50,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-    await db.insert('inventory_item', {
-      'sku': 'AMB-002',
-      'name': 'Olive Oil',
-      'category': 'Other',
-      'quantity': 100,
-      'unit': 'L',
-      'location_id': 3,
-      'expiry_date': nextWeek + 2592000000,
-      'min_temp': 15.0,
-      'max_temp': 25.0,
-      'current_temp': 20.0,
-      'humidity': 45,
-      'status': 'IN_STOCK',
-      'created_at': lastWeek,
-      'updated_at': now,
-    });
-
-    // Seed temperature logs
-    for (int i = 0; i < 10; i++) {
-      await db.insert('temperature_log', {
-        'item_id': 1,
-        'location_id': 1,
-        'temperature': 3.0 + (i % 3) * 0.2,
-        'humidity': 85 + (i % 5),
-        'timestamp': now - (i * 3600000),
-        'sensor_id': 'sensor_001',
-      });
-    }
-    for (int i = 0; i < 10; i++) {
-      await db.insert('temperature_log', {
-        'item_id': 3,
-        'location_id': 2,
-        'temperature': -1.5 + (i % 3) * 0.1,
-        'humidity': 75 + (i % 5),
-        'timestamp': now - (i * 3600000),
-        'sensor_id': 'sensor_002',
-      });
-    }
-
-    // Seed gatepass types
-    await db.insert('gatepass_types', {
-      'code': 'INBOUND',
-      'name': 'Inbound Delivery',
-      'description': 'Goods received from suppliers',
-      'workflow_type': 'RECEIVING',
-      'requires_vehicle': 1,
-      'requires_driver': 1,
-      'requires_security_check': 1,
-      'validity_hours': 24,
-      'color_code': '#4CAF50',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('gatepass_types', {
-      'code': 'OUTBOUND',
-      'name': 'Outbound Dispatch',
-      'description': 'Goods shipped to customers',
-      'workflow_type': 'DISPATCH',
-      'requires_vehicle': 1,
-      'requires_driver': 1,
-      'requires_security_check': 1,
-      'validity_hours': 48,
-      'color_code': '#2196F3',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('gatepass_types', {
-      'code': 'TRANSFER',
-      'name': 'Inter-location Transfer',
-      'description': 'Transfer between storage locations',
-      'workflow_type': 'TRANSFER',
-      'requires_vehicle': 0,
-      'requires_driver': 0,
-      'requires_security_check': 1,
-      'validity_hours': 12,
-      'color_code': '#FF9800',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed parties (vendors/customers)
-    await db.insert('parties', {
-      'name': 'Fresh Farms Co.',
-      'type': 'VENDOR',
-      'gstin': '27ABCDE1234F1Z5',
-      'address': '123 Farm Road',
-      'city': 'Mumbai',
-      'state': 'Maharashtra',
-      'pincode': '400001',
-      'phone': '9876543210',
-      'email': 'orders@freshfarms.com',
-      'contact_person': 'Rajesh Kumar',
-      'credit_limit': 500000,
-      'payment_terms': 30,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('parties', {
-      'name': 'City Supermarket Chain',
-      'type': 'CUSTOMER',
-      'gstin': '27FGHIJ5678K2Z6',
-      'address': '456 Market Street',
-      'city': 'Delhi',
-      'state': 'Delhi',
-      'pincode': '110001',
-      'phone': '9876543211',
-      'email': 'procurement@citysuper.com',
-      'contact_person': 'Priya Sharma',
-      'credit_limit': 1000000,
-      'payment_terms': 45,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('parties', {
-      'name': 'Cold Chain Logistics Ltd',
-      'type': 'CARRIER',
-      'gstin': '27KLMNO9012P3Z7',
-      'address': '789 Transport Hub',
-      'city': 'Bangalore',
-      'state': 'Karnataka',
-      'pincode': '560001',
-      'phone': '9876543212',
-      'email': 'ops@coldchainlogistics.com',
-      'contact_person': 'Amit Singh',
-      'credit_limit': 0,
-      'payment_terms': 15,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed chart of accounts
-    await db.insert('chart_of_accounts', {
-      'code': '1000',
-      'name': 'Cash',
-      'type': 'ASSET',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '1100',
-      'name': 'Accounts Receivable',
-      'type': 'ASSET',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '1200',
-      'name': 'Inventory',
-      'type': 'ASSET',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '2000',
-      'name': 'Accounts Payable',
-      'type': 'LIABILITY',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '4000',
-      'name': 'Sales Revenue',
-      'type': 'REVENUE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '5000',
-      'name': 'Cost of Goods Sold',
-      'type': 'EXPENSE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '5100',
-      'name': 'Storage Expenses',
-      'type': 'EXPENSE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('chart_of_accounts', {
-      'code': '5200',
-      'name': 'Transportation Expenses',
-      'type': 'EXPENSE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed tax rates
-    await db.insert('tax_rates', {
-      'name': 'GST 5%',
-      'type': 'GST',
-      'rate': 5.0,
-      'effective_from': now,
-      'is_active': 1,
-    });
-    await db.insert('tax_rates', {
-      'name': 'GST 12%',
-      'type': 'GST',
-      'rate': 12.0,
-      'effective_from': now,
-      'is_active': 1,
-    });
-    await db.insert('tax_rates', {
-      'name': 'GST 18%',
-      'type': 'GST',
-      'rate': 18.0,
-      'effective_from': now,
-      'is_active': 1,
-    });
-
-    // Seed carriers
-    await db.insert('carriers', {
-      'name': 'Cold Chain Logistics Ltd',
-      'code': 'CCL',
-      'contact_person': 'Amit Singh',
-      'phone': '9876543212',
-      'email': 'ops@coldchainlogistics.com',
-      'address': '789 Transport Hub, Bangalore',
-      'gstin': '27KLMNO9012P3Z7',
-      'license_number': 'DL-01-AB-1234',
-      'rating': 4.5,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('carriers', {
-      'name': 'Arctic Transport',
-      'code': 'ART',
-      'contact_person': 'Vikram Patel',
-      'phone': '9876543213',
-      'email': 'dispatch@arctictransport.com',
-      'address': '321 Frozen Lane, Hyderabad',
-      'gstin': '36PQRST3456U4Z8',
-      'license_number': 'TS-09-CD-5678',
-      'rating': 4.2,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed vehicles
-    await db.insert('vehicles', {
-      'carrier_id': 1,
-      'registration_number': 'MH-01-AB-1234',
-      'vehicle_type': 'REFRIGERATED_TRUCK',
-      'capacity_weight': 5000,
-      'capacity_volume': 30,
-      'capacity_pallets': 12,
-      'temperature_controlled': 1,
-      'min_temp': -25.0,
-      'max_temp': 10.0,
-      'gps_device_id': 'GPS-001',
-      'insurance_expiry': nextWeek + 2592000000,
-      'fitness_expiry': nextWeek + 2592000000,
-      'permit_expiry': nextWeek + 2592000000,
-      'driver_name': 'Suresh Kumar',
-      'driver_phone': '9876543220',
-      'driver_license': 'MH-1234567890',
-      'status': 'AVAILABLE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('vehicles', {
-      'carrier_id': 1,
-      'registration_number': 'MH-01-AB-5678',
-      'vehicle_type': 'REFRIGERATED_VAN',
-      'capacity_weight': 1500,
-      'capacity_volume': 10,
-      'capacity_pallets': 4,
-      'temperature_controlled': 1,
-      'min_temp': -20.0,
-      'max_temp': 5.0,
-      'gps_device_id': 'GPS-002',
-      'insurance_expiry': nextWeek + 2592000000,
-      'fitness_expiry': nextWeek + 2592000000,
-      'permit_expiry': nextWeek + 2592000000,
-      'driver_name': 'Ramesh Yadav',
-      'driver_phone': '9876543221',
-      'driver_license': 'MH-0987654321',
-      'status': 'AVAILABLE',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed routes
-    await db.insert('routes', {
-      'code': 'MUM-DEL',
-      'name': 'Mumbai to Delhi',
-      'origin': 'Mumbai',
-      'destination': 'Delhi',
-      'distance_km': 1400,
-      'estimated_duration_minutes': 1440,
-      'toll_charges': 5000,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('routes', {
-      'code': 'BLR-CHE',
-      'name': 'Bangalore to Chennai',
-      'origin': 'Bangalore',
-      'destination': 'Chennai',
-      'distance_km': 350,
-      'estimated_duration_minutes': 420,
-      'toll_charges': 1200,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed barcode definitions
-    await db.insert('barcode_definitions', {
-      'code': 'ITEM_STD',
-      'name': 'Standard Item Barcode',
-      'symbology': 'CODE128',
-      'prefix': 'ITM',
-      'format_template': 'ITM-{id:06d}',
-      'width_mm': 50,
-      'height_mm': 25,
-      'module_width': 0.33,
-      'include_text': 1,
-      'font_size': 10,
-      'error_correction': 'M',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('barcode_definitions', {
-      'code': 'GP_QR',
-      'name': 'Gatepass QR Code',
-      'symbology': 'QR_CODE',
-      'prefix': 'GP',
-      'format_template': 'GP-{id:08d}',
-      'width_mm': 40,
-      'height_mm': 40,
-      'module_width': 0.5,
-      'include_text': 1,
-      'font_size': 8,
-      'error_correction': 'M',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('barcode_definitions', {
-      'code': 'LOC_BC',
-      'name': 'Location Barcode',
-      'symbology': 'CODE128',
-      'prefix': 'LOC',
-      'format_template': 'LOC-{zone}-{rack}-{shelf}',
-      'width_mm': 60,
-      'height_mm': 20,
-      'module_width': 0.33,
-      'include_text': 1,
-      'font_size': 8,
-      'error_correction': 'M',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed barcode for items
-    await db.insert('barcodes', {
-      'barcode_value': 'ITM-000001',
-      'barcode_type_id': 1,
-      'entity_type': 'ITEM',
-      'entity_id': 1,
-      'label_data': '{"name":"Fresh Apples","sku":"PROD-001"}',
-      'status': 'ACTIVE',
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('barcodes', {
-      'barcode_value': 'ITM-000002',
-      'barcode_type_id': 1,
-      'entity_type': 'ITEM',
-      'entity_id': 2,
-      'label_data': '{"name":"Organic Carrots","sku":"PROD-002"}',
-      'status': 'ACTIVE',
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('barcodes', {
-      'barcode_value': 'ITM-000003',
-      'barcode_type_id': 1,
-      'entity_type': 'ITEM',
-      'entity_id': 3,
-      'label_data': '{"name":"Chicken Breast","sku":"MEAT-001"}',
-      'status': 'ACTIVE',
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed printer config
-    await db.insert('printer_configs', {
-      'name': 'Default Label Printer',
-      'printer_type': 'ZEBRA',
-      'connection_type': 'USB',
-      'usb_vid_pid': '0a5f:0064',
-      'paper_width_mm': 102,
-      'paper_height_mm': 152,
-      'print_speed': 4,
-      'print_density': 12,
-      'is_default': 1,
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed security gates
-    await db.insert('security_gates', {
-      'code': 'GATE-01',
-      'name': 'Main Entry Gate',
-      'gate_type': 'ENTRY',
-      'location_description': 'Main warehouse entrance',
-      'latitude': 19.0760,
-      'longitude': 72.8777,
-      'barrier_type': 'BOOM_BARRIER',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('security_gates', {
-      'code': 'GATE-02',
-      'name': 'Exit Gate',
-      'gate_type': 'EXIT',
-      'location_description': 'Warehouse exit',
-      'latitude': 19.0760,
-      'longitude': 72.8777,
-      'barrier_type': 'BOOM_BARRIER',
-      'is_active': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed camera devices
-    await db.insert('camera_devices', {
-      'name': 'Receiving Dock Camera',
-      'code': 'CAM-001',
-      'device_type': 'IP_CAMERA',
-      'location_id': 1,
-      'ip_address': '192.168.1.100',
-      'port': 554,
-      'username': 'admin',
-      'password_hash': 'camera123',
-      'rtsp_url': 'rtsp://192.168.1.100:554/stream1',
-      'resolution_width': 1920,
-      'resolution_height': 1080,
-      'fps': 30,
-      'model_path': 'assets/models/pallet_counter.tflite',
-      'model_version': '1.0',
-      'confidence_threshold': 0.5,
-      'iou_threshold': 0.45,
-      'detection_classes': 'pallet,box,crate',
-      'count_direction': 'IN',
-      'roi_coordinates': '[100,100,1820,980]',
-      'calibration_factor': 1.0,
-      'is_active': 1,
-      'last_heartbeat': now,
-      'created_at': now,
-      'updated_at': now,
-    });
-    await db.insert('camera_devices', {
-      'name': 'Dispatch Dock Camera',
-      'code': 'CAM-002',
-      'device_type': 'IP_CAMERA',
-      'location_id': 3,
-      'ip_address': '192.168.1.101',
-      'port': 554,
-      'username': 'admin',
-      'password_hash': 'camera123',
-      'rtsp_url': 'rtsp://192.168.1.101:554/stream1',
-      'resolution_width': 1920,
-      'resolution_height': 1080,
-      'fps': 30,
-      'model_path': 'assets/models/pallet_counter.tflite',
-      'model_version': '1.0',
-      'confidence_threshold': 0.5,
-      'iou_threshold': 0.45,
-      'detection_classes': 'pallet,box,crate',
-      'count_direction': 'OUT',
-      'roi_coordinates': '[100,100,1820,980]',
-      'calibration_factor': 1.0,
-      'is_active': 1,
-      'last_heartbeat': now,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed ML models
-    await db.insert('ml_models', {
-      'name': 'Pallet Counter v1',
-      'version': '1.0',
-      'model_type': 'OBJECT_DETECTION',
-      'framework': 'TFLITE',
-      'input_width': 320,
-      'input_height': 320,
-      'input_channels': 3,
-      'classes': 'pallet,box,crate',
-      'model_file_path': 'assets/models/pallet_counter.tflite',
-      'label_file_path': 'assets/labels/pallet_labels.txt',
-      'metrics_json': '{"mAP":0.85,"precision":0.88,"recall":0.82}',
-      'training_data_info': '10000 images from warehouse cameras',
-      'is_active': 1,
-      'deployed_at': now,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed gatepass (sample inbound)
-    await db.insert('gatepass', {
-      'gatepass_number': 'GP-IN-000001',
-      'gatepass_type_id': 1,
-      'party_id': 1,
-      'status': 'COMPLETED',
-      'vehicle_id': 1,
-      'vehicle_number': 'MH-01-AB-1234',
-      'driver_name': 'Suresh Kumar',
-      'driver_phone': '9876543220',
-      'requested_date': yesterday,
-      'approved_date': yesterday,
-      'valid_from': yesterday,
-      'valid_to': now + 86400000,
-      'actual_entry_time': yesterday + 3600000,
-      'actual_exit_time': yesterday + 7200000,
-      'entry_gate_id': 1,
-      'exit_gate_id': 2,
-      'security_check_status': 'PASSED',
-      'seal_number': 'SL-001',
-      'seal_intact': 1,
-      'total_items': 2,
-      'total_quantity': 250,
-      'total_packages': 50,
-      'created_by': 1,
-      'created_at': yesterday,
-      'updated_at': now,
-    });
-    await db.insert('gatepass', {
-      'gatepass_number': 'GP-OUT-000001',
-      'gatepass_type_id': 2,
-      'party_id': 2,
-      'status': 'APPROVED',
-      'vehicle_id': 1,
-      'vehicle_number': 'MH-01-AB-1234',
-      'driver_name': 'Suresh Kumar',
-      'driver_phone': '9876543220',
-      'requested_date': now,
-      'approved_date': now,
-      'valid_from': now,
-      'valid_to': nextWeek,
-      'security_officer_id': 1,
-      'security_check_status': 'PENDING',
-      'total_items': 3,
-      'total_quantity': 180,
-      'total_packages': 36,
-      'created_by': 1,
-      'created_at': now,
-      'updated_at': now,
-    });
-
-    // Seed gatepass items
-    await db.insert('gatepass_items', {
-      'gatepass_id': 1,
-      'item_id': 1,
-      'description': 'Fresh Apples',
-      'quantity': 100,
-      'unit': 'kg',
-      'weight_per_unit': 1,
-      'total_weight': 100,
-      'packages': 20,
-      'package_type': 'CRATE',
-      'verified_quantity': 100,
-      'verified_weight': 100,
-      'verified_packages': 20,
-      'verification_status': 'VERIFIED',
-    });
-    await db.insert('gatepass_items', {
-      'gatepass_id': 1,
-      'item_id': 2,
-      'description': 'Organic Carrots',
-      'quantity': 150,
-      'unit': 'kg',
-      'weight_per_unit': 1,
-      'total_weight': 150,
-      'packages': 30,
-      'package_type': 'CRATE',
-      'verified_quantity': 150,
-      'verified_weight': 150,
-      'verified_packages': 30,
-      'verification_status': 'VERIFIED',
-    });
-    await db.insert('gatepass_items', {
-      'gatepass_id': 2,
-      'item_id': 1,
-      'description': 'Fresh Apples',
-      'quantity': 50,
-      'unit': 'kg',
-      'weight_per_unit': 1,
-      'total_weight': 50,
-      'packages': 10,
-      'package_type': 'CRATE',
-      'verification_status': 'PENDING',
-    });
-    await db.insert('gatepass_items', {
-      'gatepass_id': 2,
-      'item_id': 3,
-      'description': 'Chicken Breast',
-      'quantity': 30,
-      'unit': 'kg',
-      'weight_per_unit': 1,
-      'total_weight': 30,
-      'packages': 6,
-      'package_type': 'BOX',
-      'temperature_required': 1,
-      'min_temp': -2.0,
-      'max_temp': 0.0,
-      'verification_status': 'PENDING',
-    });
-    await db.insert('gatepass_items', {
-      'gatepass_id': 2,
-      'item_id': 5,
-      'description': 'Whole Milk',
-      'quantity': 100,
-      'unit': 'L',
-      'weight_per_unit': 1.03,
-      'total_weight': 103,
-      'packages': 20,
-      'package_type': 'CARTON',
-      'temperature_required': 1,
-      'min_temp': 1.0,
-      'max_temp': 4.0,
-      'verification_status': 'PENDING',
-    });
-
-    // Seed audit logs
-    await db.insert('audit_log', {
-      'user_id': 1,
-      'action': 'system_init',
-      'detail': 'Database initialized with demo data',
-      'timestamp': now,
-      'entity_type': 'system',
-      'entity_id': 0,
-    });
-    await db.insert('audit_log', {
-      'user_id': 1,
-      'action': 'create_inventory',
-      'detail': 'Created demo inventory items',
-      'timestamp': now,
-      'entity_type': 'inventory_item',
-      'entity_id': 1,
-    });
-
-    // Seed settings
-    await db.insert('settings', {'key': 'app_name', 'value': 'Cold Storage WMS'});
-    await db.insert('settings', {'key': 'default_currency', 'value': 'INR'});
-    await db.insert('settings', {'key': 'timezone', 'value': 'Asia/Kolkata'});
-    await db.insert('settings', {'key': 'date_format', 'value': 'dd/MM/yyyy'});
-    await db.insert('settings', {'key': 'temp_unit', 'value': 'C'});
-}
-
-// Migration 001: Inventory Schema
-Future<void> _runMigration001(Database db) async {
-  await db.execute('''
-    CREATE TABLE users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE,
-      password_hash TEXT,
-      role TEXT,
-      face_embedding BLOB
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE audit_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER,
-      action TEXT,
-      detail TEXT,
-      timestamp INTEGER,
-      entity_type TEXT,
-      entity_id INTEGER,
-      acknowledged INTEGER DEFAULT 0
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE face_embeddings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER,
-      embedding BLOB,
-      created_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE settings (
-      key TEXT PRIMARY KEY,
-      value TEXT
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE otps (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      phone TEXT,
-      code TEXT,
-      expires_at INTEGER,
-      verified INTEGER DEFAULT 0
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE alert (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      type TEXT,
-      severity TEXT,
-      message TEXT,
-      target_id INTEGER,
-      acknowledged INTEGER DEFAULT 0,
-      created_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE inventory_item (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      sku TEXT UNIQUE,
-      name TEXT,
-      category TEXT,
-      quantity INTEGER DEFAULT 0,
-      unit TEXT,
-      location_id INTEGER,
-      expiry_date INTEGER,
-      min_temp REAL,
-      max_temp REAL,
-      current_temp REAL,
-      humidity REAL,
-      status TEXT,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE storage_location (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      rack_id TEXT,
-      shelf_id TEXT,
-      bin_id TEXT,
-      zone TEXT,
-      capacity REAL,
-      current_utilization REAL
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE temperature_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
-      location_id INTEGER,
-      temperature REAL,
-      humidity REAL,
-      timestamp INTEGER,
-      sensor_id TEXT
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE transfer_record (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      item_id INTEGER,
-      from_location INTEGER,
-      to_location INTEGER,
-      quantity INTEGER,
-      operator_id INTEGER,
-      timestamp INTEGER,
-      reason TEXT
-    )
-  ''');
-}
-
-// Migration 002: Finance Schema
-Future<void> _runMigration002(Database db) async {
-  await db.execute('''
-    CREATE TABLE chart_of_accounts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      parent_id INTEGER,
-      is_active INTEGER DEFAULT 1,
-      gst_applicable INTEGER DEFAULT 0,
-      gst_rate REAL DEFAULT 0,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (parent_id) REFERENCES chart_of_accounts(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE parties (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      gstin TEXT,
-      pan TEXT,
-      address TEXT,
-      city TEXT,
-      state TEXT,
-      pincode TEXT,
-      phone TEXT,
-      email TEXT,
-      contact_person TEXT,
-      credit_limit REAL DEFAULT 0,
-      payment_terms INTEGER DEFAULT 30,
-      opening_balance REAL DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE tax_rates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      rate REAL NOT NULL,
-      effective_from INTEGER,
-      effective_to INTEGER,
-      is_active INTEGER DEFAULT 1
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE invoices (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      invoice_number TEXT UNIQUE NOT NULL,
-      invoice_date INTEGER NOT NULL,
-      due_date INTEGER,
-      party_id INTEGER NOT NULL,
-      type TEXT NOT NULL,
-      status TEXT DEFAULT 'DRAFT',
-      subtotal REAL DEFAULT 0,
-      tax_amount REAL DEFAULT 0,
-      discount_amount REAL DEFAULT 0,
-      total_amount REAL DEFAULT 0,
-      paid_amount REAL DEFAULT 0,
-      balance_amount REAL DEFAULT 0,
-      narration TEXT,
-      reference_type TEXT,
-      reference_id INTEGER,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (party_id) REFERENCES parties(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE invoice_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      invoice_id INTEGER NOT NULL,
-      item_id INTEGER,
-      description TEXT,
-      hsn_code TEXT,
-      quantity REAL NOT NULL,
-      unit TEXT,
-      rate REAL NOT NULL,
-      discount_percent REAL DEFAULT 0,
-      discount_amount REAL DEFAULT 0,
-      taxable_amount REAL NOT NULL,
-      gst_rate REAL DEFAULT 0,
-      cgst_amount REAL DEFAULT 0,
-      sgst_amount REAL DEFAULT 0,
-      igst_amount REAL DEFAULT 0,
-      total_amount REAL NOT NULL,
-      FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE payments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      payment_number TEXT UNIQUE NOT NULL,
-      payment_date INTEGER NOT NULL,
-      party_id INTEGER NOT NULL,
-      type TEXT NOT NULL,
-      mode TEXT NOT NULL,
-      bank_account_id INTEGER,
-      cheque_number TEXT,
-      cheque_date INTEGER,
-      amount REAL NOT NULL,
-      narration TEXT,
-      reference_type TEXT,
-      reference_id INTEGER,
-      status TEXT DEFAULT 'POSTED',
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (party_id) REFERENCES parties(id),
-      FOREIGN KEY (created_by) REFERENCES users(id),
-      FOREIGN KEY (bank_account_id) REFERENCES chart_of_accounts(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE payment_allocations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      payment_id INTEGER NOT NULL,
-      invoice_id INTEGER NOT NULL,
-      allocated_amount REAL NOT NULL,
-      created_at INTEGER,
-      FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE,
-      FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE accounts_receivable (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      invoice_id INTEGER NOT NULL,
-      party_id INTEGER NOT NULL,
-      invoice_number TEXT,
-      invoice_date INTEGER,
-      due_date INTEGER,
-      total_amount REAL,
-      paid_amount REAL DEFAULT 0,
-      outstanding_amount REAL,
-      status TEXT DEFAULT 'OPEN',
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
-      FOREIGN KEY (party_id) REFERENCES parties(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE accounts_payable (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      invoice_id INTEGER NOT NULL,
-      party_id INTEGER NOT NULL,
-      invoice_number TEXT,
-      invoice_date INTEGER,
-      due_date INTEGER,
-      total_amount REAL,
-      paid_amount REAL DEFAULT 0,
-      outstanding_amount REAL,
-      status TEXT DEFAULT 'OPEN',
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (invoice_id) REFERENCES invoices(id),
-      FOREIGN KEY (party_id) REFERENCES parties(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE journal_entries (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      entry_number TEXT UNIQUE NOT NULL,
-      entry_date INTEGER NOT NULL,
-      narration TEXT,
-      reference_type TEXT,
-      reference_id INTEGER,
-      status TEXT DEFAULT 'DRAFT',
-      posted_at INTEGER,
-      posted_by INTEGER,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE journal_entry_lines (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      entry_id INTEGER NOT NULL,
-      account_id INTEGER NOT NULL,
-      debit REAL DEFAULT 0,
-      credit REAL DEFAULT 0,
-      narration TEXT,
-      FOREIGN KEY (entry_id) REFERENCES journal_entries(id) ON DELETE CASCADE,
-      FOREIGN KEY (account_id) REFERENCES chart_of_accounts(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE financial_periods (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      start_date INTEGER NOT NULL,
-      end_date INTEGER NOT NULL,
-      is_closed INTEGER DEFAULT 0,
-      closed_at INTEGER,
-      closed_by INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE bank_accounts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      account_name TEXT NOT NULL,
-      bank_name TEXT,
-      account_number TEXT,
-      ifsc_code TEXT,
-      branch TEXT,
-      account_type TEXT,
-      opening_balance REAL DEFAULT 0,
-      current_balance REAL DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gst_returns (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      return_type TEXT NOT NULL,
-      period TEXT NOT NULL,
-      status TEXT DEFAULT 'DRAFT',
-      total_taxable_value REAL DEFAULT 0,
-      total_cgst REAL DEFAULT 0,
-      total_sgst REAL DEFAULT 0,
-      total_igst REAL DEFAULT 0,
-      total_cess REAL DEFAULT 0,
-      filed_date INTEGER,
-      acknowledgement_no TEXT,
-      json_data TEXT,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE purchase_orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      po_number TEXT UNIQUE NOT NULL,
-      po_date INTEGER NOT NULL,
-      vendor_id INTEGER NOT NULL,
-      expected_date INTEGER,
-      status TEXT DEFAULT 'DRAFT',
-      subtotal REAL DEFAULT 0,
-      tax_amount REAL DEFAULT 0,
-      total_amount REAL DEFAULT 0,
-      narration TEXT,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (vendor_id) REFERENCES parties(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE purchase_order_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      po_id INTEGER NOT NULL,
-      item_id INTEGER,
-      description TEXT,
-      quantity REAL NOT NULL,
-      unit TEXT,
-      rate REAL NOT NULL,
-      discount_percent REAL DEFAULT 0,
-      tax_rate REAL DEFAULT 0,
-      total_amount REAL NOT NULL,
-      received_quantity REAL DEFAULT 0,
-      FOREIGN KEY (po_id) REFERENCES purchase_orders(id) ON DELETE CASCADE,
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE sales_orders (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      so_number TEXT UNIQUE NOT NULL,
-      so_date INTEGER NOT NULL,
-      customer_id INTEGER NOT NULL,
-      expected_date INTEGER,
-      status TEXT DEFAULT 'DRAFT',
-      subtotal REAL DEFAULT 0,
-      tax_amount REAL DEFAULT 0,
-      total_amount REAL DEFAULT 0,
-      narration TEXT,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (customer_id) REFERENCES parties(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE sales_order_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      so_id INTEGER NOT NULL,
-      item_id INTEGER,
-      description TEXT,
-      quantity REAL NOT NULL,
-      unit TEXT,
-      rate REAL NOT NULL,
-      discount_percent REAL DEFAULT 0,
-      tax_rate REAL DEFAULT 0,
-      total_amount REAL NOT NULL,
-      delivered_quantity REAL DEFAULT 0,
-      FOREIGN KEY (so_id) REFERENCES sales_orders(id) ON DELETE CASCADE,
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id)
-    )
-  ''');
-}
-
-// Migration 003: Logistics Schema
-Future<void> _runMigration003(Database db) async {
-  await db.execute('''
-    CREATE TABLE carriers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      code TEXT UNIQUE,
-      contact_person TEXT,
-      phone TEXT,
-      email TEXT,
-      address TEXT,
-      gstin TEXT,
-      pan TEXT,
-      license_number TEXT,
-      rating REAL DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE vehicles (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      carrier_id INTEGER,
-      registration_number TEXT UNIQUE NOT NULL,
-      vehicle_type TEXT,
-      capacity_weight REAL,
-      capacity_volume REAL,
-      capacity_pallets INTEGER,
-      temperature_controlled INTEGER DEFAULT 0,
-      min_temp REAL,
-      max_temp REAL,
-      gps_device_id TEXT,
-      insurance_expiry INTEGER,
-      fitness_expiry INTEGER,
-      permit_expiry INTEGER,
-      driver_name TEXT,
-      driver_phone TEXT,
-      driver_license TEXT,
-      status TEXT DEFAULT 'AVAILABLE',
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (carrier_id) REFERENCES carriers(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE routes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      origin TEXT NOT NULL,
-      destination TEXT NOT NULL,
-      distance_km REAL,
-      estimated_duration_minutes INTEGER,
-      toll_charges REAL DEFAULT 0,
-      route_description TEXT,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE route_stops (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      route_id INTEGER NOT NULL,
-      stop_order INTEGER NOT NULL,
-      location_name TEXT NOT NULL,
-      address TEXT,
-      latitude REAL,
-      longitude REAL,
-      estimated_arrival INTEGER,
-      estimated_departure INTEGER,
-      stop_type TEXT,
-      FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE shipments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      shipment_number TEXT UNIQUE NOT NULL,
-      shipment_date INTEGER NOT NULL,
-      reference_type TEXT,
-      reference_id INTEGER,
-      carrier_id INTEGER,
-      vehicle_id INTEGER,
-      route_id INTEGER,
-      driver_name TEXT,
-      driver_phone TEXT,
-      origin_address TEXT,
-      destination_address TEXT,
-      origin_lat REAL,
-      origin_lng REAL,
-      dest_lat REAL,
-      dest_lng REAL,
-      status TEXT DEFAULT 'PLANNED',
-      total_weight REAL DEFAULT 0,
-      total_volume REAL DEFAULT 0,
-      total_packages INTEGER DEFAULT 0,
-      freight_charges REAL DEFAULT 0,
-      additional_charges REAL DEFAULT 0,
-      total_freight REAL DEFAULT 0,
-      loading_start_time INTEGER,
-      loading_end_time INTEGER,
-      departure_time INTEGER,
-      arrival_time INTEGER,
-      unloading_start_time INTEGER,
-      unloading_end_time INTEGER,
-      proof_of_delivery TEXT,
-      pod_timestamp INTEGER,
-      pod_received_by TEXT,
-      narration TEXT,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (carrier_id) REFERENCES carriers(id),
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (route_id) REFERENCES routes(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE shipment_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      shipment_id INTEGER NOT NULL,
-      item_id INTEGER,
-      description TEXT,
-      quantity REAL NOT NULL,
-      unit TEXT,
-      weight REAL,
-      volume REAL,
-      packages INTEGER DEFAULT 1,
-      temperature_required INTEGER DEFAULT 0,
-      min_temp REAL,
-      max_temp REAL,
-      loaded_quantity REAL DEFAULT 0,
-      delivered_quantity REAL DEFAULT 0,
-      FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE,
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE shipment_tracking (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      shipment_id INTEGER NOT NULL,
-      latitude REAL,
-      longitude REAL,
-      address TEXT,
-      speed REAL,
-      heading REAL,
-      status TEXT,
-      temperature REAL,
-      humidity REAL,
-      battery_level REAL,
-      signal_strength REAL,
-      timestamp INTEGER,
-      source TEXT,
-      FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE load_plans (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      shipment_id INTEGER NOT NULL,
-      vehicle_id INTEGER NOT NULL,
-      plan_date INTEGER NOT NULL,
-      total_weight REAL DEFAULT 0,
-      total_volume REAL DEFAULT 0,
-      total_packages INTEGER DEFAULT 0,
-      weight_utilization REAL DEFAULT 0,
-      volume_utilization REAL DEFAULT 0,
-      pallet_count INTEGER DEFAULT 0,
-      loading_sequence TEXT,
-      status TEXT DEFAULT 'DRAFT',
-      approved_by INTEGER,
-      approved_at INTEGER,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (shipment_id) REFERENCES shipments(id),
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (approved_by) REFERENCES users(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE load_plan_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      load_plan_id INTEGER NOT NULL,
-      shipment_item_id INTEGER NOT NULL,
-      load_order INTEGER,
-      position_x REAL,
-      position_y REAL,
-      position_z REAL,
-      stackable INTEGER DEFAULT 1,
-      fragile INTEGER DEFAULT 0,
-      temperature_zone TEXT,
-      FOREIGN KEY (load_plan_id) REFERENCES load_plans(id) ON DELETE CASCADE,
-      FOREIGN KEY (shipment_item_id) REFERENCES shipment_items(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE freight_rates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      carrier_id INTEGER,
-      route_id INTEGER,
-      vehicle_type TEXT,
-      rate_type TEXT,
-      base_rate REAL NOT NULL,
-      min_charge REAL DEFAULT 0,
-      fuel_surcharge_percent REAL DEFAULT 0,
-      toll_included INTEGER DEFAULT 0,
-      gst_rate REAL DEFAULT 0,
-      effective_from INTEGER,
-      effective_to INTEGER,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (carrier_id) REFERENCES carriers(id),
-      FOREIGN KEY (route_id) REFERENCES routes(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE freight_bills (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      bill_number TEXT UNIQUE NOT NULL,
-      bill_date INTEGER NOT NULL,
-      carrier_id INTEGER NOT NULL,
-      shipment_id INTEGER,
-      route_id INTEGER,
-      vehicle_id INTEGER,
-      distance_km REAL,
-      weight_charged REAL,
-      rate_applied REAL,
-      base_freight REAL DEFAULT 0,
-      fuel_surcharge REAL DEFAULT 0,
-      toll_charges REAL DEFAULT 0,
-      other_charges REAL DEFAULT 0,
-      cgst_amount REAL DEFAULT 0,
-      sgst_amount REAL DEFAULT 0,
-      igst_amount REAL DEFAULT 0,
-      total_amount REAL NOT NULL,
-      status TEXT DEFAULT 'DRAFT',
-      verified_by INTEGER,
-      verified_at INTEGER,
-      paid_date INTEGER,
-      narration TEXT,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (carrier_id) REFERENCES carriers(id),
-      FOREIGN KEY (shipment_id) REFERENCES shipments(id),
-      FOREIGN KEY (route_id) REFERENCES routes(id),
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (verified_by) REFERENCES users(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE vehicle_maintenance (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      vehicle_id INTEGER NOT NULL,
-      maintenance_type TEXT,
-      description TEXT,
-      cost REAL DEFAULT 0,
-      service_date INTEGER,
-      next_due_date INTEGER,
-      odometer_reading INTEGER,
-      service_provider TEXT,
-      status TEXT DEFAULT 'SCHEDULED',
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-}
-
-// Migration 004: Camera AI Schema
-Future<void> _runMigration004(Database db) async {
-  await db.execute('''
-    CREATE TABLE camera_devices (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      code TEXT UNIQUE NOT NULL,
-      device_type TEXT,
-      location_id INTEGER,
-      ip_address TEXT,
-      port INTEGER,
-      username TEXT,
-      password_hash TEXT,
-      rtsp_url TEXT,
-      resolution_width INTEGER DEFAULT 1920,
-      resolution_height INTEGER DEFAULT 1080,
-      fps INTEGER DEFAULT 30,
-      model_path TEXT,
-      model_version TEXT,
-      confidence_threshold REAL DEFAULT 0.5,
-      iou_threshold REAL DEFAULT 0.45,
-      detection_classes TEXT,
-      count_direction TEXT,
-      roi_coordinates TEXT,
-      calibration_factor REAL DEFAULT 1.0,
-      is_active INTEGER DEFAULT 1,
-      last_heartbeat INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (location_id) REFERENCES storage_location(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE counting_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_number TEXT UNIQUE NOT NULL,
-      camera_id INTEGER NOT NULL,
-      reference_type TEXT,
-      reference_id INTEGER,
-      session_type TEXT NOT NULL,
-      status TEXT DEFAULT 'IN_PROGRESS',
-      expected_count INTEGER,
-      ai_count INTEGER DEFAULT 0,
-      manual_count INTEGER,
-      verified_count INTEGER,
-      discrepancy INTEGER DEFAULT 0,
-      discrepancy_percent REAL DEFAULT 0,
-      start_time INTEGER,
-      end_time INTEGER,
-      duration_seconds INTEGER,
-      operator_id INTEGER,
-      verified_by INTEGER,
-      verified_at INTEGER,
-      notes TEXT,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (camera_id) REFERENCES camera_devices(id),
-      FOREIGN KEY (operator_id) REFERENCES users(id),
-      FOREIGN KEY (verified_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE detection_events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id INTEGER NOT NULL,
-      frame_timestamp INTEGER NOT NULL,
-      track_id INTEGER,
-      class_name TEXT,
-      confidence REAL,
-      bbox_x REAL,
-      bbox_y REAL,
-      bbox_width REAL,
-      bbox_height REAL,
-      centroid_x REAL,
-      centroid_y REAL,
-      direction TEXT,
-      counted INTEGER DEFAULT 0,
-      count_timestamp INTEGER,
-      image_path TEXT,
-      created_at INTEGER,
-      FOREIGN KEY (session_id) REFERENCES counting_sessions(id) ON DELETE CASCADE
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE count_verifications (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id INTEGER NOT NULL,
-      verification_type TEXT,
-      verifier_id INTEGER NOT NULL,
-      original_count INTEGER,
-      verified_count INTEGER,
-      variance INTEGER,
-      variance_percent REAL,
-      status TEXT DEFAULT 'PENDING',
-      verification_notes TEXT,
-      evidence_images TEXT,
-      started_at INTEGER,
-      completed_at INTEGER,
-      created_at INTEGER,
-      FOREIGN KEY (session_id) REFERENCES counting_sessions(id) ON DELETE CASCADE,
-      FOREIGN KEY (verifier_id) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE camera_calibrations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      camera_id INTEGER NOT NULL,
-      calibration_type TEXT,
-      reference_object TEXT,
-      reference_size REAL,
-      pixel_measurement REAL,
-      calibration_factor REAL,
-      accuracy_percent REAL,
-      calibrated_by INTEGER,
-      calibrated_at INTEGER,
-      is_active INTEGER DEFAULT 1,
-      notes TEXT,
-      FOREIGN KEY (camera_id) REFERENCES camera_devices(id),
-      FOREIGN KEY (calibrated_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE ml_models (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      version TEXT NOT NULL,
-      model_type TEXT,
-      framework TEXT,
-      input_width INTEGER,
-      input_height INTEGER,
-      input_channels INTEGER DEFAULT 3,
-      classes TEXT,
-      model_file_path TEXT,
-      label_file_path TEXT,
-      metrics_json TEXT,
-      training_data_info TEXT,
-      is_active INTEGER DEFAULT 1,
-      deployed_at INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE camera_alerts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      camera_id INTEGER NOT NULL,
-      alert_type TEXT,
-      severity TEXT,
-      message TEXT,
-      session_id INTEGER,
-      detection_event_id INTEGER,
-      acknowledged INTEGER DEFAULT 0,
-      acknowledged_by INTEGER,
-      acknowledged_at INTEGER,
-      resolved INTEGER DEFAULT 0,
-      resolved_by INTEGER,
-      resolved_at INTEGER,
-      created_at INTEGER,
-      FOREIGN KEY (camera_id) REFERENCES camera_devices(id),
-      FOREIGN KEY (session_id) REFERENCES counting_sessions(id),
-      FOREIGN KEY (detection_event_id) REFERENCES detection_events(id),
-      FOREIGN KEY (acknowledged_by) REFERENCES users(id),
-      FOREIGN KEY (resolved_by) REFERENCES users(id)
-    )
-  ''');
-}
-
-// Migration 005: Gatepass & Barcode Schema
-Future<void> _runMigration005(Database db) async {
-  await db.execute('''
-    CREATE TABLE gatepass_types (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      description TEXT,
-      workflow_type TEXT,
-      requires_vehicle INTEGER DEFAULT 1,
-      requires_driver INTEGER DEFAULT 1,
-      requires_security_check INTEGER DEFAULT 1,
-      validity_hours INTEGER DEFAULT 24,
-      color_code TEXT,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gatepass (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      gatepass_number TEXT UNIQUE NOT NULL,
-      gatepass_type_id INTEGER NOT NULL,
-      reference_type TEXT,
-      reference_id INTEGER,
-      party_id INTEGER,
-      status TEXT DEFAULT 'DRAFT',
-      priority TEXT DEFAULT 'NORMAL',
-      vehicle_id INTEGER,
-      vehicle_number TEXT,
-      vehicle_type TEXT,
-      driver_name TEXT,
-      driver_phone TEXT,
-      driver_license TEXT,
-      driver_photo_path TEXT,
-      requested_date INTEGER,
-      approved_date INTEGER,
-      valid_from INTEGER,
-      valid_to INTEGER,
-      actual_entry_time INTEGER,
-      actual_exit_time INTEGER,
-      entry_gate_id INTEGER,
-      exit_gate_id INTEGER,
-      origin_location TEXT,
-      destination_location TEXT,
-      security_officer_id INTEGER,
-      security_check_status TEXT,
-      security_notes TEXT,
-      seal_number TEXT,
-      seal_intact INTEGER DEFAULT 1,
-      qr_code_data TEXT,
-      qr_code_image_path TEXT,
-      qr_generated_at INTEGER,
-      total_items INTEGER DEFAULT 0,
-      total_quantity REAL DEFAULT 0,
-      total_weight REAL DEFAULT 0,
-      total_packages INTEGER DEFAULT 0,
-      verified_by INTEGER,
-      verified_at INTEGER,
-      verification_method TEXT,
-      discrepancy_notes TEXT,
-      approved_by INTEGER,
-      approved_at INTEGER,
-      rejection_reason TEXT,
-      completed_by INTEGER,
-      completed_at INTEGER,
-      completion_notes TEXT,
-      created_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (gatepass_type_id) REFERENCES gatepass_types(id),
-      FOREIGN KEY (party_id) REFERENCES parties(id),
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (security_officer_id) REFERENCES users(id),
-      FOREIGN KEY (verified_by) REFERENCES users(id),
-      FOREIGN KEY (approved_by) REFERENCES users(id),
-      FOREIGN KEY (completed_by) REFERENCES users(id),
-      FOREIGN KEY (created_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gatepass_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      gatepass_id INTEGER NOT NULL,
-      item_id INTEGER,
-      description TEXT,
-      hsn_code TEXT,
-      quantity REAL NOT NULL,
-      unit TEXT,
-      weight_per_unit REAL,
-      total_weight REAL,
-      packages INTEGER DEFAULT 1,
-      package_type TEXT,
-      temperature_required INTEGER DEFAULT 0,
-      min_temp REAL,
-      max_temp REAL,
-      batch_number TEXT,
-      expiry_date INTEGER,
-      verified_quantity REAL DEFAULT 0,
-      verified_weight REAL DEFAULT 0,
-      verified_packages INTEGER DEFAULT 0,
-      verification_status TEXT DEFAULT 'PENDING',
-      verification_notes TEXT,
-      FOREIGN KEY (gatepass_id) REFERENCES gatepass(id) ON DELETE CASCADE,
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE security_gates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      gate_type TEXT,
-      location_description TEXT,
-      latitude REAL,
-      longitude REAL,
-      camera_id INTEGER,
-      barrier_type TEXT,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (camera_id) REFERENCES camera_devices(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gatepass_vehicle_log (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      gatepass_id INTEGER NOT NULL,
-      gate_id INTEGER NOT NULL,
-      log_type TEXT NOT NULL,
-      vehicle_number TEXT,
-      driver_name TEXT,
-      driver_verified INTEGER DEFAULT 0,
-      seal_number TEXT,
-      seal_verified INTEGER DEFAULT 0,
-      seal_intact INTEGER DEFAULT 1,
-      photos TEXT,
-      officer_id INTEGER,
-      timestamp INTEGER,
-      notes TEXT,
-      FOREIGN KEY (gatepass_id) REFERENCES gatepass(id) ON DELETE CASCADE,
-      FOREIGN KEY (gate_id) REFERENCES security_gates(id),
-      FOREIGN KEY (officer_id) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE gatepass_approvals (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      gatepass_id INTEGER NOT NULL,
-      level INTEGER NOT NULL,
-      approver_role TEXT,
-      approver_id INTEGER,
-      status TEXT DEFAULT 'PENDING',
-      action_at INTEGER,
-      comments TEXT,
-      delegated_to INTEGER,
-      FOREIGN KEY (gatepass_id) REFERENCES gatepass(id) ON DELETE CASCADE,
-      FOREIGN KEY (approver_id) REFERENCES users(id),
-      FOREIGN KEY (delegated_to) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE dispatch_schedules (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      schedule_number TEXT UNIQUE NOT NULL,
-      schedule_date INTEGER NOT NULL,
-      shift TEXT,
-      gatepass_id INTEGER,
-      shipment_id INTEGER,
-      vehicle_id INTEGER,
-      driver_id INTEGER,
-      loading_bay_id INTEGER,
-      scheduled_start INTEGER,
-      scheduled_end INTEGER,
-      actual_start INTEGER,
-      actual_end INTEGER,
-      status TEXT DEFAULT 'SCHEDULED',
-      priority INTEGER DEFAULT 0,
-      assigned_by INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (gatepass_id) REFERENCES gatepass(id),
-      FOREIGN KEY (shipment_id) REFERENCES shipments(id),
-      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-      FOREIGN KEY (driver_id) REFERENCES users(id),
-      FOREIGN KEY (loading_bay_id) REFERENCES loading_bays(id),
-      FOREIGN KEY (assigned_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE loading_bays (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      bay_type TEXT,
-      dock_level INTEGER DEFAULT 0,
-      max_vehicle_length REAL,
-      max_vehicle_weight REAL,
-      temperature_controlled INTEGER DEFAULT 0,
-      min_temp REAL,
-      max_temp REAL,
-      camera_id INTEGER,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (camera_id) REFERENCES camera_devices(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE barcode_definitions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      symbology TEXT NOT NULL,
-      prefix TEXT,
-      suffix TEXT,
-      format_template TEXT,
-      width_mm REAL,
-      height_mm REAL,
-      module_width REAL,
-      include_text INTEGER DEFAULT 1,
-      font_size INTEGER,
-      error_correction TEXT,
-      is_active INTEGER DEFAULT 1,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE barcodes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      barcode_value TEXT UNIQUE NOT NULL,
-      barcode_type_id INTEGER NOT NULL,
-      entity_type TEXT NOT NULL,
-      entity_id INTEGER NOT NULL,
-      label_data TEXT,
-      image_path TEXT,
-      print_count INTEGER DEFAULT 0,
-      last_printed_at INTEGER,
-      printed_by INTEGER,
-      status TEXT DEFAULT 'ACTIVE',
-      expires_at INTEGER,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (barcode_type_id) REFERENCES barcode_definitions(id),
-      FOREIGN KEY (printed_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE barcode_scans (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      scan_session_id INTEGER,
-      barcode_value TEXT NOT NULL,
-      barcode_id INTEGER,
-      entity_type TEXT,
-      entity_id INTEGER,
-      scan_type TEXT,
-      location_id INTEGER,
-      scanned_by INTEGER,
-      device_id TEXT,
-      latitude REAL,
-      longitude REAL,
-      quantity REAL DEFAULT 1,
-      unit TEXT,
-      status TEXT DEFAULT 'SUCCESS',
-      error_message TEXT,
-      timestamp INTEGER,
-      created_at INTEGER,
-      FOREIGN KEY (barcode_id) REFERENCES barcodes(id),
-      FOREIGN KEY (location_id) REFERENCES storage_location(id),
-      FOREIGN KEY (scanned_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE batch_scan_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_number TEXT UNIQUE NOT NULL,
-      session_type TEXT,
-      reference_type TEXT,
-      reference_id INTEGER,
-      location_id INTEGER,
-      operator_id INTEGER,
-      status TEXT DEFAULT 'IN_PROGRESS',
-      total_expected INTEGER,
-      total_scanned INTEGER DEFAULT 0,
-      total_matched INTEGER DEFAULT 0,
-      total_mismatched INTEGER DEFAULT 0,
-      started_at INTEGER,
-      completed_at INTEGER,
-      notes TEXT,
-      created_at INTEGER,
-      updated_at INTEGER,
-      FOREIGN KEY (location_id) REFERENCES storage_location(id),
-      FOREIGN KEY (operator_id) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE batch_scan_items (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_id INTEGER NOT NULL,
-      barcode_value TEXT,
-      barcode_id INTEGER,
-      item_id INTEGER,
-      expected_quantity REAL,
-      scanned_quantity REAL DEFAULT 0,
-      matched INTEGER DEFAULT 0,
-      mismatch_reason TEXT,
-      status TEXT DEFAULT 'PENDING',
-      scanned_at INTEGER,
-      verified_by INTEGER,
-      verified_at INTEGER,
-      FOREIGN KEY (session_id) REFERENCES batch_scan_sessions(id) ON DELETE CASCADE,
-      FOREIGN KEY (barcode_id) REFERENCES barcodes(id),
-      FOREIGN KEY (item_id) REFERENCES inventory_item(id),
-      FOREIGN KEY (verified_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE label_print_jobs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      job_number TEXT UNIQUE NOT NULL,
-      barcode_definition_id INTEGER NOT NULL,
-      entity_type TEXT NOT NULL,
-      entity_ids TEXT,
-      label_data_json TEXT,
-      copies INTEGER DEFAULT 1,
-      printer_name TEXT,
-      printer_type TEXT,
-      label_width_mm REAL,
-      label_height_mm REAL,
-      status TEXT DEFAULT 'QUEUED',
-      printed_count INTEGER DEFAULT 0,
-      failed_count INTEGER DEFAULT 0,
-      error_log TEXT,
-      requested_by INTEGER,
-      requested_at INTEGER,
-      started_at INTEGER,
-      completed_at INTEGER,
-      FOREIGN KEY (barcode_definition_id) REFERENCES barcode_definitions(id),
-      FOREIGN KEY (requested_by) REFERENCES users(id)
-    )
-  ''');
-  await db.execute('''
-    CREATE TABLE printer_configs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL,
-      printer_type TEXT,
-      connection_type TEXT,
-      ip_address TEXT,
-      port INTEGER,
-      usb_vid_pid TEXT,
-      bluetooth_mac TEXT,
-      serial_port TEXT,
-      baud_rate INTEGER,
-      paper_width_mm REAL,
-      paper_height_mm REAL,
-      print_speed INTEGER,
-      print_density INTEGER,
-      is_default INTEGER DEFAULT 0,
-      is_active INTEGER DEFAULT 1,
-      test_print_command TEXT,
-      created_at INTEGER,
-      updated_at INTEGER
-    )
-  ''');
+  getIt.registerSingleton<CameraAIService>(CameraAIService(db));
 }
 
 class ColdStorageWMS extends StatelessWidget {
-  final Database db;
-
-  const ColdStorageWMS({super.key, required this.db});
+  const ColdStorageWMS({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -2262,8 +161,103 @@ class ColdStorageWMS extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      home: LoginScreen(db: db),
+      home: const MainNavigationScreen(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _selectedIndex = 0;
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      InventoryDashboard(
+        inventoryService: getIt<InventoryService>(),
+        locationService: getIt<LocationService>(),
+      ),
+      FinanceDashboard(
+        chartOfAccountsService: getIt<ChartOfAccountsService>(),
+        partyService: getIt<PartyService>(),
+        taxRateService: getIt<TaxRateService>(),
+        invoiceService: getIt<InvoiceService>(),
+        paymentService: getIt<PaymentService>(),
+        accountsReceivableService: getIt<AccountsReceivableService>(),
+        accountsPayableService: getIt<AccountsPayableService>(),
+        journalEntryService: getIt<JournalEntryService>(),
+        gstReturnService: getIt<GSTReturnService>(),
+        purchaseOrderService: getIt<PurchaseOrderService>(),
+        salesOrderService: getIt<SalesOrderService>(),
+        financialReportService: getIt<FinancialReportService>(),
+      ),
+      LogisticsDashboard(
+        carrierService: getIt<CarrierService>(),
+        vehicleService: getIt<VehicleService>(),
+        shipmentService: getIt<ShipmentService>(),
+        shipmentItemService: getIt<ShipmentItemService>(),
+        shipmentTrackingService: getIt<ShipmentTrackingService>(),
+        freightRateService: getIt<FreightRateService>(),
+        freightBillService: getIt<FreightBillService>(),
+        loadPlanService: getIt<LoadPlanService>(),
+        loadPlanItemService: getIt<LoadPlanItemService>(),
+        vehicleMaintenanceService: getIt<VehicleMaintenanceService>(),
+        logisticsAnalyticsService: getIt<LogisticsAnalyticsService>(),
+      ),
+      CameraCountingScreen(
+        cameraService: getIt<CameraAIService>(),
+        gatepassService: getIt<GatepassService>(),
+      ),
+      GatepassScreen(
+        gatepassTypeService: getIt<GatepassTypeService>(),
+        gatepassService: getIt<GatepassService>(),
+        gatepassItemService: getIt<GatepassItemService>(),
+        securityGateService: getIt<SecurityGateService>(),
+        gatepassVehicleLogService: getIt<GatepassVehicleLogService>(),
+        gatepassApprovalService: getIt<GatepassApprovalService>(),
+        dispatchScheduleService: getIt<DispatchScheduleService>(),
+        loadingBayService: getIt<LoadingBayService>(),
+        inventoryService: getIt<InventoryService>(),
+        barcodeService: getIt<BarcodeService>(),
+      ),
+      BarcodeScannerScreen(
+        barcodeDefinitionService: getIt<BarcodeDefinitionService>(),
+        barcodeService: getIt<BarcodeService>(),
+        barcodeScanService: getIt<BarcodeScanService>(),
+        batchScanSessionService: getIt<BatchScanSessionService>(),
+        batchScanItemService: getIt<BatchScanItemService>(),
+        labelPrintJobService: getIt<LabelPrintJobService>(),
+        printerConfigService: getIt<PrinterConfigService>(),
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.inventory_2), label: 'Inventory'),
+          NavigationDestination(icon: Icon(Icons.account_balance), label: 'Finance'),
+          NavigationDestination(icon: Icon(Icons.local_shipping), label: 'Logistics'),
+          NavigationDestination(icon: Icon(Icons.videocam), label: 'AI Camera'),
+          NavigationDestination(icon: Icon(Icons.receipt_long), label: 'Gatepass'),
+          NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: 'Barcode'),
+        ],
+      ),
     );
   }
 }

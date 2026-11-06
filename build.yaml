@@ -5,5 +5,3 @@ targets:
         enabled: false
       code_assets|generate_manifest:
         enabled: false
-      sqlite3|sqlite3:
-        enabled: false

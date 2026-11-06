@@ -2,19 +2,43 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/gatepass_barcode_service.dart';
+import '../services/gatepass_service.dart';
+import '../services/gatepass_item_service.dart';
+import '../services/security_gate_service.dart';
+import '../services/gatepass_vehicle_log_service.dart';
+import '../services/gatepass_approval_service.dart';
+import '../services/gatepass_type_service.dart';
+import '../services/dispatch_schedule_service.dart';
+import '../services/loading_bay_service.dart';
 import '../services/inventory_service.dart';
+import '../services/barcode_service.dart';
 import '../models/gatepass_barcode_models.dart';
 import '../models/inventory_item.dart';
 
 class GatepassScreen extends StatefulWidget {
-  final GatepassBarcodeService gatepassService;
+  final GatepassTypeService gatepassTypeService;
+  final GatepassService gatepassService;
+  final GatepassItemService gatepassItemService;
+  final SecurityGateService securityGateService;
+  final GatepassVehicleLogService gatepassVehicleLogService;
+  final GatepassApprovalService gatepassApprovalService;
+  final DispatchScheduleService dispatchScheduleService;
+  final LoadingBayService loadingBayService;
   final InventoryService inventoryService;
+  final BarcodeService barcodeService;
 
   const GatepassScreen({
     super.key,
+    required this.gatepassTypeService,
     required this.gatepassService,
+    required this.gatepassItemService,
+    required this.securityGateService,
+    required this.gatepassVehicleLogService,
+    required this.gatepassApprovalService,
+    required this.dispatchScheduleService,
+    required this.loadingBayService,
     required this.inventoryService,
+    required this.barcodeService,
   });
 
   @override
@@ -39,7 +63,7 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
     setState(() => _loading = true);
     final results = await Future.wait([
       widget.gatepassService.getGatepasses(status: _filterStatus == 'ALL' ? null : _filterStatus),
-      widget.gatepassService.getGatepassTypes(),
+      widget.gatepassTypeService.getGatepassTypes(),
     ]);
     setState(() {
       _gatepasses = results[0] as List<Gatepass>;
@@ -130,7 +154,7 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
                 children: [
                   Text('Type: ${_getTypeName(gp.gatepassTypeId)} | Vehicle: ${gp.vehicleNumber ?? 'N/A'}'),
                   Text('Driver: ${gp.driverName ?? 'N/A'} | ${DateFormat('MMM dd, yyyy HH:mm').format(DateTime.fromMillisecondsSinceEpoch(gp.requestedDate ?? 0))}'),
-                  Text('Items: ${gp.totalItems} | Qty: ${gp.totalQuantity} | Weight: ${gp.totalWeight.toStringAsFixed(1)} kg'),
+                  Text('Items: ${gp.totalItems} | Qty: ${gp.totalQuantity} | Weight: ${gp.totalWeight?.toStringAsFixed(1) ?? '0'} kg'),
                 ],
               ),
               trailing: Column(
@@ -159,7 +183,9 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: _GatepassForm(
+        gatepassTypeService: widget.gatepassTypeService,
         gatepassService: widget.gatepassService,
+        gatepassItemService: widget.gatepassItemService,
         gatepassTypes: _gatepassTypes,
         inventoryService: widget.inventoryService,
         onSaved: _loadData,
@@ -168,7 +194,10 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
   }
 
   Widget _buildDispatchSchedule() {
-    return _DispatchScheduleTab(gatepassService: widget.gatepassService);
+    return _DispatchScheduleTab(
+      dispatchScheduleService: widget.dispatchScheduleService,
+      loadingBayService: widget.loadingBayService,
+    );
   }
 
   void _showGatepassDetails(Gatepass gp) {
@@ -182,6 +211,7 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
         builder: (context, scrollController) => _GatepassDetailSheet(
           gatepass: gp,
           gatepassService: widget.gatepassService,
+          gatepassItemService: widget.gatepassItemService,
           scrollController: scrollController,
         ),
       ),
@@ -305,7 +335,7 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
   }
 
   void _showQRCode(Gatepass gp) {
-    final qrData = widget.gatepassService.generateGatepassQR(gp);
+    final qrData = widget.barcodeService.generateGatepassQR(gp);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -349,13 +379,17 @@ class _GatepassScreenState extends State<GatepassScreen> with SingleTickerProvid
 }
 
 class _GatepassForm extends StatefulWidget {
-  final GatepassBarcodeService gatepassService;
+  final GatepassTypeService gatepassTypeService;
+  final GatepassService gatepassService;
+  final GatepassItemService gatepassItemService;
   final List<GatepassType> gatepassTypes;
   final InventoryService inventoryService;
   final VoidCallback onSaved;
 
   const _GatepassForm({
+    required this.gatepassTypeService,
     required this.gatepassService,
+    required this.gatepassItemService,
     required this.gatepassTypes,
     required this.inventoryService,
     required this.onSaved,
@@ -428,7 +462,7 @@ class _GatepassFormState extends State<_GatepassForm> {
 
     for (var itemForm in _items) {
       if (itemForm.itemId != null) {
-        await widget.gatepassService.addGatepassItem(GatepassItem(
+        await widget.gatepassItemService.addGatepassItem(GatepassItem(
           gatepassId: gatepassId,
           itemId: itemForm.itemId,
           description: itemForm.description,
@@ -678,9 +712,13 @@ class _GatepassItemForm {
 }
 
 class _DispatchScheduleTab extends StatefulWidget {
-  final GatepassBarcodeService gatepassService;
+  final DispatchScheduleService dispatchScheduleService;
+  final LoadingBayService loadingBayService;
 
-  const _DispatchScheduleTab({required this.gatepassService});
+  const _DispatchScheduleTab({
+    required this.dispatchScheduleService,
+    required this.loadingBayService,
+  });
 
   @override
   State<_DispatchScheduleTab> createState() => _DispatchScheduleTabState();
@@ -699,8 +737,8 @@ class _DispatchScheduleTabState extends State<_DispatchScheduleTab> {
 
   Future<void> _loadData() async {
     final today = DateTime.now().millisecondsSinceEpoch;
-    final schedules = await widget.gatepassService.getDispatchSchedules(date: today);
-    final bays = await widget.gatepassService.getLoadingBays();
+    final schedules = await widget.dispatchScheduleService.getDispatchSchedules(date: today);
+    final bays = await widget.loadingBayService.getLoadingBays();
     setState(() {
       _schedules = schedules;
       _loadingBays = bays;
@@ -789,12 +827,14 @@ class _DispatchScheduleTabState extends State<_DispatchScheduleTab> {
 
 class _GatepassDetailSheet extends StatelessWidget {
   final Gatepass gatepass;
-  final GatepassBarcodeService gatepassService;
+  final GatepassService gatepassService;
+  final GatepassItemService gatepassItemService;
   final ScrollController scrollController;
 
   const _GatepassDetailSheet({
     required this.gatepass,
     required this.gatepassService,
+    required this.gatepassItemService,
     required this.scrollController,
   });
 
@@ -841,7 +881,7 @@ class _GatepassDetailSheet extends StatelessWidget {
                 const Divider(),
                 const Text('Items', style: TextStyle(fontWeight: FontWeight.bold)),
                 FutureBuilder<List<GatepassItem>>(
-                  future: gatepassService.getGatepassItems(gatepass.id!),
+                  future: gatepassItemService.getGatepassItems(gatepass.id!),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return const CircularProgressIndicator();
                     return Column(

@@ -1,0 +1,5 @@
+Analyzing 2 items...                                            
+
+warning • The left operand can't be null, so the right operand is never executed • lib/services/finance_service.dart:676:50 • dead_null_aware_expression
+
+1 issue found. (ran in 3.1s)

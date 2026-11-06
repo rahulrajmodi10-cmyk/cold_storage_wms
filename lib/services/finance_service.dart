@@ -15,7 +15,7 @@ class FinanceService {
 
   Future<int> createAccount(ChartOfAccount account, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = account.toJson();
+    final map = account.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -35,7 +35,7 @@ class FinanceService {
   Future<ChartOfAccount?> getAccount(int id) async {
     final maps = await db.query('chart_of_accounts', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return ChartOfAccount.fromJson(maps.first);
+    return ChartOfAccount.fromMap(maps.first);
   }
 
   Future<List<ChartOfAccount>> getAccounts({String? type, int? parentId, bool activeOnly = true}) async {
@@ -58,11 +58,11 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'code',
     );
-    return maps.map((m) => ChartOfAccount.fromJson(m)).toList();
+    return maps.map((m) => ChartOfAccount.fromMap(m)).toList();
   }
 
   Future<int> updateAccount(ChartOfAccount account, {int? userId}) async {
-    final map = account.toJson();
+    final map = account.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('chart_of_accounts', map, where: 'id = ?', whereArgs: [account.id]);
@@ -83,7 +83,7 @@ class FinanceService {
 
   Future<int> createParty(Party party, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = party.toJson();
+    final map = party.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -103,7 +103,7 @@ class FinanceService {
   Future<Party?> getParty(int id) async {
     final maps = await db.query('parties', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Party.fromJson(maps.first);
+    return Party.fromMap(maps.first);
   }
 
   Future<List<Party>> getParties({String? type, bool activeOnly = true}) async {
@@ -122,11 +122,11 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'name',
     );
-    return maps.map((m) => Party.fromJson(m)).toList();
+    return maps.map((m) => Party.fromMap(m)).toList();
   }
 
   Future<int> updateParty(Party party, {int? userId}) async {
-    final map = party.toJson();
+    final map = party.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('parties', map, where: 'id = ?', whereArgs: [party.id]);
@@ -147,7 +147,7 @@ class FinanceService {
 
   Future<int> createTaxRate(TaxRate taxRate, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('tax_rates', taxRate.toJson());
+      final id = await txn.insert('tax_rates', taxRate.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'create_tax_rate',
@@ -178,14 +178,14 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'type, rate',
     );
-    return maps.map((m) => TaxRate.fromJson(m)).toList();
+    return maps.map((m) => TaxRate.fromMap(m)).toList();
   }
 
   // ============ Invoices ============
 
   Future<int> createInvoice(Invoice invoice, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = invoice.toJson();
+    final map = invoice.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -205,13 +205,13 @@ class FinanceService {
   Future<Invoice?> getInvoice(int id) async {
     final maps = await db.query('invoices', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Invoice.fromJson(maps.first);
+    return Invoice.fromMap(maps.first);
   }
 
   Future<Invoice?> getInvoiceByNumber(String invoiceNumber) async {
     final maps = await db.query('invoices', where: 'invoice_number = ?', whereArgs: [invoiceNumber]);
     if (maps.isEmpty) return null;
-    return Invoice.fromJson(maps.first);
+    return Invoice.fromMap(maps.first);
   }
 
   Future<List<Invoice>> getInvoices({
@@ -253,11 +253,11 @@ class FinanceService {
       limit: limit,
       offset: offset,
     );
-    return maps.map((m) => Invoice.fromJson(m)).toList();
+    return maps.map((m) => Invoice.fromMap(m)).toList();
   }
 
   Future<int> updateInvoice(Invoice invoice, {int? userId}) async {
-    final map = invoice.toJson();
+    final map = invoice.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('invoices', map, where: 'id = ?', whereArgs: [invoice.id]);
@@ -297,7 +297,7 @@ class FinanceService {
 
   Future<int> addInvoiceItem(InvoiceItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('invoice_items', item.toJson());
+      final id = await txn.insert('invoice_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_invoice_item',
@@ -312,12 +312,12 @@ class FinanceService {
 
   Future<List<InvoiceItem>> getInvoiceItems(int invoiceId) async {
     final maps = await db.query('invoice_items', where: 'invoice_id = ?', whereArgs: [invoiceId]);
-    return maps.map((m) => InvoiceItem.fromJson(m)).toList();
+    return maps.map((m) => InvoiceItem.fromMap(m)).toList();
   }
 
   Future<int> updateInvoiceItem(InvoiceItem item, {int? userId}) async {
     await db.transaction((txn) async {
-      final count = await txn.update('invoice_items', item.toJson(), where: 'id = ?', whereArgs: [item.id]);
+      final count = await txn.update('invoice_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
       if (count == 0) throw StateError('Invoice item not found');
       await auditService.logInTransaction(
         txn,
@@ -349,7 +349,7 @@ class FinanceService {
 
   Future<int> createPayment(Payment payment, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = payment.toJson();
+    final map = payment.toMap();
     map['created_at'] = now;
     return await db.transaction((txn) async {
       final id = await txn.insert('payments', map);
@@ -368,7 +368,7 @@ class FinanceService {
   Future<Payment?> getPayment(int id) async {
     final maps = await db.query('payments', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Payment.fromJson(maps.first);
+    return Payment.fromMap(maps.first);
   }
 
   Future<List<Payment>> getPayments({
@@ -410,7 +410,7 @@ class FinanceService {
       limit: limit,
       offset: offset,
     );
-    return maps.map((m) => Payment.fromJson(m)).toList();
+    return maps.map((m) => Payment.fromMap(m)).toList();
   }
 
   Future<int> updatePaymentStatus(int id, String status, {int? userId}) async {
@@ -433,7 +433,7 @@ class FinanceService {
 
   Future<int> createReceivable(AccountReceivable ar, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = ar.toJson();
+    final map = ar.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -467,11 +467,11 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'due_date',
     );
-    return maps.map((m) => AccountReceivable.fromJson(m)).toList();
+    return maps.map((m) => AccountReceivable.fromMap(m)).toList();
   }
 
   Future<int> updateReceivable(AccountReceivable ar, {int? userId}) async {
-    final map = ar.toJson();
+    final map = ar.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('accounts_receivable', map, where: 'id = ?', whereArgs: [ar.id]);
@@ -490,7 +490,7 @@ class FinanceService {
 
   Future<int> createPayable(AccountPayable ap, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = ap.toJson();
+    final map = ap.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -524,11 +524,11 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'due_date',
     );
-    return maps.map((m) => AccountPayable.fromJson(m)).toList();
+    return maps.map((m) => AccountPayable.fromMap(m)).toList();
   }
 
   Future<int> updatePayable(AccountPayable ap, {int? userId}) async {
-    final map = ap.toJson();
+    final map = ap.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('accounts_payable', map, where: 'id = ?', whereArgs: [ap.id]);
@@ -549,7 +549,7 @@ class FinanceService {
 
   Future<int> createJournalEntry(JournalEntry entry, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = entry.toJson();
+    final map = entry.toMap();
     map['created_at'] = now;
     return await db.transaction((txn) async {
       final entryId = await txn.insert('journal_entries', map);
@@ -567,7 +567,7 @@ class FinanceService {
 
   Future<int> addJournalEntryLine(JournalEntryLine line, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('journal_entry_lines', line.toJson());
+      final id = await txn.insert('journal_entry_lines', line.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_journal_entry_line',
@@ -583,7 +583,7 @@ class FinanceService {
   Future<void> addJournalEntryLines(int entryId, List<JournalEntryLine> lines, {int? userId}) async {
     await db.transaction((txn) async {
       for (final line in lines) {
-        final map = line.toJson();
+        final map = line.toMap();
         map['entry_id'] = entryId;
         await txn.insert('journal_entry_lines', map);
       }
@@ -601,12 +601,12 @@ class FinanceService {
   Future<JournalEntry?> getJournalEntry(int id) async {
     final maps = await db.query('journal_entries', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return JournalEntry.fromJson(maps.first);
+    return JournalEntry.fromMap(maps.first);
   }
 
   Future<List<JournalEntryLine>> getJournalEntryLines(int entryId) async {
     final maps = await db.query('journal_entry_lines', where: 'entry_id = ?', whereArgs: [entryId]);
-    return maps.map((m) => JournalEntryLine.fromJson(m)).toList();
+    return maps.map((m) => JournalEntryLine.fromMap(m)).toList();
   }
 
   Future<int> postJournalEntry(int entryId, int postedBy, {int? userId}) async {
@@ -673,7 +673,7 @@ class FinanceService {
     double totalEquity = 0.0;
 
     for (final account in accounts) {
-      double balance = account.openingBalance;
+      double balance = account.openingBalance ?? 0.0;
 
       final result = await db.rawQuery('''
         SELECT
@@ -836,7 +836,7 @@ class FinanceService {
 
   Future<int> createGSTReturn(GSTReturn return_, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = return_.toJson();
+    final map = return_.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -856,7 +856,7 @@ class FinanceService {
   Future<GSTReturn?> getGSTReturn(int id) async {
     final maps = await db.query('gst_returns', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return GSTReturn.fromJson(maps.first);
+    return GSTReturn.fromMap(maps.first);
   }
 
   Future<List<GSTReturn>> getGSTRReturns({String? returnType, String? period}) async {
@@ -876,14 +876,14 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'period DESC',
     );
-    return maps.map((m) => GSTReturn.fromJson(m)).toList();
+    return maps.map((m) => GSTReturn.fromMap(m)).toList();
   }
 
   // ============ Purchase Orders ============
 
   Future<int> createPurchaseOrder(PurchaseOrder po, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = po.toJson();
+    final map = po.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -903,7 +903,7 @@ class FinanceService {
   Future<PurchaseOrder?> getPurchaseOrder(int id) async {
     final maps = await db.query('purchase_orders', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return PurchaseOrder.fromJson(maps.first);
+    return PurchaseOrder.fromMap(maps.first);
   }
 
   Future<List<PurchaseOrder>> getPurchaseOrders({String? status, int? vendorId}) async {
@@ -923,12 +923,12 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'po_date DESC',
     );
-    return maps.map((m) => PurchaseOrder.fromJson(m)).toList();
+    return maps.map((m) => PurchaseOrder.fromMap(m)).toList();
   }
 
   Future<int> addPurchaseOrderItem(PurchaseOrderItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('purchase_order_items', item.toJson());
+      final id = await txn.insert('purchase_order_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_purchase_order_item',
@@ -943,14 +943,14 @@ class FinanceService {
 
   Future<List<PurchaseOrderItem>> getPurchaseOrderItems(int poId) async {
     final maps = await db.query('purchase_order_items', where: 'po_id = ?', whereArgs: [poId]);
-    return maps.map((m) => PurchaseOrderItem.fromJson(m)).toList();
+    return maps.map((m) => PurchaseOrderItem.fromMap(m)).toList();
   }
 
   // ============ Sales Orders ============
 
   Future<int> createSalesOrder(SalesOrder so, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = so.toJson();
+    final map = so.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -970,7 +970,7 @@ class FinanceService {
   Future<SalesOrder?> getSalesOrder(int id) async {
     final maps = await db.query('sales_orders', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return SalesOrder.fromJson(maps.first);
+    return SalesOrder.fromMap(maps.first);
   }
 
   Future<List<SalesOrder>> getSalesOrders({String? status, int? customerId}) async {
@@ -990,12 +990,12 @@ class FinanceService {
       whereArgs: args,
       orderBy: 'so_date DESC',
     );
-    return maps.map((m) => SalesOrder.fromJson(m)).toList();
+    return maps.map((m) => SalesOrder.fromMap(m)).toList();
   }
 
   Future<int> addSalesOrderItem(SalesOrderItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('sales_order_items', item.toJson());
+      final id = await txn.insert('sales_order_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_sales_order_item',
@@ -1010,6 +1010,6 @@ class FinanceService {
 
   Future<List<SalesOrderItem>> getSalesOrderItems(int soId) async {
     final maps = await db.query('sales_order_items', where: 'so_id = ?', whereArgs: [soId]);
-    return maps.map((m) => SalesOrderItem.fromJson(m)).toList();
+    return maps.map((m) => SalesOrderItem.fromMap(m)).toList();
   }
 }

@@ -96,7 +96,7 @@ class ReceivingService {
         timestamp: now,
         sensorId: 'manual_receiving',
       );
-      await txn.insert('temperature_log', tempLog.toJson());
+      await txn.insert('temperature_log', tempLog.toMap());
 
       // Create transfer record for receiving
       await txn.insert('transfer_record', {

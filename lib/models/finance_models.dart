@@ -1,11 +1,9 @@
 // lib/models/finance_models.dart
 
-import 'package:json_annotation/json_annotation.dart';
+import 'base_model.dart';
 
-part 'finance_models.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class ChartOfAccount {
+class ChartOfAccount with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -15,7 +13,9 @@ class ChartOfAccount {
   final int gstApplicable;
   final double gstRate;
   final double openingBalance;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   ChartOfAccount({
@@ -34,12 +34,39 @@ class ChartOfAccount {
 
   double get balance => openingBalance;
 
-  factory ChartOfAccount.fromJson(Map<String, dynamic> json) => _$ChartOfAccountFromJson(json);
-  Map<String, dynamic> toJson() => _$ChartOfAccountToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'code': code,
+      'name': name,
+      'type': type,
+      'parent_id': parentId,
+      'is_active': isActive,
+      'gst_applicable': gstApplicable,
+      'gst_rate': gstRate,
+      'opening_balance': openingBalance,
+    };
+  }
+
+  factory ChartOfAccount.fromMap(Map<String, dynamic> m) {
+    return ChartOfAccount(
+      id: m['id'] as int?,
+      code: m['code'] as String,
+      name: m['name'] as String,
+      type: m['type'] as String,
+      parentId: m['parent_id'] as int?,
+      isActive: m['is_active'] as int? ?? 1,
+      gstApplicable: m['gst_applicable'] as int? ?? 0,
+      gstRate: (m['gst_rate'] as num?)?.toDouble() ?? 0,
+      openingBalance: (m['opening_balance'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Party {
+class Party with BaseModel {
+  @override
   final int? id;
   final String name;
   final String type; // CUSTOMER, VENDOR, BOTH
@@ -56,7 +83,9 @@ class Party {
   final int paymentTerms;
   final double openingBalance;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Party({
@@ -80,12 +109,53 @@ class Party {
     this.updatedAt,
   });
 
-  factory Party.fromJson(Map<String, dynamic> json) => _$PartyFromJson(json);
-  Map<String, dynamic> toJson() => _$PartyToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'name': name,
+      'type': type,
+      'gstin': gstin,
+      'pan': pan,
+      'address': address,
+      'city': city,
+      'state': state,
+      'pincode': pincode,
+      'phone': phone,
+      'email': email,
+      'contact_person': contactPerson,
+      'credit_limit': creditLimit,
+      'payment_terms': paymentTerms,
+      'opening_balance': openingBalance,
+      'is_active': isActive,
+    };
+  }
+
+  factory Party.fromMap(Map<String, dynamic> m) {
+    return Party(
+      id: m['id'] as int?,
+      name: m['name'] as String,
+      type: m['type'] as String,
+      gstin: m['gstin'] as String?,
+      pan: m['pan'] as String?,
+      address: m['address'] as String?,
+      city: m['city'] as String?,
+      state: m['state'] as String?,
+      pincode: m['pincode'] as String?,
+      phone: m['phone'] as String?,
+      email: m['email'] as String?,
+      contactPerson: m['contact_person'] as String?,
+      creditLimit: (m['credit_limit'] as num?)?.toDouble() ?? 0,
+      paymentTerms: m['payment_terms'] as int? ?? 30,
+      openingBalance: (m['opening_balance'] as num?)?.toDouble() ?? 0,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Invoice {
+class Invoice with BaseModel {
+  @override
   final int? id;
   final String invoiceNumber;
   final int invoiceDate;
@@ -103,7 +173,9 @@ class Invoice {
   final String? referenceType;
   final int? referenceId;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Invoice({
@@ -128,12 +200,55 @@ class Invoice {
     this.updatedAt,
   });
 
-  factory Invoice.fromJson(Map<String, dynamic> json) => _$InvoiceFromJson(json);
-  Map<String, dynamic> toJson() => _$InvoiceToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'invoice_number': invoiceNumber,
+      'invoice_date': invoiceDate,
+      'due_date': dueDate,
+      'party_id': partyId,
+      'type': type,
+      'status': status,
+      'subtotal': subtotal,
+      'tax_amount': taxAmount,
+      'discount_amount': discountAmount,
+      'total_amount': totalAmount,
+      'paid_amount': paidAmount,
+      'balance_amount': balanceAmount,
+      'narration': narration,
+      'reference_type': referenceType,
+      'reference_id': referenceId,
+      'created_by': createdBy,
+    };
+  }
+
+  factory Invoice.fromMap(Map<String, dynamic> m) {
+    return Invoice(
+      id: m['id'] as int?,
+      invoiceNumber: m['invoice_number'] as String,
+      invoiceDate: m['invoice_date'] as int,
+      dueDate: m['due_date'] as int?,
+      partyId: m['party_id'] as int,
+      type: m['type'] as String,
+      status: m['status'] as String? ?? 'DRAFT',
+      subtotal: (m['subtotal'] as num?)?.toDouble() ?? 0,
+      taxAmount: (m['tax_amount'] as num?)?.toDouble() ?? 0,
+      discountAmount: (m['discount_amount'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      paidAmount: (m['paid_amount'] as num?)?.toDouble() ?? 0,
+      balanceAmount: (m['balance_amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      referenceType: m['reference_type'] as String?,
+      referenceId: m['reference_id'] as int?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class InvoiceItem {
+class InvoiceItem with BaseModel {
+  @override
   final int? id;
   final int invoiceId;
   final int? itemId;
@@ -150,6 +265,10 @@ class InvoiceItem {
   final double sgstAmount;
   final double igstAmount;
   final double totalAmount;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   InvoiceItem({
     this.id,
@@ -168,14 +287,57 @@ class InvoiceItem {
     this.sgstAmount = 0,
     this.igstAmount = 0,
     required this.totalAmount,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory InvoiceItem.fromJson(Map<String, dynamic> json) => _$InvoiceItemFromJson(json);
-  Map<String, dynamic> toJson() => _$InvoiceItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'invoice_id': invoiceId,
+      'item_id': itemId,
+      'description': description,
+      'hsn_code': hsnCode,
+      'quantity': quantity,
+      'unit': unit,
+      'rate': rate,
+      'discount_percent': discountPercent,
+      'discount_amount': discountAmount,
+      'taxable_amount': taxableAmount,
+      'gst_rate': gstRate,
+      'cgst_amount': cgstAmount,
+      'sgst_amount': sgstAmount,
+      'igst_amount': igstAmount,
+      'total_amount': totalAmount,
+    };
+  }
+
+  factory InvoiceItem.fromMap(Map<String, dynamic> m) {
+    return InvoiceItem(
+      id: m['id'] as int?,
+      invoiceId: m['invoice_id'] as int,
+      itemId: m['item_id'] as int?,
+      description: m['description'] as String?,
+      hsnCode: m['hsn_code'] as String?,
+      quantity: (m['quantity'] as num?)?.toDouble() ?? 0,
+      unit: m['unit'] as String?,
+      rate: (m['rate'] as num?)?.toDouble() ?? 0,
+      discountPercent: (m['discount_percent'] as num?)?.toDouble() ?? 0,
+      discountAmount: (m['discount_amount'] as num?)?.toDouble() ?? 0,
+      taxableAmount: (m['taxable_amount'] as num?)?.toDouble() ?? 0,
+      gstRate: (m['gst_rate'] as num?)?.toDouble() ?? 0,
+      cgstAmount: (m['cgst_amount'] as num?)?.toDouble() ?? 0,
+      sgstAmount: (m['sgst_amount'] as num?)?.toDouble() ?? 0,
+      igstAmount: (m['igst_amount'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class Payment {
+class Payment with BaseModel {
+  @override
   final int? id;
   final String paymentNumber;
   final int paymentDate;
@@ -191,7 +353,9 @@ class Payment {
   final int? referenceId;
   final String status; // POSTED, CLEARED, BOUNCED, CANCELLED
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Payment({
@@ -214,12 +378,51 @@ class Payment {
     this.updatedAt,
   });
 
-  factory Payment.fromJson(Map<String, dynamic> json) => _$PaymentFromJson(json);
-  Map<String, dynamic> toJson() => _$PaymentToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'payment_number': paymentNumber,
+      'payment_date': paymentDate,
+      'party_id': partyId,
+      'type': type,
+      'mode': mode,
+      'bank_account_id': bankAccountId,
+      'cheque_number': chequeNumber,
+      'cheque_date': chequeDate,
+      'amount': amount,
+      'narration': narration,
+      'reference_type': referenceType,
+      'reference_id': referenceId,
+      'status': status,
+      'created_by': createdBy,
+    };
+  }
+
+  factory Payment.fromMap(Map<String, dynamic> m) {
+    return Payment(
+      id: m['id'] as int?,
+      paymentNumber: m['payment_number'] as String,
+      paymentDate: m['payment_date'] as int,
+      partyId: m['party_id'] as int,
+      type: m['type'] as String,
+      mode: m['mode'] as String,
+      bankAccountId: m['bank_account_id'] as int?,
+      chequeNumber: m['cheque_number'] as String?,
+      chequeDate: m['cheque_date'] as int?,
+      amount: (m['amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      referenceType: m['reference_type'] as String?,
+      referenceId: m['reference_id'] as int?,
+      status: m['status'] as String? ?? 'POSTED',
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class BankAccount {
+class BankAccount with BaseModel {
+  @override
   final int? id;
   final String accountName;
   final String? bankName;
@@ -230,7 +433,9 @@ class BankAccount {
   final double openingBalance;
   final double currentBalance;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   BankAccount({
@@ -248,23 +453,52 @@ class BankAccount {
     this.updatedAt,
   });
 
-  factory BankAccount.fromJson(Map<String, dynamic> json) => _$BankAccountFromJson(json);
-  Map<String, dynamic> toJson() => _$BankAccountToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'account_name': accountName,
+      'bank_name': bankName,
+      'account_number': accountNumber,
+      'ifsc_code': ifscCode,
+      'branch': branch,
+      'account_type': accountType,
+      'opening_balance': openingBalance,
+      'current_balance': currentBalance,
+      'is_active': isActive,
+    };
+  }
+
+  factory BankAccount.fromMap(Map<String, dynamic> m) {
+    return BankAccount(
+      id: m['id'] as int?,
+      accountName: m['account_name'] as String,
+      bankName: m['bank_name'] as String?,
+      accountNumber: m['account_number'] as String?,
+      ifscCode: m['ifsc_code'] as String?,
+      branch: m['branch'] as String?,
+      accountType: m['account_type'] as String?,
+      openingBalance: (m['opening_balance'] as num?)?.toDouble() ?? 0,
+      currentBalance: (m['current_balance'] as num?)?.toDouble() ?? 0,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class JournalEntry {
+class JournalEntry with BaseModel {
+  @override
   final int? id;
   final String entryNumber;
   final int entryDate;
   final String? narration;
   final String? referenceType;
   final int? referenceId;
-  final String status; // POSTED, REVERSED
+  final String status; // POSTED, REVERSEVED
   final int? createdBy;
-  final int? postedAt;
-  final int? postedBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   JournalEntry({
@@ -276,24 +510,51 @@ class JournalEntry {
     this.referenceId,
     this.status = 'POSTED',
     this.createdBy,
-    this.postedAt,
-    this.postedBy,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory JournalEntry.fromJson(Map<String, dynamic> json) => _$JournalEntryFromJson(json);
-  Map<String, dynamic> toJson() => _$JournalEntryToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'entry_number': entryNumber,
+      'entry_date': entryDate,
+      'narration': narration,
+      'reference_type': referenceType,
+      'reference_id': referenceId,
+      'status': status,
+      'created_by': createdBy,
+    };
+  }
+
+  factory JournalEntry.fromMap(Map<String, dynamic> m) {
+    return JournalEntry(
+      id: m['id'] as int?,
+      entryNumber: m['entry_number'] as String,
+      entryDate: m['entry_date'] as int,
+      narration: m['narration'] as String?,
+      referenceType: m['reference_type'] as String?,
+      referenceId: m['reference_id'] as int?,
+      status: m['status'] as String? ?? 'POSTED',
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class JournalEntryLine {
+class JournalEntryLine with BaseModel {
+  @override
   final int? id;
   final int entryId;
   final int accountId;
   final double debit;
   final double credit;
   final String? narration;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   JournalEntryLine({
     this.id,
@@ -302,14 +563,37 @@ class JournalEntryLine {
     this.debit = 0,
     this.credit = 0,
     this.narration,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory JournalEntryLine.fromJson(Map<String, dynamic> json) => _$JournalEntryLineFromJson(json);
-  Map<String, dynamic> toJson() => _$JournalEntryLineToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'entry_id': entryId,
+      'account_id': accountId,
+      'debit': debit,
+      'credit': credit,
+      'narration': narration,
+    };
+  }
+
+  factory JournalEntryLine.fromMap(Map<String, dynamic> m) {
+    return JournalEntryLine(
+      id: m['id'] as int?,
+      entryId: m['entry_id'] as int,
+      accountId: m['account_id'] as int,
+      debit: (m['debit'] as num?)?.toDouble() ?? 0,
+      credit: (m['credit'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class PurchaseOrder {
+class PurchaseOrder with BaseModel {
+  @override
   final int? id;
   final String poNumber;
   final int poDate;
@@ -321,7 +605,9 @@ class PurchaseOrder {
   final double totalAmount;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   PurchaseOrder({
@@ -340,12 +626,43 @@ class PurchaseOrder {
     this.updatedAt,
   });
 
-  factory PurchaseOrder.fromJson(Map<String, dynamic> json) => _$PurchaseOrderFromJson(json);
-  Map<String, dynamic> toJson() => _$PurchaseOrderToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'po_number': poNumber,
+      'po_date': poDate,
+      'vendor_id': vendorId,
+      'expected_date': expectedDate,
+      'status': status,
+      'subtotal': subtotal,
+      'tax_amount': taxAmount,
+      'total_amount': totalAmount,
+      'narration': narration,
+      'created_by': createdBy,
+    };
+  }
+
+  factory PurchaseOrder.fromMap(Map<String, dynamic> m) {
+    return PurchaseOrder(
+      id: m['id'] as int?,
+      poNumber: m['po_number'] as String,
+      poDate: m['po_date'] as int,
+      vendorId: m['vendor_id'] as int,
+      expectedDate: m['expected_date'] as int?,
+      status: m['status'] as String? ?? 'DRAFT',
+      subtotal: (m['subtotal'] as num?)?.toDouble() ?? 0,
+      taxAmount: (m['tax_amount'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class PurchaseOrderItem {
+class PurchaseOrderItem with BaseModel {
+  @override
   final int? id;
   final int poId;
   final int? itemId;
@@ -357,6 +674,10 @@ class PurchaseOrderItem {
   final double taxRate;
   final double totalAmount;
   final double receivedQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   PurchaseOrderItem({
     this.id,
@@ -370,14 +691,47 @@ class PurchaseOrderItem {
     this.taxRate = 0,
     required this.totalAmount,
     this.receivedQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory PurchaseOrderItem.fromJson(Map<String, dynamic> json) => _$PurchaseOrderItemFromJson(json);
-  Map<String, dynamic> toJson() => _$PurchaseOrderItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'po_id': poId,
+      'item_id': itemId,
+      'description': description,
+      'quantity': quantity,
+      'unit': unit,
+      'rate': rate,
+      'discount_percent': discountPercent,
+      'tax_rate': taxRate,
+      'total_amount': totalAmount,
+      'received_quantity': receivedQuantity,
+    };
+  }
+
+  factory PurchaseOrderItem.fromMap(Map<String, dynamic> m) {
+    return PurchaseOrderItem(
+      id: m['id'] as int?,
+      poId: m['po_id'] as int,
+      itemId: m['item_id'] as int?,
+      description: m['description'] as String?,
+      quantity: (m['quantity'] as num?)?.toDouble() ?? 0,
+      unit: m['unit'] as String?,
+      rate: (m['rate'] as num?)?.toDouble() ?? 0,
+      discountPercent: (m['discount_percent'] as num?)?.toDouble() ?? 0,
+      taxRate: (m['tax_rate'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      receivedQuantity: (m['received_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class SalesOrder {
+class SalesOrder with BaseModel {
+  @override
   final int? id;
   final String soNumber;
   final int soDate;
@@ -389,7 +743,9 @@ class SalesOrder {
   final double totalAmount;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   SalesOrder({
@@ -408,12 +764,43 @@ class SalesOrder {
     this.updatedAt,
   });
 
-  factory SalesOrder.fromJson(Map<String, dynamic> json) => _$SalesOrderFromJson(json);
-  Map<String, dynamic> toJson() => _$SalesOrderToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'so_number': soNumber,
+      'so_date': soDate,
+      'customer_id': customerId,
+      'expected_date': expectedDate,
+      'status': status,
+      'subtotal': subtotal,
+      'tax_amount': taxAmount,
+      'total_amount': totalAmount,
+      'narration': narration,
+      'created_by': createdBy,
+    };
+  }
+
+  factory SalesOrder.fromMap(Map<String, dynamic> m) {
+    return SalesOrder(
+      id: m['id'] as int?,
+      soNumber: m['so_number'] as String,
+      soDate: m['so_date'] as int,
+      customerId: m['customer_id'] as int,
+      expectedDate: m['expected_date'] as int?,
+      status: m['status'] as String? ?? 'DRAFT',
+      subtotal: (m['subtotal'] as num?)?.toDouble() ?? 0,
+      taxAmount: (m['tax_amount'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      createdBy: m['created_by'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class SalesOrderItem {
+class SalesOrderItem with BaseModel {
+  @override
   final int? id;
   final int soId;
   final int? itemId;
@@ -425,6 +812,10 @@ class SalesOrderItem {
   final double taxRate;
   final double totalAmount;
   final double deliveredQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   SalesOrderItem({
     this.id,
@@ -438,14 +829,47 @@ class SalesOrderItem {
     this.taxRate = 0,
     required this.totalAmount,
     this.deliveredQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory SalesOrderItem.fromJson(Map<String, dynamic> json) => _$SalesOrderItemFromJson(json);
-  Map<String, dynamic> toJson() => _$SalesOrderItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'so_id': soId,
+      'item_id': itemId,
+      'description': description,
+      'quantity': quantity,
+      'unit': unit,
+      'rate': rate,
+      'discount_percent': discountPercent,
+      'tax_rate': taxRate,
+      'total_amount': totalAmount,
+      'delivered_quantity': deliveredQuantity,
+    };
+  }
+
+  factory SalesOrderItem.fromMap(Map<String, dynamic> m) {
+    return SalesOrderItem(
+      id: m['id'] as int?,
+      soId: m['so_id'] as int,
+      itemId: m['item_id'] as int?,
+      description: m['description'] as String?,
+      quantity: (m['quantity'] as num?)?.toDouble() ?? 0,
+      unit: m['unit'] as String?,
+      rate: (m['rate'] as num?)?.toDouble() ?? 0,
+      discountPercent: (m['discount_percent'] as num?)?.toDouble() ?? 0,
+      taxRate: (m['tax_rate'] as num?)?.toDouble() ?? 0,
+      totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      deliveredQuantity: (m['delivered_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class TaxRate {
+class TaxRate with BaseModel {
+  @override
   final int? id;
   final String name;
   final String type; // CGST, SGST, IGST, CESS
@@ -453,6 +877,10 @@ class TaxRate {
   final int? effectiveFrom;
   final int? effectiveTo;
   final int isActive;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   TaxRate({
     this.id,
@@ -462,29 +890,53 @@ class TaxRate {
     this.effectiveFrom,
     this.effectiveTo,
     this.isActive = 1,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory TaxRate.fromJson(Map<String, dynamic> json) => _$TaxRateFromJson(json);
-  Map<String, dynamic> toJson() => _$TaxRateToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'name': name,
+      'type': type,
+      'rate': rate,
+      'effective_from': effectiveFrom,
+      'effective_to': effectiveTo,
+      'is_active': isActive,
+    };
+  }
+
+  factory TaxRate.fromMap(Map<String, dynamic> m) {
+    return TaxRate(
+      id: m['id'] as int?,
+      name: m['name'] as String,
+      type: m['type'] as String,
+      rate: (m['rate'] as num?)?.toDouble() ?? 0,
+      effectiveFrom: m['effective_from'] as int?,
+      effectiveTo: m['effective_to'] as int?,
+      isActive: m['is_active'] as int? ?? 1,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class AccountReceivable {
+class AccountReceivable with BaseModel {
+  @override
   final int? id;
-  @JsonKey(name: 'invoice_number')
   final String arNumber;
   final int partyId;
   final int invoiceId;
-  @JsonKey(name: 'invoice_date')
   final int invoiceDate;
   final int dueDate;
-  @JsonKey(name: 'total_amount')
   final double invoiceAmount;
   final double paidAmount;
   final double outstandingAmount;
   final String status; // OPEN, PARTIAL, CLOSED, OVERDUE
   final String? narration;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   AccountReceivable({
@@ -503,27 +955,57 @@ class AccountReceivable {
     this.updatedAt,
   });
 
-  factory AccountReceivable.fromJson(Map<String, dynamic> json) => _$AccountReceivableFromJson(json);
-  Map<String, dynamic> toJson() => _$AccountReceivableToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'ar_number': arNumber,
+      'party_id': partyId,
+      'invoice_id': invoiceId,
+      'invoice_date': invoiceDate,
+      'due_date': dueDate,
+      'invoice_amount': invoiceAmount,
+      'paid_amount': paidAmount,
+      'outstanding_amount': outstandingAmount,
+      'status': status,
+      'narration': narration,
+    };
+  }
+
+  factory AccountReceivable.fromMap(Map<String, dynamic> m) {
+    return AccountReceivable(
+      id: m['id'] as int?,
+      arNumber: m['ar_number'] as String,
+      partyId: m['party_id'] as int,
+      invoiceId: m['invoice_id'] as int,
+      invoiceDate: m['invoice_date'] as int,
+      dueDate: m['due_date'] as int,
+      invoiceAmount: (m['invoice_amount'] as num?)?.toDouble() ?? 0,
+      paidAmount: (m['paid_amount'] as num?)?.toDouble() ?? 0,
+      outstandingAmount: (m['outstanding_amount'] as num?)?.toDouble() ?? 0,
+      status: m['status'] as String? ?? 'OPEN',
+      narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class AccountPayable {
+class AccountPayable with BaseModel {
+  @override
   final int? id;
-  @JsonKey(name: 'invoice_number')
   final String apNumber;
   final int partyId;
   final int invoiceId;
-  @JsonKey(name: 'invoice_date')
   final int invoiceDate;
   final int dueDate;
-  @JsonKey(name: 'total_amount')
   final double invoiceAmount;
   final double paidAmount;
   final double outstandingAmount;
   final String status; // OPEN, PARTIAL, CLOSED, OVERDUE
   final String? narration;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   AccountPayable({
@@ -542,12 +1024,88 @@ class AccountPayable {
     this.updatedAt,
   });
 
-  factory AccountPayable.fromJson(Map<String, dynamic> json) => _$AccountPayableFromJson(json);
-  Map<String, dynamic> toJson() => _$AccountPayableToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'ap_number': apNumber,
+      'party_id': partyId,
+      'invoice_id': invoiceId,
+      'invoice_date': invoiceDate,
+      'due_date': dueDate,
+      'invoice_amount': invoiceAmount,
+      'paid_amount': paidAmount,
+      'outstanding_amount': outstandingAmount,
+      'status': status,
+      'narration': narration,
+    };
+  }
+
+  factory AccountPayable.fromMap(Map<String, dynamic> m) {
+    return AccountPayable(
+      id: m['id'] as int?,
+      apNumber: m['ap_number'] as String,
+      partyId: m['party_id'] as int,
+      invoiceId: m['invoice_id'] as int,
+      invoiceDate: m['invoice_date'] as int,
+      dueDate: m['due_date'] as int,
+      invoiceAmount: (m['invoice_amount'] as num?)?.toDouble() ?? 0,
+      paidAmount: (m['paid_amount'] as num?)?.toDouble() ?? 0,
+      outstandingAmount: (m['outstanding_amount'] as num?)?.toDouble() ?? 0,
+      status: m['status'] as String? ?? 'OPEN',
+      narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class GSTReturn {
+class PaymentAllocation with BaseModel {
+  @override
+  final int? id;
+  final int paymentId;
+  final int invoiceId;
+  final double amount;
+  final String? narration;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
+
+  PaymentAllocation({
+    this.id,
+    required this.paymentId,
+    required this.invoiceId,
+    required this.amount,
+    this.narration,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'payment_id': paymentId,
+      'invoice_id': invoiceId,
+      'amount': amount,
+      'narration': narration,
+    };
+  }
+
+  factory PaymentAllocation.fromMap(Map<String, dynamic> m) {
+    return PaymentAllocation(
+      id: m['id'] as int?,
+      paymentId: m['payment_id'] as int,
+      invoiceId: m['invoice_id'] as int,
+      amount: (m['amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
+}
+
+class GSTReturn with BaseModel {
+  @override
   final int? id;
   final String returnType; // GSTR1, GSTR3B
   final String period; // YYYY-MM
@@ -560,7 +1118,9 @@ class GSTReturn {
   final int? filedDate;
   final String? acknowledgementNo;
   final String? jsonData;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   GSTReturn({
@@ -580,6 +1140,39 @@ class GSTReturn {
     this.updatedAt,
   });
 
-  factory GSTReturn.fromJson(Map<String, dynamic> json) => _$GSTReturnFromJson(json);
-  Map<String, dynamic> toJson() => _$GSTReturnToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'return_type': returnType,
+      'period': period,
+      'status': status,
+      'total_taxable_value': totalTaxableValue,
+      'total_cgst': totalCgst,
+      'total_sgst': totalSgst,
+      'total_igst': totalIgst,
+      'total_cess': totalCess,
+      'filed_date': filedDate,
+      'acknowledgement_no': acknowledgementNo,
+      'json_data': jsonData,
+    };
+  }
+
+  factory GSTReturn.fromMap(Map<String, dynamic> m) {
+    return GSTReturn(
+      id: m['id'] as int?,
+      returnType: m['return_type'] as String,
+      period: m['period'] as String,
+      status: m['status'] as String? ?? 'DRAFT',
+      totalTaxableValue: (m['total_taxable_value'] as num?)?.toDouble() ?? 0,
+      totalCgst: (m['total_cgst'] as num?)?.toDouble() ?? 0,
+      totalSgst: (m['total_sgst'] as num?)?.toDouble() ?? 0,
+      totalIgst: (m['total_igst'] as num?)?.toDouble() ?? 0,
+      totalCess: (m['total_cess'] as num?)?.toDouble() ?? 0,
+      filedDate: m['filed_date'] as int?,
+      acknowledgementNo: m['acknowledgement_no'] as String?,
+      jsonData: m['json_data'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }

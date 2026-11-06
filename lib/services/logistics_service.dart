@@ -15,7 +15,7 @@ class LogisticsService {
 
   Future<int> createCarrier(Carrier carrier, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = carrier.toJson();
+    final map = carrier.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -35,7 +35,7 @@ class LogisticsService {
   Future<Carrier?> getCarrier(int id) async {
     final maps = await db.query('carriers', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Carrier.fromJson(maps.first);
+    return Carrier.fromMap(maps.first);
   }
 
   Future<List<Carrier>> getCarriers({bool activeOnly = true}) async {
@@ -45,11 +45,11 @@ class LogisticsService {
   Future<List<Carrier>> _getCarriers({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('carriers', where: where, orderBy: 'name');
-    return maps.map((m) => Carrier.fromJson(m)).toList();
+    return maps.map((m) => Carrier.fromMap(m)).toList();
   }
 
   Future<int> updateCarrier(Carrier carrier, {int? userId}) async {
-    final map = carrier.toJson();
+    final map = carrier.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('carriers', map, where: 'id = ?', whereArgs: [carrier.id]);
@@ -70,7 +70,7 @@ class LogisticsService {
 
   Future<int> createVehicle(Vehicle vehicle, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = vehicle.toJson();
+    final map = vehicle.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -90,13 +90,13 @@ class LogisticsService {
   Future<Vehicle?> getVehicle(int id) async {
     final maps = await db.query('vehicles', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Vehicle.fromJson(maps.first);
+    return Vehicle.fromMap(maps.first);
   }
 
   Future<Vehicle?> getVehicleByRegistration(String registrationNumber) async {
     final maps = await db.query('vehicles', where: 'registration_number = ?', whereArgs: [registrationNumber]);
     if (maps.isEmpty) return null;
-    return Vehicle.fromJson(maps.first);
+    return Vehicle.fromMap(maps.first);
   }
 
   Future<List<Vehicle>> getVehicles({
@@ -131,11 +131,11 @@ class LogisticsService {
       whereArgs: args,
       orderBy: 'registration_number',
     );
-    return maps.map((m) => Vehicle.fromJson(m)).toList();
+    return maps.map((m) => Vehicle.fromMap(m)).toList();
   }
 
   Future<int> updateVehicle(Vehicle vehicle, {int? userId}) async {
-    final map = vehicle.toJson();
+    final map = vehicle.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('vehicles', map, where: 'id = ?', whereArgs: [vehicle.id]);
@@ -175,7 +175,7 @@ class LogisticsService {
 
   Future<int> createRoute(Route route, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = route.toJson();
+    final map = route.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -195,17 +195,17 @@ class LogisticsService {
   Future<Route?> getRoute(int id) async {
     final maps = await db.query('routes', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Route.fromJson(maps.first);
+    return Route.fromMap(maps.first);
   }
 
   Future<List<Route>> getRoutes({bool activeOnly = true}) async {
     final where = activeOnly ? 'is_active = 1' : null;
     final maps = await db.query('routes', where: where, orderBy: 'name');
-    return maps.map((m) => Route.fromJson(m)).toList();
+    return maps.map((m) => Route.fromMap(m)).toList();
   }
 
   Future<int> updateRoute(Route route, {int? userId}) async {
-    final map = route.toJson();
+    final map = route.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('routes', map, where: 'id = ?', whereArgs: [route.id]);
@@ -226,7 +226,7 @@ class LogisticsService {
 
   Future<int> addRouteStop(RouteStop stop, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('route_stops', stop.toJson());
+      final id = await txn.insert('route_stops', stop.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_route_stop',
@@ -241,14 +241,14 @@ class LogisticsService {
 
   Future<List<RouteStop>> getRouteStops(int routeId) async {
     final maps = await db.query('route_stops', where: 'route_id = ?', whereArgs: [routeId], orderBy: 'stop_order');
-    return maps.map((m) => RouteStop.fromJson(m)).toList();
+    return maps.map((m) => RouteStop.fromMap(m)).toList();
   }
 
   // ============ Shipments ============
 
   Future<int> createShipment(Shipment shipment, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = shipment.toJson();
+    final map = shipment.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -268,13 +268,13 @@ class LogisticsService {
   Future<Shipment?> getShipment(int id) async {
     final maps = await db.query('shipments', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return Shipment.fromJson(maps.first);
+    return Shipment.fromMap(maps.first);
   }
 
   Future<Shipment?> getShipmentByNumber(String shipmentNumber) async {
     final maps = await db.query('shipments', where: 'shipment_number = ?', whereArgs: [shipmentNumber]);
     if (maps.isEmpty) return null;
-    return Shipment.fromJson(maps.first);
+    return Shipment.fromMap(maps.first);
   }
 
   Future<List<Shipment>> getShipments({
@@ -316,11 +316,11 @@ class LogisticsService {
       limit: limit,
       offset: offset,
     );
-    return maps.map((m) => Shipment.fromJson(m)).toList();
+    return maps.map((m) => Shipment.fromMap(m)).toList();
   }
 
   Future<int> updateShipment(Shipment shipment, {int? userId}) async {
-    final map = shipment.toJson();
+    final map = shipment.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('shipments', map, where: 'id = ?', whereArgs: [shipment.id]);
@@ -383,7 +383,7 @@ class LogisticsService {
 
   Future<int> addShipmentItem(ShipmentItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('shipment_items', item.toJson());
+      final id = await txn.insert('shipment_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_shipment_item',
@@ -398,12 +398,12 @@ class LogisticsService {
 
   Future<List<ShipmentItem>> getShipmentItems(int shipmentId) async {
     final maps = await db.query('shipment_items', where: 'shipment_id = ?', whereArgs: [shipmentId]);
-    return maps.map((m) => ShipmentItem.fromJson(m)).toList();
+    return maps.map((m) => ShipmentItem.fromMap(m)).toList();
   }
 
   Future<int> updateShipmentItem(ShipmentItem item, {int? userId}) async {
     await db.transaction((txn) async {
-      final count = await txn.update('shipment_items', item.toJson(), where: 'id = ?', whereArgs: [item.id]);
+      final count = await txn.update('shipment_items', item.toMap(), where: 'id = ?', whereArgs: [item.id]);
       if (count == 0) throw StateError('Shipment item not found');
       await auditService.logInTransaction(
         txn,
@@ -457,7 +457,7 @@ class LogisticsService {
 
   Future<int> addTrackingPoint(ShipmentTracking tracking, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('shipment_tracking', tracking.toJson());
+      final id = await txn.insert('shipment_tracking', tracking.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_tracking_point',
@@ -472,7 +472,7 @@ class LogisticsService {
 
   Future<List<ShipmentTracking>> getShipmentTracking(int shipmentId) async {
     final maps = await db.query('shipment_tracking', where: 'shipment_id = ?', whereArgs: [shipmentId], orderBy: 'timestamp');
-    return maps.map((m) => ShipmentTracking.fromJson(m)).toList();
+    return maps.map((m) => ShipmentTracking.fromMap(m)).toList();
   }
 
   Future<ShipmentTracking?> getLatestTracking(int shipmentId) async {
@@ -484,14 +484,14 @@ class LogisticsService {
       limit: 1,
     );
     if (maps.isEmpty) return null;
-    return ShipmentTracking.fromJson(maps.first);
+    return ShipmentTracking.fromMap(maps.first);
   }
 
   // ============ Load Plans ============
 
   Future<int> createLoadPlan(LoadPlan plan, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = plan.toJson();
+    final map = plan.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -511,13 +511,13 @@ class LogisticsService {
   Future<LoadPlan?> getLoadPlan(int id) async {
     final maps = await db.query('load_plans', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return LoadPlan.fromJson(maps.first);
+    return LoadPlan.fromMap(maps.first);
   }
 
   Future<LoadPlan?> getLoadPlanByShipment(int shipmentId) async {
     final maps = await db.query('load_plans', where: 'shipment_id = ?', whereArgs: [shipmentId], limit: 1);
     if (maps.isEmpty) return null;
-    return LoadPlan.fromJson(maps.first);
+    return LoadPlan.fromMap(maps.first);
   }
 
   Future<List<LoadPlan>> getLoadPlans({String? status, int? vehicleId}) async {
@@ -532,11 +532,11 @@ class LogisticsService {
       args.add(vehicleId);
     }
     final maps = await db.query('load_plans', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'plan_date DESC');
-    return maps.map((m) => LoadPlan.fromJson(m)).toList();
+    return maps.map((m) => LoadPlan.fromMap(m)).toList();
   }
 
   Future<int> updateLoadPlan(LoadPlan plan, {int? userId}) async {
-    final map = plan.toJson();
+    final map = plan.toMap();
     map['updated_at'] = DateTime.now().millisecondsSinceEpoch;
     await db.transaction((txn) async {
       final count = await txn.update('load_plans', map, where: 'id = ?', whereArgs: [plan.id]);
@@ -557,7 +557,7 @@ class LogisticsService {
 
   Future<int> addLoadPlanItem(LoadPlanItem item, {int? userId}) async {
     return await db.transaction((txn) async {
-      final id = await txn.insert('load_plan_items', item.toJson());
+      final id = await txn.insert('load_plan_items', item.toMap());
       await auditService.logInTransaction(
         txn,
         action: 'add_load_plan_item',
@@ -572,7 +572,7 @@ class LogisticsService {
 
   Future<List<LoadPlanItem>> getLoadPlanItems(int loadPlanId) async {
     final maps = await db.query('load_plan_items', where: 'load_plan_id = ?', whereArgs: [loadPlanId], orderBy: 'load_order');
-    return maps.map((m) => LoadPlanItem.fromJson(m)).toList();
+    return maps.map((m) => LoadPlanItem.fromMap(m)).toList();
   }
 
   Future<int> updateLoadPlanItemStatus(int itemId, String status, {double? loadedQuantity, int? loadedAt, int? loadedBy, int? userId}) async {
@@ -599,7 +599,7 @@ class LogisticsService {
 
   Future<int> createFreightRate(FreightRate rate, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = rate.toJson();
+    final map = rate.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -644,7 +644,7 @@ class LogisticsService {
       args.add(effectiveDate);
     }
     final maps = await db.query('freight_rates', where: where.join(' AND '), whereArgs: args);
-    return maps.map((m) => FreightRate.fromJson(m)).toList();
+    return maps.map((m) => FreightRate.fromMap(m)).toList();
   }
 
   Future<FreightRate?> getBestFreightRate(int routeId, String vehicleType, int date) async {
@@ -658,7 +658,7 @@ class LogisticsService {
 
   Future<int> createFreightBill(FreightBill bill, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = bill.toJson();
+    final map = bill.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -678,7 +678,7 @@ class LogisticsService {
   Future<FreightBill?> getFreightBill(int id) async {
     final maps = await db.query('freight_bills', where: 'id = ?', whereArgs: [id]);
     if (maps.isEmpty) return null;
-    return FreightBill.fromJson(maps.first);
+    return FreightBill.fromMap(maps.first);
   }
 
   Future<List<FreightBill>> getFreightBills({int? carrierId, String? status, int? fromDate, int? toDate}) async {
@@ -701,7 +701,7 @@ class LogisticsService {
       args.add(toDate);
     }
     final maps = await db.query('freight_bills', where: where.isEmpty ? null : where.join(' AND '), whereArgs: args, orderBy: 'bill_date DESC');
-    return maps.map((m) => FreightBill.fromJson(m)).toList();
+    return maps.map((m) => FreightBill.fromMap(m)).toList();
   }
 
   Future<int> updateFreightBillStatus(int id, String status, {int? verifiedBy, int? paidDate, int? userId}) async {
@@ -730,7 +730,7 @@ class LogisticsService {
 
   Future<int> createMaintenance(VehicleMaintenance maintenance, {int? userId}) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final map = maintenance.toJson();
+    final map = maintenance.toMap();
     map['created_at'] = now;
     map['updated_at'] = now;
     return await db.transaction((txn) async {
@@ -755,7 +755,7 @@ class LogisticsService {
       args.add(status);
     }
     final maps = await db.query('vehicle_maintenance', where: where.join(' AND '), whereArgs: args, orderBy: 'service_date DESC');
-    return maps.map((m) => VehicleMaintenance.fromJson(m)).toList();
+    return maps.map((m) => VehicleMaintenance.fromMap(m)).toList();
   }
 
   Future<List<VehicleMaintenance>> getUpcomingMaintenance(int daysAhead) async {
@@ -768,7 +768,7 @@ class LogisticsService {
       WHERE vm.next_due_date BETWEEN ? AND ? AND vm.status != 'COMPLETED'
       ORDER BY vm.next_due_date
     ''', [now, future]);
-    return maps.map((m) => VehicleMaintenance.fromJson(m)).toList();
+    return maps.map((m) => VehicleMaintenance.fromMap(m)).toList();
   }
 
   // ============ Analytics ============

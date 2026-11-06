@@ -1,11 +1,9 @@
 // lib/models/transfer_record.dart
 
-import 'package:json_annotation/json_annotation.dart';
+import 'base_model.dart';
 
-part 'transfer_record.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class TransferRecord {
+class TransferRecord with BaseModel {
+  @override
   final int? id;
   final int itemId;
   final int? fromLocation;
@@ -14,6 +12,10 @@ class TransferRecord {
   final int operatorId;
   final int timestamp;
   final String reason;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   TransferRecord({
     this.id,
@@ -24,9 +26,35 @@ class TransferRecord {
     required this.operatorId,
     required this.timestamp,
     required this.reason,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory TransferRecord.fromJson(Map<String, dynamic> json) =>
-      _$TransferRecordFromJson(json);
-  Map<String, dynamic> toJson() => _$TransferRecordToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'item_id': itemId,
+      'from_location': fromLocation,
+      'to_location': toLocation,
+      'quantity': quantity,
+      'operator_id': operatorId,
+      'timestamp': timestamp,
+      'reason': reason,
+    };
+  }
+
+  factory TransferRecord.fromMap(Map<String, dynamic> m) {
+    return TransferRecord(
+      id: m['id'] as int?,
+      itemId: m['item_id'] as int,
+      fromLocation: m['from_location'] as int?,
+      toLocation: m['to_location'] as int?,
+      quantity: m['quantity'] as int,
+      operatorId: m['operator_id'] as int,
+      timestamp: m['timestamp'] as int,
+      reason: m['reason'] as String,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }

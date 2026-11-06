@@ -3,13 +3,34 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/gatepass_barcode_service.dart';
+import '../services/barcode_definition_service.dart';
+import '../services/barcode_service.dart';
+import '../services/barcode_scan_service.dart';
+import '../services/batch_scan_session_service.dart';
+import '../services/batch_scan_item_service.dart';
+import '../services/label_print_service.dart';
+import '../services/printer_config_service.dart';
 import '../models/gatepass_barcode_models.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
-  final GatepassBarcodeService barcodeService;
+  final BarcodeDefinitionService barcodeDefinitionService;
+  final BarcodeService barcodeService;
+  final BarcodeScanService barcodeScanService;
+  final BatchScanSessionService batchScanSessionService;
+  final BatchScanItemService batchScanItemService;
+  final LabelPrintJobService labelPrintJobService;
+  final PrinterConfigService printerConfigService;
 
-  const BarcodeScannerScreen({super.key, required this.barcodeService});
+  const BarcodeScannerScreen({
+    super.key,
+    required this.barcodeDefinitionService,
+    required this.barcodeService,
+    required this.barcodeScanService,
+    required this.batchScanSessionService,
+    required this.batchScanItemService,
+    required this.labelPrintJobService,
+    required this.printerConfigService,
+  });
 
   @override
   State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
@@ -50,10 +71,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
 
   Future<void> _loadData() async {
     final results = await Future.wait([
-      widget.barcodeService.getBarcodeDefinitions(),
-      widget.barcodeService.getBatchScanSessions(),
-      widget.barcodeService.getLabelPrintJobs(),
-      widget.barcodeService.getPrinterConfigs(),
+      widget.barcodeDefinitionService.getBarcodeDefinitions(),
+      widget.batchScanSessionService.getBatchScanSessions(),
+      widget.labelPrintJobService.getLabelPrintJobs(),
+      widget.printerConfigService.getPrinterConfigs(),
     ]);
     setState(() {
       _definitions = results[0] as List<BarcodeDefinition>;
@@ -81,7 +102,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
       status: barcode != null ? 'SUCCESS' : 'NOT_FOUND',
     );
 
-    await widget.barcodeService.logBarcodeScan(scan);
+    await widget.barcodeScanService.logBarcodeScan(scan);
 
     setState(() {
       _lastScannedValue = value;
@@ -109,8 +130,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
       totalExpected: 0, // Will be updated as items are added
     );
 
-    final id = await widget.barcodeService.createBatchScanSession(session);
-    final created = await widget.barcodeService.getBatchScanSession(id);
+    final id = await widget.batchScanSessionService.createBatchScanSession(session);
+    final created = await widget.batchScanSessionService.getBatchScanSession(id);
     setState(() => _activeBatchSession = created);
   }
 
@@ -129,7 +150,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
       scannedAt: DateTime.now().millisecondsSinceEpoch,
     );
 
-    await widget.barcodeService.addBatchScanItem(item);
+    await widget.batchScanItemService.addBatchScanItem(item);
 
     setState(() {
       _batchItems.add(item);
@@ -156,7 +177,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
   Future<void> _completeBatchSession() async {
     if (_activeBatchSession == null) return;
 
-    await widget.barcodeService.updateBatchScanSession(BatchScanSession(
+    await widget.batchScanSessionService.updateBatchScanSession(BatchScanSession(
       id: _activeBatchSession!.id,
       sessionNumber: _activeBatchSession!.sessionNumber,
       sessionType: _activeBatchSession!.sessionType,
@@ -184,9 +205,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
     showDialog(
       context: context,
       builder: (context) => _PrintJobDialog(
-        barcodeService: widget.barcodeService,
         definitions: _definitions,
         printers: _printers,
+        labelPrintJobService: widget.labelPrintJobService,
         onCreated: _loadData,
       ),
     );
@@ -548,7 +569,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
         ),
         Expanded(
           child: FutureBuilder<List<BarcodeScan>>(
-            future: widget.barcodeService.getBarcodeScans(
+            future: widget.barcodeScanService.getBarcodeScans(
               scanType: _scanType == 'ALL' ? null : _scanType,
               fromDate: DateTime.now().subtract(const Duration(days: 7)).millisecondsSinceEpoch,
               toDate: DateTime.now().millisecondsSinceEpoch,
@@ -625,15 +646,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
 }
 
 class _PrintJobDialog extends StatefulWidget {
-  final GatepassBarcodeService barcodeService;
   final List<BarcodeDefinition> definitions;
   final List<PrinterConfig> printers;
+  final LabelPrintJobService labelPrintJobService;
   final VoidCallback onCreated;
 
   const _PrintJobDialog({
-    required this.barcodeService,
     required this.definitions,
     required this.printers,
+    required this.labelPrintJobService,
     required this.onCreated,
   });
 
@@ -701,7 +722,7 @@ class _PrintJobDialogState extends State<_PrintJobDialog> {
         ElevatedButton(
           onPressed: () async {
             if (_selectedDefinition == null) return;
-            await widget.barcodeService.createLabelPrintJob(LabelPrintJob(
+            await widget.labelPrintJobService.createLabelPrintJob(LabelPrintJob(
               jobNumber: 'PRINT-${DateTime.now().millisecondsSinceEpoch}',
               barcodeDefinitionId: _selectedDefinition!.id!,
               entityType: _entityType,

@@ -1,11 +1,9 @@
 // lib/models/camera_ai_models.dart
 
-import 'package:json_annotation/json_annotation.dart';
+import 'base_model.dart';
 
-part 'camera_ai_models.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CameraDevice {
+class CameraDevice with BaseModel {
+  @override
   final int? id;
   final String name;
   final String code;
@@ -29,7 +27,9 @@ class CameraDevice {
   final double calibrationFactor;
   final int isActive;
   final int? lastHeartbeat;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   CameraDevice({
@@ -60,12 +60,67 @@ class CameraDevice {
     this.updatedAt,
   });
 
-  factory CameraDevice.fromJson(Map<String, dynamic> json) => _$CameraDeviceFromJson(json);
-  Map<String, dynamic> toJson() => _$CameraDeviceToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'name': name,
+      'code': code,
+      'device_type': deviceType,
+      'location_id': locationId,
+      'ip_address': ipAddress,
+      'port': port,
+      'username': username,
+      'password_hash': passwordHash,
+      'rtsp_url': rtspUrl,
+      'resolution_width': resolutionWidth,
+      'resolution_height': resolutionHeight,
+      'fps': fps,
+      'model_path': modelPath,
+      'model_version': modelVersion,
+      'confidence_threshold': confidenceThreshold,
+      'iou_threshold': iouThreshold,
+      'detection_classes': detectionClasses,
+      'count_direction': countDirection,
+      'roi_coordinates': roiCoordinates,
+      'calibration_factor': calibrationFactor,
+      'is_active': isActive,
+      'last_heartbeat': lastHeartbeat,
+    };
+  }
+
+  factory CameraDevice.fromMap(Map<String, dynamic> m) {
+    return CameraDevice(
+      id: m['id'] as int?,
+      name: m['name'] as String,
+      code: m['code'] as String,
+      deviceType: m['device_type'] as String?,
+      locationId: m['location_id'] as int?,
+      ipAddress: m['ip_address'] as String?,
+      port: m['port'] as int?,
+      username: m['username'] as String?,
+      passwordHash: m['password_hash'] as String?,
+      rtspUrl: m['rtsp_url'] as String?,
+      resolutionWidth: m['resolution_width'] as int? ?? 1920,
+      resolutionHeight: m['resolution_height'] as int? ?? 1080,
+      fps: m['fps'] as int? ?? 30,
+      modelPath: m['model_path'] as String?,
+      modelVersion: m['model_version'] as String?,
+      confidenceThreshold: (m['confidence_threshold'] as num?)?.toDouble() ?? 0.5,
+      iouThreshold: (m['iou_threshold'] as num?)?.toDouble() ?? 0.45,
+      detectionClasses: m['detection_classes'] as String?,
+      countDirection: m['count_direction'] as String?,
+      roiCoordinates: m['roi_coordinates'] as String?,
+      calibrationFactor: (m['calibration_factor'] as num?)?.toDouble() ?? 1.0,
+      isActive: m['is_active'] as int? ?? 1,
+      lastHeartbeat: m['last_heartbeat'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CountingSession {
+class CountingSession with BaseModel {
+  @override
   final int? id;
   final String sessionNumber;
   final int cameraId;
@@ -86,7 +141,9 @@ class CountingSession {
   final int? verifiedBy;
   final int? verifiedAt;
   final String? notes;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   CountingSession({
@@ -114,12 +171,61 @@ class CountingSession {
     this.updatedAt,
   });
 
-  factory CountingSession.fromJson(Map<String, dynamic> json) => _$CountingSessionFromJson(json);
-  Map<String, dynamic> toJson() => _$CountingSessionToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'session_number': sessionNumber,
+      'camera_id': cameraId,
+      'reference_type': referenceType,
+      'reference_id': referenceId,
+      'session_type': sessionType,
+      'status': status,
+      'expected_count': expectedCount,
+      'ai_count': aiCount,
+      'manual_count': manualCount,
+      'verified_count': verifiedCount,
+      'discrepancy': discrepancy,
+      'discrepancy_percent': discrepancyPercent,
+      'start_time': startTime,
+      'end_time': endTime,
+      'duration_seconds': durationSeconds,
+      'operator_id': operatorId,
+      'verified_by': verifiedBy,
+      'verified_at': verifiedAt,
+      'notes': notes,
+    };
+  }
+
+  factory CountingSession.fromMap(Map<String, dynamic> m) {
+    return CountingSession(
+      id: m['id'] as int?,
+      sessionNumber: m['session_number'] as String,
+      cameraId: m['camera_id'] as int,
+      referenceType: m['reference_type'] as String?,
+      referenceId: m['reference_id'] as int?,
+      sessionType: m['session_type'] as String,
+      status: m['status'] as String? ?? 'IN_PROGRESS',
+      expectedCount: m['expected_count'] as int?,
+      aiCount: m['ai_count'] as int? ?? 0,
+      manualCount: m['manual_count'] as int?,
+      verifiedCount: m['verified_count'] as int?,
+      discrepancy: m['discrepancy'] as int? ?? 0,
+      discrepancyPercent: (m['discrepancy_percent'] as num?)?.toDouble() ?? 0,
+      startTime: m['start_time'] as int?,
+      endTime: m['end_time'] as int?,
+      durationSeconds: m['duration_seconds'] as int?,
+      operatorId: m['operator_id'] as int?,
+      verifiedBy: m['verified_by'] as int?,
+      verifiedAt: m['verified_at'] as int?,
+      notes: m['notes'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class DetectionEvent {
+class DetectionEvent with BaseModel {
+  @override
   final int? id;
   final int sessionId;
   final int frameTimestamp;
@@ -136,7 +242,10 @@ class DetectionEvent {
   final int counted;
   final int? countTimestamp;
   final String? imagePath;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   DetectionEvent({
     this.id,
@@ -156,14 +265,56 @@ class DetectionEvent {
     this.countTimestamp,
     this.imagePath,
     this.createdAt,
+    this.updatedAt,
   });
 
-  factory DetectionEvent.fromJson(Map<String, dynamic> json) => _$DetectionEventFromJson(json);
-  Map<String, dynamic> toJson() => _$DetectionEventToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'session_id': sessionId,
+      'frame_timestamp': frameTimestamp,
+      'track_id': trackId,
+      'class_name': className,
+      'confidence': confidence,
+      'bbox_x': bboxX,
+      'bbox_y': bboxY,
+      'bbox_width': bboxWidth,
+      'bbox_height': bboxHeight,
+      'centroid_x': centroidX,
+      'centroid_y': centroidY,
+      'direction': direction,
+      'counted': counted,
+      'count_timestamp': countTimestamp,
+      'image_path': imagePath,
+    };
+  }
+
+  factory DetectionEvent.fromMap(Map<String, dynamic> m) {
+    return DetectionEvent(
+      id: m['id'] as int?,
+      sessionId: m['session_id'] as int,
+      frameTimestamp: m['frame_timestamp'] as int,
+      trackId: m['track_id'] as int?,
+      className: m['class_name'] as String?,
+      confidence: (m['confidence'] as num?)?.toDouble(),
+      bboxX: (m['bbox_x'] as num?)?.toDouble(),
+      bboxY: (m['bbox_y'] as num?)?.toDouble(),
+      bboxWidth: (m['bbox_width'] as num?)?.toDouble(),
+      bboxHeight: (m['bbox_height'] as num?)?.toDouble(),
+      centroidX: (m['centroid_x'] as num?)?.toDouble(),
+      centroidY: (m['centroid_y'] as num?)?.toDouble(),
+      direction: m['direction'] as String?,
+      counted: m['counted'] as int? ?? 0,
+      countTimestamp: m['count_timestamp'] as int?,
+      imagePath: m['image_path'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CountVerification {
+class CountVerification with BaseModel {
+  @override
   final int? id;
   final int sessionId;
   final String? verificationType; // MANUAL_RECOUNT, SUPERVISOR_APPROVAL, WEIGHT_BASED, BARCODE_MATCH
@@ -177,7 +328,10 @@ class CountVerification {
   final String? evidenceImages; // JSON array
   final int? startedAt;
   final int? completedAt;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CountVerification({
     this.id,
@@ -194,14 +348,50 @@ class CountVerification {
     this.startedAt,
     this.completedAt,
     this.createdAt,
+    this.updatedAt,
   });
 
-  factory CountVerification.fromJson(Map<String, dynamic> json) => _$CountVerificationFromJson(json);
-  Map<String, dynamic> toJson() => _$CountVerificationToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'session_id': sessionId,
+      'verification_type': verificationType,
+      'verifier_id': verifierId,
+      'original_count': originalCount,
+      'verified_count': verifiedCount,
+      'variance': variance,
+      'variance_percent': variancePercent,
+      'status': status,
+      'verification_notes': verificationNotes,
+      'evidence_images': evidenceImages,
+      'started_at': startedAt,
+      'completed_at': completedAt,
+    };
+  }
+
+  factory CountVerification.fromMap(Map<String, dynamic> m) {
+    return CountVerification(
+      id: m['id'] as int?,
+      sessionId: m['session_id'] as int,
+      verificationType: m['verification_type'] as String?,
+      verifierId: m['verifier_id'] as int,
+      originalCount: m['original_count'] as int,
+      verifiedCount: m['verified_count'] as int,
+      variance: m['variance'] as int,
+      variancePercent: (m['variance_percent'] as num?)?.toDouble() ?? 0,
+      status: m['status'] as String? ?? 'PENDING',
+      verificationNotes: m['verification_notes'] as String?,
+      evidenceImages: m['evidence_images'] as String?,
+      startedAt: m['started_at'] as int?,
+      completedAt: m['completed_at'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CameraCalibration {
+class CameraCalibration with BaseModel {
+  @override
   final int? id;
   final int cameraId;
   final String? calibrationType; // DISTANCE, COUNT_LINE, ROI, LENS
@@ -214,6 +404,10 @@ class CameraCalibration {
   final int? calibratedAt;
   final int isActive;
   final String? notes;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CameraCalibration({
     this.id,
@@ -228,14 +422,49 @@ class CameraCalibration {
     this.calibratedAt,
     this.isActive = 1,
     this.notes,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  factory CameraCalibration.fromJson(Map<String, dynamic> json) => _$CameraCalibrationFromJson(json);
-  Map<String, dynamic> toJson() => _$CameraCalibrationToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'camera_id': cameraId,
+      'calibration_type': calibrationType,
+      'reference_object': referenceObject,
+      'reference_size': referenceSize,
+      'pixel_measurement': pixelMeasurement,
+      'calibration_factor': calibrationFactor,
+      'accuracy_percent': accuracyPercent,
+      'calibrated_by': calibratedBy,
+      'calibrated_at': calibratedAt,
+      'is_active': isActive,
+      'notes': notes,
+    };
+  }
+
+  factory CameraCalibration.fromMap(Map<String, dynamic> m) {
+    return CameraCalibration(
+      id: m['id'] as int?,
+      cameraId: m['camera_id'] as int,
+      calibrationType: m['calibration_type'] as String?,
+      referenceObject: m['reference_object'] as String?,
+      referenceSize: (m['reference_size'] as num?)?.toDouble(),
+      pixelMeasurement: (m['pixel_measurement'] as num?)?.toDouble(),
+      calibrationFactor: (m['calibration_factor'] as num?)?.toDouble(),
+      accuracyPercent: (m['accuracy_percent'] as num?)?.toDouble(),
+      calibratedBy: m['calibrated_by'] as int?,
+      calibratedAt: m['calibrated_at'] as int?,
+      isActive: m['is_active'] as int? ?? 1,
+      notes: m['notes'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class MLModel {
+class MLModel with BaseModel {
+  @override
   final int? id;
   final String name;
   final String version;
@@ -251,7 +480,9 @@ class MLModel {
   final String? trainingDataInfo;
   final int isActive;
   final int? deployedAt;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   MLModel({
@@ -274,12 +505,51 @@ class MLModel {
     this.updatedAt,
   });
 
-  factory MLModel.fromJson(Map<String, dynamic> json) => _$MLModelFromJson(json);
-  Map<String, dynamic> toJson() => _$MLModelToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'name': name,
+      'version': version,
+      'model_type': modelType,
+      'framework': framework,
+      'input_width': inputWidth,
+      'input_height': inputHeight,
+      'input_channels': inputChannels,
+      'classes': classes,
+      'model_file_path': modelFilePath,
+      'label_file_path': labelFilePath,
+      'metrics_json': metricsJson,
+      'training_data_info': trainingDataInfo,
+      'is_active': isActive,
+      'deployed_at': deployedAt,
+    };
+  }
+
+  factory MLModel.fromMap(Map<String, dynamic> m) {
+    return MLModel(
+      id: m['id'] as int?,
+      name: m['name'] as String,
+      version: m['version'] as String,
+      modelType: m['model_type'] as String?,
+      framework: m['framework'] as String?,
+      inputWidth: m['input_width'] as int?,
+      inputHeight: m['input_height'] as int?,
+      inputChannels: m['input_channels'] as int? ?? 3,
+      classes: m['classes'] as String?,
+      modelFilePath: m['model_file_path'] as String?,
+      labelFilePath: m['label_file_path'] as String?,
+      metricsJson: m['metrics_json'] as String?,
+      trainingDataInfo: m['training_data_info'] as String?,
+      isActive: m['is_active'] as int? ?? 1,
+      deployedAt: m['deployed_at'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class CameraAlert {
+class CameraAlert with BaseModel {
+  @override
   final int? id;
   final int cameraId;
   final String? alertType; // DISCREPANCY, CAMERA_OFFLINE, LOW_CONFIDENCE, OBSTRUCTION, TAMPERING
@@ -293,7 +563,10 @@ class CameraAlert {
   final int resolved;
   final int? resolvedBy;
   final int? resolvedAt;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CameraAlert({
     this.id,
@@ -310,8 +583,44 @@ class CameraAlert {
     this.resolvedBy,
     this.resolvedAt,
     this.createdAt,
+    this.updatedAt,
   });
 
-  factory CameraAlert.fromJson(Map<String, dynamic> json) => _$CameraAlertFromJson(json);
-  Map<String, dynamic> toJson() => _$CameraAlertToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'camera_id': cameraId,
+      'alert_type': alertType,
+      'severity': severity,
+      'message': message,
+      'session_id': sessionId,
+      'detection_event_id': detectionEventId,
+      'acknowledged': acknowledged,
+      'acknowledged_by': acknowledgedBy,
+      'acknowledged_at': acknowledgedAt,
+      'resolved': resolved,
+      'resolved_by': resolvedBy,
+      'resolved_at': resolvedAt,
+    };
+  }
+
+  factory CameraAlert.fromMap(Map<String, dynamic> m) {
+    return CameraAlert(
+      id: m['id'] as int?,
+      cameraId: m['camera_id'] as int,
+      alertType: m['alert_type'] as String?,
+      severity: m['severity'] as String?,
+      message: m['message'] as String?,
+      sessionId: m['session_id'] as int?,
+      detectionEventId: m['detection_event_id'] as int?,
+      acknowledged: m['acknowledged'] as int? ?? 0,
+      acknowledgedBy: m['acknowledged_by'] as int?,
+      acknowledgedAt: m['acknowledged_at'] as int?,
+      resolved: m['resolved'] as int? ?? 0,
+      resolvedBy: m['resolved_by'] as int?,
+      resolvedAt: m['resolved_at'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }

@@ -1,11 +1,9 @@
 // lib/models/inventory_item.dart
 
-import 'package:json_annotation/json_annotation.dart';
+import 'base_model.dart';
 
-part 'inventory_item.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
-class InventoryItem {
+class InventoryItem with BaseModel {
+  @override
   final int? id;
   final String sku;
   final String name;
@@ -19,7 +17,9 @@ class InventoryItem {
   final double? currentTemp;
   final double? humidity;
   final String status;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   InventoryItem({
@@ -40,7 +40,41 @@ class InventoryItem {
     this.updatedAt,
   });
 
-  factory InventoryItem.fromJson(Map<String, dynamic> json) =>
-      _$InventoryItemFromJson(json);
-  Map<String, dynamic> toJson() => _$InventoryItemToJson(this);
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'sku': sku,
+      'name': name,
+      'category': category,
+      'quantity': quantity,
+      'unit': unit,
+      'location_id': locationId,
+      'expiry_date': expiryDate,
+      'min_temp': minTemp,
+      'max_temp': maxTemp,
+      'current_temp': currentTemp,
+      'humidity': humidity,
+      'status': status,
+    };
+  }
+
+  factory InventoryItem.fromMap(Map<String, dynamic> m) {
+    return InventoryItem(
+      id: m['id'] as int?,
+      sku: m['sku'] as String,
+      name: m['name'] as String,
+      category: m['category'] as String,
+      quantity: m['quantity'] as int,
+      unit: m['unit'] as String,
+      locationId: m['location_id'] as int?,
+      expiryDate: m['expiry_date'] as int?,
+      minTemp: (m['min_temp'] as num?)?.toDouble(),
+      maxTemp: (m['max_temp'] as num?)?.toDouble(),
+      currentTemp: (m['current_temp'] as num?)?.toDouble(),
+      humidity: (m['humidity'] as num?)?.toDouble(),
+      status: m['status'] as String? ?? 'IN_STOCK',
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
 }
