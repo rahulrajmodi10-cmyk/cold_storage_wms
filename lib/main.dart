@@ -30,6 +30,7 @@ import 'services/gst_return_service.dart';
 import 'services/purchase_order_service.dart';
 import 'services/sales_order_service.dart';
 import 'services/financial_report_service.dart';
+import 'services/finance_service.dart';
 import 'services/carrier_vehicle_service.dart';
 import 'services/route_service.dart';
 import 'services/shipment_service.dart';
@@ -104,6 +105,7 @@ void _setupServiceLocator(Database db) {
   getIt.registerSingleton<AccountsPayableService>(AccountsPayableService(db));
   getIt.registerSingleton<JournalEntryService>(JournalEntryService(db));
   getIt.registerSingleton<JournalEntryLineService>(JournalEntryLineService(db));
+  getIt.registerSingleton<FinanceService>(FinanceService(db));
   getIt.registerSingleton<GSTReturnService>(GSTReturnService(db));
   getIt.registerSingleton<PurchaseOrderService>(PurchaseOrderService(db));
   getIt.registerSingleton<PurchaseOrderItemService>(PurchaseOrderItemService(db));
@@ -189,7 +191,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       FinanceDashboard(
         chartOfAccountsService: getIt<ChartOfAccountsService>(),
-        partyService: getIt<PartyService>(),
+        financeService: getIt<FinanceService>(),
         taxRateService: getIt<TaxRateService>(),
         invoiceService: getIt<InvoiceService>(),
         paymentService: getIt<PaymentService>(),
