@@ -1,6 +1,9 @@
 // lib/main.dart
 
 import 'dart:io';
+import 'dart:convert';
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
@@ -25,6 +28,8 @@ import 'services/finance_service.dart';
 import 'services/logistics_service.dart';
 import 'services/camera_ai_service.dart';
 import 'services/gatepass_barcode_service.dart';
+import 'package:crypto/crypto.dart';
+import 'package:collection/collection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,26 +90,56 @@ Future<Database> _initDatabase() async {
   );
 }
 
+// Generate PBKDF2-HMAC-SHA256 hash for a password
+// Returns a hash string in format: iterations:salt_base64:hash_base64
+String _generatePasswordHash(String password, {int iterations = 10000}) {
+  final rng = Random.secure();
+  final salt = List.generate(16, (_) => rng.nextInt(256));
+  final saltBytes = Uint8List.fromList(salt);
+
+  final key = pbkdf2(
+    Hmac(sha256, utf8.encode(password)),
+    saltBytes,
+    iterations: iterations,
+    keyLength: 32,
+  );
+
+  return '$iterations:${base64.encode(saltBytes)}:${base64.encode(key)}';
+}
+
 Future<void> _seedDemoData(DatabaseExecutor db) async {
   final now = DateTime.now().millisecondsSinceEpoch;
   final yesterday = now - 86400000;
   final lastWeek = now - 604800000;
   final nextWeek = now + 604800000;
 
-  // Seed users
+  // Helper to generate consistent PBKDF2 hash using fixed salt
+  String generateHash(String password, String saltStr) {
+    final salt = base64.decode(saltStr);
+    final key = pbkdf2(
+      Hmac(sha256, utf8.encode(password)),
+      salt,
+      iterations: 10000,
+      keyLength: 32,
+    );
+    return '10000:$saltStr:${base64.encode(key)}';
+  }
+
+  // Seed users with properly hashed passwords
+  // Fixed salts for reproducible demo hashes
   await db.insert('users', {
       'username': 'admin',
-      'password_hash': 'admin123',
+      'password_hash': generateHash('admin123', base64.encode(Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]))),
       'role': 'ADMIN',
     });
     await db.insert('users', {
       'username': 'operator',
-      'password_hash': 'operator123',
+      'password_hash': generateHash('operator123', base64.encode(Uint8List.fromList([16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))),
       'role': 'OPERATOR',
     });
     await db.insert('users', {
       'username': 'manager',
-      'password_hash': 'manager123',
+      'password_hash': generateHash('manager123', base64.encode(Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]))),
       'role': 'MANAGER',
     });
 

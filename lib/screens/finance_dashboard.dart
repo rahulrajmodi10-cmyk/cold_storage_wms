@@ -82,17 +82,26 @@ class _FinanceDashboardState extends State<FinanceDashboard> {
       appBar: AppBar(
         title: const Text('Finance Dashboard'),
         actions: [
-          DropdownButton<int>(
-            value: _selectedPeriod,
-            underline: Container(),
-            items: const [
-              DropdownMenuItem(value: 0, child: Text('This Month')),
-              DropdownMenuItem(value: 1, child: Text('Last Month')),
-              DropdownMenuItem(value: 2, child: Text('This Quarter')),
-              DropdownMenuItem(value: 3, child: Text('This Year')),
+          // Period selector - using PopupMenuButton for better AppBar compatibility
+          PopupMenuButton<int>(
+            icon: Icon(
+              _selectedPeriod == 0
+                  ? Icons.calendar_today
+                  : _selectedPeriod == 1
+                      ? Icons.calendar_month
+                      : _selectedPeriod == 2
+                          ? Icons.view_quilt
+                          : Icons.calendar_year,
+            ),
+            tooltip: 'Select Period',
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 0, child: Text('This Month')),
+              PopupMenuItem(value: 1, child: Text('Last Month')),
+              PopupMenuItem(value: 2, child: Text('This Quarter')),
+              PopupMenuItem(value: 3, child: Text('This Year')),
             ],
-            onChanged: (value) {
-              setState(() => _selectedPeriod = value!);
+            onSelected: (value) {
+              setState(() => _selectedPeriod = value);
               _loadData();
             },
           ),

@@ -505,7 +505,7 @@ class _HomeDashboardState extends State<HomeDashboard> {
         barcodeService: widget.gatepassService,
       ),
       PartiesScreen(
-        partyService: widget.financeService,
+        financeService: widget.financeService,
       ),
       AlertsScreen(
         auditService: widget.auditService,
