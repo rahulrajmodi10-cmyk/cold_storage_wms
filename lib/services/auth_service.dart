@@ -3,12 +3,17 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
+import 'package:crypto/pbkdf2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'audit_service.dart';
+
+// Use DeepCollectionEquality for comparing byte arrays
+final _listEquality = const DeepCollectionEquality();
 
 class AuthService {
   final Database db;
@@ -30,14 +35,18 @@ class AuthService {
     final expectedHash = base64.decode(parts[2]);
 
     // Compute hash using the crypto package's pbkdf2 function
+    // In crypto 3.x, use pbkdf2 from crypto/pbkdf2.dart
+    // Create HMAC-SHA256 with empty key for password hashing
+    final hmac = Hmac(sha256, Uint8List(32));
     final key = pbkdf2(
-      Hmac(sha256, utf8.encode(password)),
-      salt,
+      hmac,
+      password,
+      salt: salt,
       iterations: iterations,
-      keyLength: 32,
+      outputLength: 32,
     );
 
-    return const ListEquality().equals(key, expectedHash);
+    return _listEquality.equals(key, expectedHash);
   }
 
   Future<void> sendOtp(int userId) async {
