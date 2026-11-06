@@ -1,6 +1,9 @@
 // lib/models/inventory_item.dart
 
-class InventoryItem {
+import 'base_model.dart';
+
+class InventoryItem with BaseModel {
+  @override
   final int? id;
   final String sku;
   final String name;
@@ -14,7 +17,9 @@ class InventoryItem {
   final double? currentTemp;
   final double? humidity;
   final String status;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   InventoryItem({
@@ -37,7 +42,7 @@ class InventoryItem {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'sku': sku,
       'name': name,
       'category': category,
@@ -50,8 +55,6 @@ class InventoryItem {
       'current_temp': currentTemp,
       'humidity': humidity,
       'status': status,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 

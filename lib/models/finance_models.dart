@@ -1,6 +1,9 @@
 // lib/models/finance_models.dart
 
-class ChartOfAccount {
+import 'base_model.dart';
+
+class ChartOfAccount with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -10,7 +13,9 @@ class ChartOfAccount {
   final int gstApplicable;
   final double gstRate;
   final double openingBalance;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   ChartOfAccount({
@@ -31,7 +36,7 @@ class ChartOfAccount {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'type': type,
@@ -40,8 +45,6 @@ class ChartOfAccount {
       'gst_applicable': gstApplicable,
       'gst_rate': gstRate,
       'opening_balance': openingBalance,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -62,7 +65,8 @@ class ChartOfAccount {
   }
 }
 
-class Party {
+class Party with BaseModel {
+  @override
   final int? id;
   final String name;
   final String type; // CUSTOMER, VENDOR, BOTH
@@ -79,7 +83,9 @@ class Party {
   final int paymentTerms;
   final double openingBalance;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Party({
@@ -105,7 +111,7 @@ class Party {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'type': type,
       'gstin': gstin,
@@ -121,8 +127,6 @@ class Party {
       'payment_terms': paymentTerms,
       'opening_balance': openingBalance,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -150,7 +154,8 @@ class Party {
   }
 }
 
-class Invoice {
+class Invoice with BaseModel {
+  @override
   final int? id;
   final String invoiceNumber;
   final int invoiceDate;
@@ -168,7 +173,9 @@ class Invoice {
   final String? referenceType;
   final int? referenceId;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Invoice({
@@ -195,7 +202,7 @@ class Invoice {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'invoice_number': invoiceNumber,
       'invoice_date': invoiceDate,
       'due_date': dueDate,
@@ -212,8 +219,6 @@ class Invoice {
       'reference_type': referenceType,
       'reference_id': referenceId,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -242,7 +247,8 @@ class Invoice {
   }
 }
 
-class InvoiceItem {
+class InvoiceItem with BaseModel {
+  @override
   final int? id;
   final int invoiceId;
   final int? itemId;
@@ -259,6 +265,10 @@ class InvoiceItem {
   final double sgstAmount;
   final double igstAmount;
   final double totalAmount;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   InvoiceItem({
     this.id,
@@ -277,11 +287,13 @@ class InvoiceItem {
     this.sgstAmount = 0,
     this.igstAmount = 0,
     required this.totalAmount,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'invoice_id': invoiceId,
       'item_id': itemId,
       'description': description,
@@ -318,11 +330,14 @@ class InvoiceItem {
       sgstAmount: (m['sgst_amount'] as num?)?.toDouble() ?? 0,
       igstAmount: (m['igst_amount'] as num?)?.toDouble() ?? 0,
       totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class Payment {
+class Payment with BaseModel {
+  @override
   final int? id;
   final String paymentNumber;
   final int paymentDate;
@@ -338,7 +353,9 @@ class Payment {
   final int? referenceId;
   final String status; // POSTED, CLEARED, BOUNCED, CANCELLED
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Payment({
@@ -363,7 +380,7 @@ class Payment {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'payment_number': paymentNumber,
       'payment_date': paymentDate,
       'party_id': partyId,
@@ -378,8 +395,6 @@ class Payment {
       'reference_id': referenceId,
       'status': status,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -406,7 +421,8 @@ class Payment {
   }
 }
 
-class BankAccount {
+class BankAccount with BaseModel {
+  @override
   final int? id;
   final String accountName;
   final String? bankName;
@@ -417,7 +433,9 @@ class BankAccount {
   final double openingBalance;
   final double currentBalance;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   BankAccount({
@@ -437,7 +455,7 @@ class BankAccount {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'account_name': accountName,
       'bank_name': bankName,
       'account_number': accountNumber,
@@ -447,8 +465,6 @@ class BankAccount {
       'opening_balance': openingBalance,
       'current_balance': currentBalance,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -470,16 +486,19 @@ class BankAccount {
   }
 }
 
-class JournalEntry {
+class JournalEntry with BaseModel {
+  @override
   final int? id;
   final String entryNumber;
   final int entryDate;
   final String? narration;
   final String? referenceType;
   final int? referenceId;
-  final String status; // POSTED, REVERSED
+  final String status; // POSTED, REVERSEVED
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   JournalEntry({
@@ -497,7 +516,7 @@ class JournalEntry {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'entry_number': entryNumber,
       'entry_date': entryDate,
       'narration': narration,
@@ -505,8 +524,6 @@ class JournalEntry {
       'reference_id': referenceId,
       'status': status,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -526,13 +543,18 @@ class JournalEntry {
   }
 }
 
-class JournalEntryLine {
+class JournalEntryLine with BaseModel {
+  @override
   final int? id;
   final int entryId;
   final int accountId;
   final double debit;
   final double credit;
   final String? narration;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   JournalEntryLine({
     this.id,
@@ -541,11 +563,13 @@ class JournalEntryLine {
     this.debit = 0,
     this.credit = 0,
     this.narration,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'entry_id': entryId,
       'account_id': accountId,
       'debit': debit,
@@ -562,11 +586,14 @@ class JournalEntryLine {
       debit: (m['debit'] as num?)?.toDouble() ?? 0,
       credit: (m['credit'] as num?)?.toDouble() ?? 0,
       narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class PurchaseOrder {
+class PurchaseOrder with BaseModel {
+  @override
   final int? id;
   final String poNumber;
   final int poDate;
@@ -578,7 +605,9 @@ class PurchaseOrder {
   final double totalAmount;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   PurchaseOrder({
@@ -599,7 +628,7 @@ class PurchaseOrder {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'po_number': poNumber,
       'po_date': poDate,
       'vendor_id': vendorId,
@@ -610,8 +639,6 @@ class PurchaseOrder {
       'total_amount': totalAmount,
       'narration': narration,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -634,7 +661,8 @@ class PurchaseOrder {
   }
 }
 
-class PurchaseOrderItem {
+class PurchaseOrderItem with BaseModel {
+  @override
   final int? id;
   final int poId;
   final int? itemId;
@@ -646,6 +674,10 @@ class PurchaseOrderItem {
   final double taxRate;
   final double totalAmount;
   final double receivedQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   PurchaseOrderItem({
     this.id,
@@ -659,11 +691,13 @@ class PurchaseOrderItem {
     this.taxRate = 0,
     required this.totalAmount,
     this.receivedQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'po_id': poId,
       'item_id': itemId,
       'description': description,
@@ -690,11 +724,14 @@ class PurchaseOrderItem {
       taxRate: (m['tax_rate'] as num?)?.toDouble() ?? 0,
       totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
       receivedQuantity: (m['received_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class SalesOrder {
+class SalesOrder with BaseModel {
+  @override
   final int? id;
   final String soNumber;
   final int soDate;
@@ -706,7 +743,9 @@ class SalesOrder {
   final double totalAmount;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   SalesOrder({
@@ -727,7 +766,7 @@ class SalesOrder {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'so_number': soNumber,
       'so_date': soDate,
       'customer_id': customerId,
@@ -738,8 +777,6 @@ class SalesOrder {
       'total_amount': totalAmount,
       'narration': narration,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -762,7 +799,8 @@ class SalesOrder {
   }
 }
 
-class SalesOrderItem {
+class SalesOrderItem with BaseModel {
+  @override
   final int? id;
   final int soId;
   final int? itemId;
@@ -774,6 +812,10 @@ class SalesOrderItem {
   final double taxRate;
   final double totalAmount;
   final double deliveredQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   SalesOrderItem({
     this.id,
@@ -787,11 +829,13 @@ class SalesOrderItem {
     this.taxRate = 0,
     required this.totalAmount,
     this.deliveredQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'so_id': soId,
       'item_id': itemId,
       'description': description,
@@ -818,11 +862,14 @@ class SalesOrderItem {
       taxRate: (m['tax_rate'] as num?)?.toDouble() ?? 0,
       totalAmount: (m['total_amount'] as num?)?.toDouble() ?? 0,
       deliveredQuantity: (m['delivered_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class TaxRate {
+class TaxRate with BaseModel {
+  @override
   final int? id;
   final String name;
   final String type; // CGST, SGST, IGST, CESS
@@ -830,7 +877,9 @@ class TaxRate {
   final int? effectiveFrom;
   final int? effectiveTo;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   TaxRate({
@@ -847,15 +896,13 @@ class TaxRate {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'type': type,
       'rate': rate,
       'effective_from': effectiveFrom,
       'effective_to': effectiveTo,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -874,7 +921,8 @@ class TaxRate {
   }
 }
 
-class AccountReceivable {
+class AccountReceivable with BaseModel {
+  @override
   final int? id;
   final String arNumber;
   final int partyId;
@@ -886,7 +934,9 @@ class AccountReceivable {
   final double outstandingAmount;
   final String status; // OPEN, PARTIAL, CLOSED, OVERDUE
   final String? narration;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   AccountReceivable({
@@ -907,7 +957,7 @@ class AccountReceivable {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'ar_number': arNumber,
       'party_id': partyId,
       'invoice_id': invoiceId,
@@ -918,8 +968,6 @@ class AccountReceivable {
       'outstanding_amount': outstandingAmount,
       'status': status,
       'narration': narration,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -942,7 +990,8 @@ class AccountReceivable {
   }
 }
 
-class AccountPayable {
+class AccountPayable with BaseModel {
+  @override
   final int? id;
   final String apNumber;
   final int partyId;
@@ -954,7 +1003,9 @@ class AccountPayable {
   final double outstandingAmount;
   final String status; // OPEN, PARTIAL, CLOSED, OVERDUE
   final String? narration;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   AccountPayable({
@@ -975,7 +1026,7 @@ class AccountPayable {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'ap_number': apNumber,
       'party_id': partyId,
       'invoice_id': invoiceId,
@@ -986,8 +1037,6 @@ class AccountPayable {
       'outstanding_amount': outstandingAmount,
       'status': status,
       'narration': narration,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -1010,7 +1059,53 @@ class AccountPayable {
   }
 }
 
-class GSTReturn {
+class PaymentAllocation with BaseModel {
+  @override
+  final int? id;
+  final int paymentId;
+  final int invoiceId;
+  final double amount;
+  final String? narration;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
+
+  PaymentAllocation({
+    this.id,
+    required this.paymentId,
+    required this.invoiceId,
+    required this.amount,
+    this.narration,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      ...baseToMap(),
+      'payment_id': paymentId,
+      'invoice_id': invoiceId,
+      'amount': amount,
+      'narration': narration,
+    };
+  }
+
+  factory PaymentAllocation.fromMap(Map<String, dynamic> m) {
+    return PaymentAllocation(
+      id: m['id'] as int?,
+      paymentId: m['payment_id'] as int,
+      invoiceId: m['invoice_id'] as int,
+      amount: (m['amount'] as num?)?.toDouble() ?? 0,
+      narration: m['narration'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
+    );
+  }
+}
+
+class GSTReturn with BaseModel {
+  @override
   final int? id;
   final String returnType; // GSTR1, GSTR3B
   final String period; // YYYY-MM
@@ -1023,7 +1118,9 @@ class GSTReturn {
   final int? filedDate;
   final String? acknowledgementNo;
   final String? jsonData;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   GSTReturn({
@@ -1045,7 +1142,7 @@ class GSTReturn {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'return_type': returnType,
       'period': period,
       'status': status,
@@ -1057,8 +1154,6 @@ class GSTReturn {
       'filed_date': filedDate,
       'acknowledgement_no': acknowledgementNo,
       'json_data': jsonData,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 

@@ -4,13 +4,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/camera_ai_service.dart';
-import '../services/gatepass_barcode_service.dart';
+import '../services/gatepass_service.dart';
 import '../models/camera_ai_models.dart';
 import '../models/gatepass_barcode_models.dart';
 
 class CameraCountingScreen extends StatefulWidget {
   final CameraAIService cameraService;
-  final GatepassBarcodeService gatepassService;
+  final GatepassService gatepassService;
 
   const CameraCountingScreen({
     super.key,

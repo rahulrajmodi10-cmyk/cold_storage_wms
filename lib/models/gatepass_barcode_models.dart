@@ -1,6 +1,9 @@
 // lib/models/gatepass_barcode_models.dart
 
-class GatepassType {
+import 'base_model.dart';
+
+class GatepassType with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -12,7 +15,9 @@ class GatepassType {
   final int validityHours;
   final String? colorCode;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   GatepassType({
@@ -33,7 +38,7 @@ class GatepassType {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'description': description,
@@ -44,8 +49,6 @@ class GatepassType {
       'validity_hours': validityHours,
       'color_code': colorCode,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -68,7 +71,8 @@ class GatepassType {
   }
 }
 
-class Gatepass {
+class Gatepass with BaseModel {
+  @override
   final int? id;
   final String gatepassNumber;
   final int gatepassTypeId;
@@ -136,7 +140,9 @@ class Gatepass {
   final String? completionNotes;
 
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Gatepass({
@@ -194,7 +200,7 @@ class Gatepass {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'gatepass_number': gatepassNumber,
       'gatepass_type_id': gatepassTypeId,
       'reference_type': referenceType,
@@ -242,8 +248,6 @@ class Gatepass {
       'completed_at': completedAt,
       'completion_notes': completionNotes,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -303,7 +307,8 @@ class Gatepass {
   }
 }
 
-class GatepassItem {
+class GatepassItem with BaseModel {
+  @override
   final int? id;
   final int gatepassId;
   final int? itemId;
@@ -325,6 +330,10 @@ class GatepassItem {
   final int verifiedPackages;
   final String verificationStatus; // PENDING, VERIFIED, SHORT, EXCESS, DAMAGED
   final String? verificationNotes;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   GatepassItem({
     this.id,
@@ -348,11 +357,13 @@ class GatepassItem {
     this.verifiedPackages = 0,
     this.verificationStatus = 'PENDING',
     this.verificationNotes,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'gatepass_id': gatepassId,
       'item_id': itemId,
       'description': description,
@@ -399,11 +410,14 @@ class GatepassItem {
       verifiedPackages: m['verified_packages'] as int? ?? 0,
       verificationStatus: m['verification_status'] as String? ?? 'PENDING',
       verificationNotes: m['verification_notes'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class SecurityGate {
+class SecurityGate with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -414,7 +428,9 @@ class SecurityGate {
   final int? cameraId;
   final String? barrierType; // MANUAL, AUTOMATIC, BOOM, TURNSTILE
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   SecurityGate({
@@ -434,7 +450,7 @@ class SecurityGate {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'gate_type': gateType,
@@ -444,8 +460,6 @@ class SecurityGate {
       'camera_id': cameraId,
       'barrier_type': barrierType,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -467,7 +481,8 @@ class SecurityGate {
   }
 }
 
-class GatepassVehicleLog {
+class GatepassVehicleLog with BaseModel {
+  @override
   final int? id;
   final int gatepassId;
   final int gateId;
@@ -482,6 +497,10 @@ class GatepassVehicleLog {
   final int? officerId;
   final int timestamp;
   final String? notes;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   GatepassVehicleLog({
     this.id,
@@ -498,11 +517,13 @@ class GatepassVehicleLog {
     this.officerId,
     required this.timestamp,
     this.notes,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'gatepass_id': gatepassId,
       'gate_id': gateId,
       'log_type': logType,
@@ -535,11 +556,14 @@ class GatepassVehicleLog {
       officerId: m['officer_id'] as int?,
       timestamp: m['timestamp'] as int,
       notes: m['notes'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class GatepassApproval {
+class GatepassApproval with BaseModel {
+  @override
   final int? id;
   final int gatepassId;
   final int level;
@@ -549,6 +573,10 @@ class GatepassApproval {
   final int? actionAt;
   final String? comments;
   final int? delegatedTo;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   GatepassApproval({
     this.id,
@@ -560,11 +588,13 @@ class GatepassApproval {
     this.actionAt,
     this.comments,
     this.delegatedTo,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'gatepass_id': gatepassId,
       'level': level,
       'approver_role': approverRole,
@@ -587,11 +617,14 @@ class GatepassApproval {
       actionAt: m['action_at'] as int?,
       comments: m['comments'] as String?,
       delegatedTo: m['delegated_to'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class DispatchSchedule {
+class DispatchSchedule with BaseModel {
+  @override
   final int? id;
   final String scheduleNumber;
   final int scheduleDate;
@@ -608,7 +641,9 @@ class DispatchSchedule {
   final String status; // SCHEDULED, IN_PROGRESS, COMPLETED, DELAYED, CANCELLED
   final int priority;
   final int? assignedBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   DispatchSchedule({
@@ -634,7 +669,7 @@ class DispatchSchedule {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'schedule_number': scheduleNumber,
       'schedule_date': scheduleDate,
       'shift': shift,
@@ -650,8 +685,6 @@ class DispatchSchedule {
       'status': status,
       'priority': priority,
       'assigned_by': assignedBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -679,7 +712,8 @@ class DispatchSchedule {
   }
 }
 
-class LoadingBay {
+class LoadingBay with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -692,7 +726,9 @@ class LoadingBay {
   final double? maxTemp;
   final int? cameraId;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   LoadingBay({
@@ -714,7 +750,7 @@ class LoadingBay {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'bay_type': bayType,
@@ -726,8 +762,6 @@ class LoadingBay {
       'max_temp': maxTemp,
       'camera_id': cameraId,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -755,7 +789,8 @@ class LoadingBay {
 // Barcode/QR Code Models
 // ============================================
 
-class BarcodeDefinition {
+class BarcodeDefinition with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -770,7 +805,9 @@ class BarcodeDefinition {
   final int? fontSize;
   final String? errorCorrection; // L, M, Q, H
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   BarcodeDefinition({
@@ -794,7 +831,7 @@ class BarcodeDefinition {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'symbology': symbology,
@@ -808,8 +845,6 @@ class BarcodeDefinition {
       'font_size': fontSize,
       'error_correction': errorCorrection,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -835,7 +870,8 @@ class BarcodeDefinition {
   }
 }
 
-class Barcode {
+class Barcode with BaseModel {
+  @override
   final int? id;
   final String barcodeValue;
   final int barcodeTypeId;
@@ -848,7 +884,9 @@ class Barcode {
   final int? printedBy;
   final String status; // ACTIVE, VOIDED, REPLACED
   final int? expiresAt;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Barcode({
@@ -870,7 +908,7 @@ class Barcode {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'barcode_value': barcodeValue,
       'barcode_type_id': barcodeTypeId,
       'entity_type': entityType,
@@ -882,8 +920,6 @@ class Barcode {
       'printed_by': printedBy,
       'status': status,
       'expires_at': expiresAt,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -907,7 +943,8 @@ class Barcode {
   }
 }
 
-class BarcodeScan {
+class BarcodeScan with BaseModel {
+  @override
   final int? id;
   final int? scanSessionId;
   final String barcodeValue;
@@ -925,7 +962,10 @@ class BarcodeScan {
   final String status; // SUCCESS, FAILED, DUPLICATE, NOT_FOUND, MISMATCH
   final String? errorMessage;
   final int timestamp;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   BarcodeScan({
     this.id,
@@ -946,11 +986,12 @@ class BarcodeScan {
     this.errorMessage,
     required this.timestamp,
     this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'scan_session_id': scanSessionId,
       'barcode_value': barcodeValue,
       'barcode_id': barcodeId,
@@ -967,7 +1008,6 @@ class BarcodeScan {
       'status': status,
       'error_message': errorMessage,
       'timestamp': timestamp,
-      'created_at': createdAt,
     };
   }
 
@@ -991,11 +1031,13 @@ class BarcodeScan {
       errorMessage: m['error_message'] as String?,
       timestamp: m['timestamp'] as int,
       createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class BatchScanSession {
+class BatchScanSession with BaseModel {
+  @override
   final int? id;
   final String sessionNumber;
   final String? sessionType; // RECEIVING, DISPATCH, TRANSFER, INVENTORY, GATEPASS
@@ -1011,7 +1053,9 @@ class BatchScanSession {
   final int? startedAt;
   final int? completedAt;
   final String? notes;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   BatchScanSession({
@@ -1036,7 +1080,7 @@ class BatchScanSession {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'session_number': sessionNumber,
       'session_type': sessionType,
       'reference_type': referenceType,
@@ -1051,8 +1095,6 @@ class BatchScanSession {
       'started_at': startedAt,
       'completed_at': completedAt,
       'notes': notes,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -1079,7 +1121,8 @@ class BatchScanSession {
   }
 }
 
-class BatchScanItem {
+class BatchScanItem with BaseModel {
+  @override
   final int? id;
   final int sessionId;
   final String? barcodeValue;
@@ -1093,6 +1136,10 @@ class BatchScanItem {
   final int? scannedAt;
   final int? verifiedBy;
   final int? verifiedAt;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   BatchScanItem({
     this.id,
@@ -1108,11 +1155,13 @@ class BatchScanItem {
     this.scannedAt,
     this.verifiedBy,
     this.verifiedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'session_id': sessionId,
       'barcode_value': barcodeValue,
       'barcode_id': barcodeId,
@@ -1143,11 +1192,14 @@ class BatchScanItem {
       scannedAt: m['scanned_at'] as int?,
       verifiedBy: m['verified_by'] as int?,
       verifiedAt: m['verified_at'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class LabelPrintJob {
+class LabelPrintJob with BaseModel {
+  @override
   final int? id;
   final String jobNumber;
   final int barcodeDefinitionId;
@@ -1167,6 +1219,10 @@ class LabelPrintJob {
   final int? requestedAt;
   final int? startedAt;
   final int? completedAt;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   LabelPrintJob({
     this.id,
@@ -1188,11 +1244,13 @@ class LabelPrintJob {
     this.requestedAt,
     this.startedAt,
     this.completedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'job_number': jobNumber,
       'barcode_definition_id': barcodeDefinitionId,
       'entity_type': entityType,
@@ -1235,11 +1293,14 @@ class LabelPrintJob {
       requestedAt: m['requested_at'] as int?,
       startedAt: m['started_at'] as int?,
       completedAt: m['completed_at'] as int?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class PrinterConfig {
+class PrinterConfig with BaseModel {
+  @override
   final int? id;
   final String name;
   final String? printerType; // ZEBRA_ZPL, DATAMAX_DPL, SATO_SBPL, EPSON_ESCPOS, GENERIC
@@ -1257,7 +1318,9 @@ class PrinterConfig {
   final int isDefault;
   final int isActive;
   final String? testPrintCommand;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   PrinterConfig({
@@ -1284,7 +1347,7 @@ class PrinterConfig {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'printer_type': printerType,
       'connection_type': connectionType,
@@ -1301,8 +1364,6 @@ class PrinterConfig {
       'is_default': isDefault,
       'is_active': isActive,
       'test_print_command': testPrintCommand,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 

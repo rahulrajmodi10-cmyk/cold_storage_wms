@@ -2,13 +2,48 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../services/finance_service.dart';
+import '../services/chart_of_accounts_service.dart';
+import '../services/party_service.dart';
+import '../services/tax_rate_service.dart';
+import '../services/invoice_service.dart';
+import '../services/payment_service.dart';
+import '../services/accounts_receivable_payable_service.dart';
+import '../services/journal_entry_service.dart';
+import '../services/gst_return_service.dart';
+import '../services/purchase_order_service.dart';
+import '../services/sales_order_service.dart';
+import '../services/financial_report_service.dart';
 import '../models/finance_models.dart';
 
 class FinanceDashboard extends StatefulWidget {
-  final FinanceService financeService;
+  final ChartOfAccountsService chartOfAccountsService;
+  final PartyService partyService;
+  final TaxRateService taxRateService;
+  final InvoiceService invoiceService;
+  final PaymentService paymentService;
+  final AccountsReceivableService accountsReceivableService;
+  final AccountsPayableService accountsPayableService;
+  final JournalEntryService journalEntryService;
+  final GSTReturnService gstReturnService;
+  final PurchaseOrderService purchaseOrderService;
+  final SalesOrderService salesOrderService;
+  final FinancialReportService financialReportService;
 
-  const FinanceDashboard({super.key, required this.financeService});
+  const FinanceDashboard({
+    super.key,
+    required this.chartOfAccountsService,
+    required this.partyService,
+    required this.taxRateService,
+    required this.invoiceService,
+    required this.paymentService,
+    required this.accountsReceivableService,
+    required this.accountsPayableService,
+    required this.journalEntryService,
+    required this.gstReturnService,
+    required this.purchaseOrderService,
+    required this.salesOrderService,
+    required this.financialReportService,
+  });
 
   @override
   State<FinanceDashboard> createState() => _FinanceDashboardState();
@@ -58,11 +93,11 @@ class _FinanceDashboardState extends State<FinanceDashboard> {
     }
 
     final results = await Future.wait([
-      widget.financeService.getTrialBalance(toDate),
-      widget.financeService.getProfitLoss(fromDate, toDate),
-      widget.financeService.getBalanceSheet(toDate),
-      widget.financeService.getAgedReceivables(toDate),
-      widget.financeService.getAgedPayables(toDate),
+      widget.financialReportService.getTrialBalance(toDate),
+      widget.financialReportService.getProfitLoss(fromDate, toDate),
+      widget.financialReportService.getBalanceSheet(toDate),
+      widget.financialReportService.getAgedReceivables(toDate),
+      widget.financialReportService.getAgedPayables(toDate),
     ]);
 
     setState(() {
@@ -137,7 +172,7 @@ class _FinanceDashboardState extends State<FinanceDashboard> {
 
   Widget _buildPLSummary() {
     final revenue = _profitLoss?['revenue'] as double? ?? 0;
-    final expenses = _profitLoss?['expenses'] as double? ?? 0;
+    final expenses = _profitLoss?['expense'] as double? ?? 0;
     final netProfit = _profitLoss?['net_profit'] as double? ?? 0;
 
     return Column(

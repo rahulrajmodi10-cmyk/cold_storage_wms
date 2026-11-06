@@ -1,6 +1,9 @@
 // lib/models/logistics_models.dart
 
-class Carrier {
+import 'base_model.dart';
+
+class Carrier with BaseModel {
+  @override
   final int? id;
   final String name;
   final String? code;
@@ -13,7 +16,9 @@ class Carrier {
   final String? licenseNumber;
   final double rating;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Carrier({
@@ -35,7 +40,7 @@ class Carrier {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'code': code,
       'contact_person': contactPerson,
@@ -47,8 +52,6 @@ class Carrier {
       'license_number': licenseNumber,
       'rating': rating,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -72,7 +75,8 @@ class Carrier {
   }
 }
 
-class Vehicle {
+class Vehicle with BaseModel {
+  @override
   final int? id;
   final int? carrierId;
   final String registrationNumber;
@@ -92,7 +96,9 @@ class Vehicle {
   final String? driverLicense;
   final String status; // AVAILABLE, IN_TRANSIT, MAINTENANCE, RETIRED
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Vehicle({
@@ -121,7 +127,7 @@ class Vehicle {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'carrier_id': carrierId,
       'registration_number': registrationNumber,
       'vehicle_type': vehicleType,
@@ -140,8 +146,6 @@ class Vehicle {
       'driver_license': driverLicense,
       'status': status,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -172,7 +176,8 @@ class Vehicle {
   }
 }
 
-class Route {
+class Route with BaseModel {
+  @override
   final int? id;
   final String code;
   final String name;
@@ -183,7 +188,9 @@ class Route {
   final double tollCharges;
   final String? routeDescription;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Route({
@@ -203,7 +210,7 @@ class Route {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'code': code,
       'name': name,
       'origin': origin,
@@ -213,8 +220,6 @@ class Route {
       'toll_charges': tollCharges,
       'route_description': routeDescription,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -236,7 +241,8 @@ class Route {
   }
 }
 
-class RouteStop {
+class RouteStop with BaseModel {
+  @override
   final int? id;
   final int routeId;
   final int stopOrder;
@@ -247,6 +253,10 @@ class RouteStop {
   final int? estimatedArrival;
   final int? estimatedDeparture;
   final String? stopType; // PICKUP, DELIVERY, BOTH
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   RouteStop({
     this.id,
@@ -259,11 +269,13 @@ class RouteStop {
     this.estimatedArrival,
     this.estimatedDeparture,
     this.stopType,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'route_id': routeId,
       'stop_order': stopOrder,
       'location_name': locationName,
@@ -288,11 +300,14 @@ class RouteStop {
       estimatedArrival: m['estimated_arrival'] as int?,
       estimatedDeparture: m['estimated_departure'] as int?,
       stopType: m['stop_type'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class Shipment {
+class Shipment with BaseModel {
+  @override
   final int? id;
   final String shipmentNumber;
   final int shipmentDate;
@@ -327,7 +342,9 @@ class Shipment {
   final String? podReceivedBy;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   Shipment({
@@ -371,7 +388,7 @@ class Shipment {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'shipment_number': shipmentNumber,
       'shipment_date': shipmentDate,
       'reference_type': referenceType,
@@ -405,8 +422,6 @@ class Shipment {
       'pod_received_by': podReceivedBy,
       'narration': narration,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -452,7 +467,8 @@ class Shipment {
   }
 }
 
-class ShipmentItem {
+class ShipmentItem with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final int? itemId;
@@ -467,6 +483,10 @@ class ShipmentItem {
   final double? maxTemp;
   final double loadedQuantity;
   final double deliveredQuantity;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   ShipmentItem({
     this.id,
@@ -483,11 +503,13 @@ class ShipmentItem {
     this.maxTemp,
     this.loadedQuantity = 0,
     this.deliveredQuantity = 0,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'shipment_id': shipmentId,
       'item_id': itemId,
       'description': description,
@@ -520,11 +542,14 @@ class ShipmentItem {
       maxTemp: (m['max_temp'] as num?)?.toDouble(),
       loadedQuantity: (m['loaded_quantity'] as num?)?.toDouble() ?? 0,
       deliveredQuantity: (m['delivered_quantity'] as num?)?.toDouble() ?? 0,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class ShipmentTracking {
+class ShipmentTracking with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final double? latitude;
@@ -539,6 +564,10 @@ class ShipmentTracking {
   final double? signalStrength;
   final int timestamp;
   final String? source; // GPS, MANUAL, DRIVER_APP
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   ShipmentTracking({
     this.id,
@@ -555,11 +584,13 @@ class ShipmentTracking {
     this.signalStrength,
     required this.timestamp,
     this.source,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'shipment_id': shipmentId,
       'latitude': latitude,
       'longitude': longitude,
@@ -592,11 +623,14 @@ class ShipmentTracking {
       signalStrength: (m['signal_strength'] as num?)?.toDouble(),
       timestamp: m['timestamp'] as int,
       source: m['source'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class LoadPlan {
+class LoadPlan with BaseModel {
+  @override
   final int? id;
   final int shipmentId;
   final int vehicleId;
@@ -612,7 +646,9 @@ class LoadPlan {
   final int? approvedBy;
   final int? approvedAt;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   LoadPlan({
@@ -637,7 +673,7 @@ class LoadPlan {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'shipment_id': shipmentId,
       'vehicle_id': vehicleId,
       'plan_date': planDate,
@@ -652,8 +688,6 @@ class LoadPlan {
       'approved_by': approvedBy,
       'approved_at': approvedAt,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -680,7 +714,8 @@ class LoadPlan {
   }
 }
 
-class LoadPlanItem {
+class LoadPlanItem with BaseModel {
+  @override
   final int? id;
   final int loadPlanId;
   final int shipmentItemId;
@@ -691,6 +726,10 @@ class LoadPlanItem {
   final int stackable;
   final int fragile;
   final String? temperatureZone;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   LoadPlanItem({
     this.id,
@@ -703,11 +742,13 @@ class LoadPlanItem {
     this.stackable = 1,
     this.fragile = 0,
     this.temperatureZone,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'load_plan_id': loadPlanId,
       'shipment_item_id': shipmentItemId,
       'load_order': loadOrder,
@@ -732,11 +773,14 @@ class LoadPlanItem {
       stackable: m['stackable'] as int? ?? 1,
       fragile: m['fragile'] as int? ?? 0,
       temperatureZone: m['temperature_zone'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class FreightRate {
+class FreightRate with BaseModel {
+  @override
   final int? id;
   final int? carrierId;
   final int? routeId;
@@ -750,7 +794,9 @@ class FreightRate {
   final int? effectiveFrom;
   final int? effectiveTo;
   final int isActive;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   FreightRate({
@@ -773,7 +819,7 @@ class FreightRate {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'carrier_id': carrierId,
       'route_id': routeId,
       'vehicle_type': vehicleType,
@@ -786,8 +832,6 @@ class FreightRate {
       'effective_from': effectiveFrom,
       'effective_to': effectiveTo,
       'is_active': isActive,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -812,7 +856,8 @@ class FreightRate {
   }
 }
 
-class FreightBill {
+class FreightBill with BaseModel {
+  @override
   final int? id;
   final String billNumber;
   final int billDate;
@@ -837,7 +882,9 @@ class FreightBill {
   final int? paidDate;
   final String? narration;
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   FreightBill({
@@ -871,7 +918,7 @@ class FreightBill {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'bill_number': billNumber,
       'bill_date': billDate,
       'carrier_id': carrierId,
@@ -895,8 +942,6 @@ class FreightBill {
       'paid_date': paidDate,
       'narration': narration,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -932,7 +977,8 @@ class FreightBill {
   }
 }
 
-class VehicleMaintenance {
+class VehicleMaintenance with BaseModel {
+  @override
   final int? id;
   final int vehicleId;
   final String? maintenanceType; // PREVENTIVE, BREAKDOWN, ACCIDENT, INSPECTION
@@ -944,7 +990,9 @@ class VehicleMaintenance {
   final String? serviceProvider;
   final String status; // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
   final int? createdBy;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   VehicleMaintenance({
@@ -965,7 +1013,7 @@ class VehicleMaintenance {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'vehicle_id': vehicleId,
       'maintenance_type': maintenanceType,
       'description': description,
@@ -976,8 +1024,6 @@ class VehicleMaintenance {
       'service_provider': serviceProvider,
       'status': status,
       'created_by': createdBy,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 

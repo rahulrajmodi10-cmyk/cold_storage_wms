@@ -1,6 +1,9 @@
 // lib/models/transfer_record.dart
 
-class TransferRecord {
+import 'base_model.dart';
+
+class TransferRecord with BaseModel {
+  @override
   final int? id;
   final int itemId;
   final int? fromLocation;
@@ -9,6 +12,10 @@ class TransferRecord {
   final int operatorId;
   final int timestamp;
   final String reason;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   TransferRecord({
     this.id,
@@ -19,11 +26,13 @@ class TransferRecord {
     required this.operatorId,
     required this.timestamp,
     required this.reason,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'item_id': itemId,
       'from_location': fromLocation,
       'to_location': toLocation,
@@ -44,6 +53,8 @@ class TransferRecord {
       operatorId: m['operator_id'] as int,
       timestamp: m['timestamp'] as int,
       reason: m['reason'] as String,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }

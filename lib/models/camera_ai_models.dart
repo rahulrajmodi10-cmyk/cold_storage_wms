@@ -1,6 +1,9 @@
 // lib/models/camera_ai_models.dart
 
-class CameraDevice {
+import 'base_model.dart';
+
+class CameraDevice with BaseModel {
+  @override
   final int? id;
   final String name;
   final String code;
@@ -24,7 +27,9 @@ class CameraDevice {
   final double calibrationFactor;
   final int isActive;
   final int? lastHeartbeat;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   CameraDevice({
@@ -57,7 +62,7 @@ class CameraDevice {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'code': code,
       'device_type': deviceType,
@@ -80,8 +85,6 @@ class CameraDevice {
       'calibration_factor': calibrationFactor,
       'is_active': isActive,
       'last_heartbeat': lastHeartbeat,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -116,7 +119,8 @@ class CameraDevice {
   }
 }
 
-class CountingSession {
+class CountingSession with BaseModel {
+  @override
   final int? id;
   final String sessionNumber;
   final int cameraId;
@@ -137,7 +141,9 @@ class CountingSession {
   final int? verifiedBy;
   final int? verifiedAt;
   final String? notes;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   CountingSession({
@@ -167,7 +173,7 @@ class CountingSession {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'session_number': sessionNumber,
       'camera_id': cameraId,
       'reference_type': referenceType,
@@ -187,8 +193,6 @@ class CountingSession {
       'verified_by': verifiedBy,
       'verified_at': verifiedAt,
       'notes': notes,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -220,7 +224,8 @@ class CountingSession {
   }
 }
 
-class DetectionEvent {
+class DetectionEvent with BaseModel {
+  @override
   final int? id;
   final int sessionId;
   final int frameTimestamp;
@@ -237,7 +242,10 @@ class DetectionEvent {
   final int counted;
   final int? countTimestamp;
   final String? imagePath;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   DetectionEvent({
     this.id,
@@ -257,11 +265,12 @@ class DetectionEvent {
     this.countTimestamp,
     this.imagePath,
     this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'session_id': sessionId,
       'frame_timestamp': frameTimestamp,
       'track_id': trackId,
@@ -277,7 +286,6 @@ class DetectionEvent {
       'counted': counted,
       'count_timestamp': countTimestamp,
       'image_path': imagePath,
-      'created_at': createdAt,
     };
   }
 
@@ -300,11 +308,13 @@ class DetectionEvent {
       countTimestamp: m['count_timestamp'] as int?,
       imagePath: m['image_path'] as String?,
       createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class CountVerification {
+class CountVerification with BaseModel {
+  @override
   final int? id;
   final int sessionId;
   final String? verificationType; // MANUAL_RECOUNT, SUPERVISOR_APPROVAL, WEIGHT_BASED, BARCODE_MATCH
@@ -318,7 +328,10 @@ class CountVerification {
   final String? evidenceImages; // JSON array
   final int? startedAt;
   final int? completedAt;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CountVerification({
     this.id,
@@ -335,11 +348,12 @@ class CountVerification {
     this.startedAt,
     this.completedAt,
     this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'session_id': sessionId,
       'verification_type': verificationType,
       'verifier_id': verifierId,
@@ -352,7 +366,6 @@ class CountVerification {
       'evidence_images': evidenceImages,
       'started_at': startedAt,
       'completed_at': completedAt,
-      'created_at': createdAt,
     };
   }
 
@@ -372,11 +385,13 @@ class CountVerification {
       startedAt: m['started_at'] as int?,
       completedAt: m['completed_at'] as int?,
       createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class CameraCalibration {
+class CameraCalibration with BaseModel {
+  @override
   final int? id;
   final int cameraId;
   final String? calibrationType; // DISTANCE, COUNT_LINE, ROI, LENS
@@ -389,6 +404,10 @@ class CameraCalibration {
   final int? calibratedAt;
   final int isActive;
   final String? notes;
+  @override
+  final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CameraCalibration({
     this.id,
@@ -403,11 +422,13 @@ class CameraCalibration {
     this.calibratedAt,
     this.isActive = 1,
     this.notes,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'camera_id': cameraId,
       'calibration_type': calibrationType,
       'reference_object': referenceObject,
@@ -436,11 +457,14 @@ class CameraCalibration {
       calibratedAt: m['calibrated_at'] as int?,
       isActive: m['is_active'] as int? ?? 1,
       notes: m['notes'] as String?,
+      createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
 
-class MLModel {
+class MLModel with BaseModel {
+  @override
   final int? id;
   final String name;
   final String version;
@@ -456,7 +480,9 @@ class MLModel {
   final String? trainingDataInfo;
   final int isActive;
   final int? deployedAt;
+  @override
   final int? createdAt;
+  @override
   final int? updatedAt;
 
   MLModel({
@@ -481,7 +507,7 @@ class MLModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'name': name,
       'version': version,
       'model_type': modelType,
@@ -496,8 +522,6 @@ class MLModel {
       'training_data_info': trainingDataInfo,
       'is_active': isActive,
       'deployed_at': deployedAt,
-      'created_at': createdAt,
-      'updated_at': updatedAt,
     };
   }
 
@@ -524,7 +548,8 @@ class MLModel {
   }
 }
 
-class CameraAlert {
+class CameraAlert with BaseModel {
+  @override
   final int? id;
   final int cameraId;
   final String? alertType; // DISCREPANCY, CAMERA_OFFLINE, LOW_CONFIDENCE, OBSTRUCTION, TAMPERING
@@ -538,7 +563,10 @@ class CameraAlert {
   final int resolved;
   final int? resolvedBy;
   final int? resolvedAt;
+  @override
   final int? createdAt;
+  @override
+  final int? updatedAt;
 
   CameraAlert({
     this.id,
@@ -555,11 +583,12 @@ class CameraAlert {
     this.resolvedBy,
     this.resolvedAt,
     this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      ...baseToMap(),
       'camera_id': cameraId,
       'alert_type': alertType,
       'severity': severity,
@@ -572,7 +601,6 @@ class CameraAlert {
       'resolved': resolved,
       'resolved_by': resolvedBy,
       'resolved_at': resolvedAt,
-      'created_at': createdAt,
     };
   }
 
@@ -592,6 +620,7 @@ class CameraAlert {
       resolvedBy: m['resolved_by'] as int?,
       resolvedAt: m['resolved_at'] as int?,
       createdAt: m['created_at'] as int?,
+      updatedAt: m['updated_at'] as int?,
     );
   }
 }
