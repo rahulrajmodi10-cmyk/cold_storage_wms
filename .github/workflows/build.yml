@@ -118,119 +118,59 @@ jobs:
           key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
-      - name: Verify pubspec.lock exists
-        run: ls -la pubspec.lock
-      - name: Get dependencies
-        run: |
-          for i in 1 2 3; do
-            echo "Attempt $i of 3..."
-            flutter pub get --verbose && break
-            echo "Attempt $i failed, waiting 15 seconds..."
-            sleep 15
-          done
-        shell: bash
       - name: Generate local.properties
         run: |
-          echo "=== Generating android/local.properties ==="
           echo "flutterRoot=$(dirname "$(dirname "$(command -v flutter)")")" > android/local.properties
           echo "sdk.dir=${ANDROID_HOME:-/usr/lib/android-sdk}" >> android/local.properties
           echo "=== local.properties contents ==="
           cat android/local.properties
-      - name: Verify Android platform directory
+      - name: Get dependencies
+        run: flutter pub get --verbose
+      - name: Verify Android SDK
         run: |
-          echo "=== Checking if android directory exists ==="
-          ls -la
-          if [ ! -d "android" ]; then
-            echo "ERROR: Android platform directory not found!"
-            exit 1
-          else
-            echo "Android platform directory already exists"
-            ls -la android/
-          fi
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          ls -la $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms dir"
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
           flutter --version
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Running flutter build apk --release --split-per-abi ==="
-          flutter build apk --release --split-per-abi --verbose 2>&1 | tee build_apk_output.txt
-          echo "=== Build APK exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
-          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
+          flutter build apk --release --split-per-abi --verbose
       - name: Build App Bundle (release)
         run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Running flutter build appbundle --release ==="
-          flutter build appbundle --release --verbose 2>&1 | tee build_aab_output.txt
-          echo "=== Build AAB exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
-      - name: Verify APK/AAB outputs
+          echo "=== Building AAB ==="
+          flutter build appbundle --release --verbose
+      - name: Verify APK artifacts exist
         run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Checking APK outputs ==="
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "flutter-apk dir not found"
-          echo "=== Checking AAB outputs ==="
-          ls -la build/app/outputs/bundle/release/ 2>/dev/null || echo "bundle/release dir not found"
-          echo "=== Full build/app tree ==="
-          find build/app -type f \( -name "*.apk" -o -name "*.aab" \) 2>/dev/null | head -20
-          echo "=== Checking if any APKs exist ==="
-          find build/app -name "*.apk" -type f 2>/dev/null | wc -l
-          echo "=== Checking if any AABs exist ==="
-          find build/app -name "*.aab" -type f 2>/dev/null | wc -l
-          echo "=== Build APK output tail ==="
-          tail -50 build_apk_output.txt
-          echo "=== Build AAB output tail ==="
-          tail -50 build_aab_output.txt
-      - name: Verify APK/AAB artifacts before upload
-        run: |
-          echo "=== Verifying artifacts exist before upload ==="
-          echo "=== Searching for APK files anywhere in build/ ==="
-          APK_COUNT=$(find build -name "*.apk" -type f 2>/dev/null | wc -l)
-          echo "APK files found: $APK_COUNT"
+          echo "=== Checking APK files ==="
+          ls -la build/app/outputs/flutter-apk/release/
+          APK_COUNT=$(ls build/app/outputs/flutter-apk/release/*.apk 2>/dev/null | wc -l)
+          echo "APK files count: $APK_COUNT"
           if [ "$APK_COUNT" -eq 0 ]; then
-            echo "ERROR: No APK files found anywhere in build/"
+            echo "ERROR: No APK files found"
             exit 1
           fi
-          echo "=== Found APKs ==="
-          find build -name "*.apk" -type f -exec ls -la {} \;
-          echo "=== Searching for AAB files anywhere in build/ ==="
-          AAB_COUNT=$(find build -name "*.aab" -type f 2>/dev/null | wc -l)
-          echo "AAB files found: $AAB_COUNT"
-          if [ "$AAB_COUNT" -eq 0 ]; then
-            echo "ERROR: No AAB files found anywhere in build/"
-            exit 1
-          fi
-          echo "=== Found AABs ==="
-          find build -name "*.aab" -type f -exec ls -la {} \;
-      - name: Debug - Check entire build directory structure
+      - name: Verify AAB artifact exists
         run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Full build directory tree ==="
-          find build -type f 2>/dev/null | head -100
-          echo "=== All directories in build ==="
-          find build -type d 2>/dev/null | head -50
+          echo "=== Checking AAB file ==="
+          ls -la build/app/outputs/bundle/release/
+          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "ERROR: No AAB file found"
+            exit 1
+          fi
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-android-logs
           path: |
-            build_apk_output.txt
-            build_aab_output.txt
-      - name: Find all APK and AAB files
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Finding all APK files ==="
-          find . -name "*.apk" -type f 2>/dev/null
-          echo "=== Finding all AAB files ==="
-          find . -name "*.aab" -type f 2>/dev/null
+            build/**/*.txt
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-apks
           path: |
-            build/**/*.apk
-            build/**/*.aab
+            build/app/outputs/flutter-apk/release/*.apk
+            build/app/outputs/bundle/release/*.aab
           retention-days: 30
           if-no-files-found: error
 
@@ -254,86 +194,26 @@ jobs:
           key: flutter-deps-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
           restore-keys: |
             flutter-deps-
-      - name: Verify pubspec.lock exists
-        run: ls -la pubspec.lock
       - name: Get dependencies
-        run: |
-          for i in 1 2 3; do
-            echo "Attempt $i of 3..."
-            flutter pub get --verbose && break
-            echo "Attempt $i failed, waiting 15 seconds..."
-            sleep 15
-          done
-        shell: bash
-      - name: Create Web platform directory
-        run: |
-          echo "=== Checking if web directory exists ==="
-          ls -la
-          if [ ! -d "web" ]; then
-            echo "Creating Web platform directory..."
-            flutter create --platforms=web . 2>&1 || echo "flutter create failed, checking if it's a 'project already exists' error"
-            ls -la web/ 2>/dev/null || echo "web directory not created"
-          else
-            echo "Web platform directory already exists"
-            ls -la web/
-          fi
+        run: flutter pub get --verbose
       - name: Build Web (release)
         run: |
           echo "=== Flutter version ==="
           flutter --version
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Running flutter build web --release ==="
-          flutter build web --release --verbose 2>&1 | tee build_web_output.txt
-          echo "=== Build Web exit code: ${PIPESTATUS[0]} ==="
-          echo "=== Post-build working directory: $(pwd) ==="
-          echo "=== Post-build build directory exists: $(test -d build && echo YES || echo NO) ==="
+          flutter build web --release --verbose
       - name: Verify Web outputs
         run: |
-          echo "=== Working directory: $(pwd) ==="
           echo "=== Checking Web outputs ==="
-          ls -la build/web/ 2>/dev/null || echo "build/web not found"
-          echo "=== Full build/web tree ==="
-          find build/web -type f 2>/dev/null | head -30
-          echo "=== Build Web output tail ==="
-          tail -50 build_web_output.txt
-      - name: Debug - Check entire build directory structure (Web)
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Full build directory tree (Web) ==="
-          find build -type f 2>/dev/null | head -100
-          echo "=== All directories in build (Web) ==="
-          find build -type d 2>/dev/null | head -50
-      - name: Upload build logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-web-logs
-          path: build_web_output.txt
-      - name: List files to upload for Web artifacts
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Files in build/web ==="
-          ls -la build/web/ 2>/dev/null || echo "No web build found"
-          echo "=== All files in build/web ==="
-          find build/web -type f 2>/dev/null | head -30
-          echo "=== All files anywhere in build/ ==="
-          find build -type f 2>/dev/null | head -30
-      - name: Verify Web artifacts before upload
-        run: |
-          echo "=== Verifying Web artifacts exist before upload ==="
+          ls -la build/web/
           if [ ! -d "build/web" ] || [ -z "$(ls -A build/web 2>/dev/null)" ]; then
             echo "ERROR: No Web build files found in build/web/"
             exit 1
           fi
-          echo "Web build files found:"
-          ls -la build/web/
       - name: Upload Web artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-web
-          path: |
-            build/web/
-            **/build/web/**
+          path: build/web/
           retention-days: 30
           if-no-files-found: error
 
@@ -390,8 +270,8 @@ jobs:
           ls -la
           if [ ! -d "linux" ]; then
             echo "Creating Linux platform directory..."
-            flutter create --platforms=linux . 2>&1 || echo "flutter create failed"
-            ls -la linux/ 2>/dev/null || echo "linux directory not created"
+            flutter create --platforms=linux .
+            ls -la linux/
           else
             echo "Linux platform directory already exists"
             ls -la linux/
@@ -403,8 +283,8 @@ jobs:
           ls -la
           if [ ! -d "macos" ]; then
             echo "Creating macOS platform directory..."
-            flutter create --platforms=macos . 2>&1 || echo "flutter create failed"
-            ls -la macos/ 2>/dev/null || echo "macos directory not created"
+            flutter create --platforms=macos .
+            ls -la macos/
           else
             echo "macOS platform directory already exists"
             ls -la macos/
@@ -416,11 +296,9 @@ jobs:
           Get-ChildItem
           if (-not (Test-Path "windows")) {
             Write-Host "Creating Windows platform directory..."
-            flutter create --platforms=windows . 2>&1
+            flutter create --platforms=windows .
             if (Test-Path "windows") {
               Get-ChildItem windows/
-            } else {
-              Write-Host "windows directory not created"
             }
           } else {
             Write-Host "Windows platform directory already exists"
@@ -433,20 +311,16 @@ jobs:
         run: |
           echo "=== Flutter version ==="
           flutter --version
-          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build linux --release ==="
-          flutter build linux --release --verbose 2>&1 | tee build_linux_output.txt
-          echo "=== Build Linux exit code: ${PIPESTATUS[0]} ==="
+          flutter build linux --release --verbose
       - name: Build macOS
         if: matrix.os == 'macos-latest'
         timeout-minutes: 30
         run: |
           echo "=== Flutter version ==="
           flutter --version
-          echo "=== Working directory: $(pwd) ==="
           echo "=== Running flutter build macos --release ==="
-          flutter build macos --release --verbose 2>&1 | tee build_macos_output.txt
-          echo "=== Build macOS exit code: ${PIPESTATUS[0]} ==="
+          flutter build macos --release --verbose
       - name: Build Windows
         if: matrix.os == 'windows-2022'
         timeout-minutes: 60
@@ -455,118 +329,22 @@ jobs:
           $env:FLUTTER_VS_VERSION = "17"
           echo "=== Flutter version ==="
           flutter --version
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Checking windows directory ==="
-          Get-ChildItem windows/ -Directory
-          echo "=== Checking CMake version ==="
-          cmake --version
-          echo "=== Checking Visual Studio location ==="
-          Get-ChildItem "C:\Program Files\Microsoft Visual Studio\" -Directory -ErrorAction SilentlyContinue
           echo "=== Running flutter build windows --release ==="
-          # Capture both stdout and stderr to file and console
           $output = flutter build windows --release 2>&1
           $exitCode = $LASTEXITCODE
-          $output | Out-File -FilePath build_windows_output.txt -Encoding utf8
           $output | Write-Host
-          echo "=== Build Windows exit code: $exitCode ==="
+          echo "=== Build exit code: $exitCode ==="
           if ($exitCode -ne 0) {
-            echo "=== BUILD FAILED - Showing last 300 lines ==="
-            Get-Content build_windows_output.txt -Tail 300
-            echo "=== Checking build directory ==="
-            Get-ChildItem build/ -Directory -ErrorAction SilentlyContinue
-            if (Test-Path "build/windows") {
-              Get-ChildItem build/windows/ -Directory -ErrorAction SilentlyContinue
-            }
-          }
-          # Always create the log file even if build fails
-          if (-not (Test-Path "build_windows_output.txt")) {
-            "Build output file not created" | Out-File -FilePath build_windows_output.txt -Encoding utf8
+            echo "=== BUILD FAILED ==="
           }
           exit $exitCode
         shell: powershell
-
-      - name: Verify Windows build outputs
-        if: matrix.os == 'windows-2022'
-        run: |
-          echo "=== Verifying Windows build outputs ==="
-          if (Test-Path "build/windows/x64/runner/Release") {
-            Get-ChildItem build/windows/x64/runner/Release/ -File
-          } else {
-            echo "Release directory not found at expected path"
-            Get-ChildItem build/windows/ -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 20
-          }
-        shell: powershell
-      - name: Upload build logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-desktop-logs-${{ matrix.os }}
-          path: |
-            build_linux_output.txt
-            build_macos_output.txt
-            build_windows_output.txt
-      - name: List files to upload for Desktop artifacts (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          echo "=== Working directory: $(pwd) ==="
-          echo "=== Files in build/linux ==="
-          ls -la build/linux/ 2>/dev/null || echo "No Linux build found"
-          echo "=== All files in build/linux ==="
-          find build/linux -type f 2>/dev/null | head -30
-          echo "=== Files in build/macos ==="
-          ls -la build/macos/ 2>/dev/null || echo "No macOS build found"
-          echo "=== All files in build/macos ==="
-          find build/macos -type f 2>/dev/null | head -30
-          echo "=== Files in build/windows ==="
-          ls -la build/windows/ 2>/dev/null || echo "No Windows build found"
-          echo "=== All files in build/windows ==="
-          find build/windows -type f 2>/dev/null | head -30
-          echo "=== All files anywhere in build/ ==="
-          find build -type f 2>/dev/null | head -30
-      - name: List files to upload for Desktop artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          Write-Host "=== Working directory: $(pwd) ==="
-          Write-Host "=== Files in build/linux ==="
-          if (Test-Path "build/linux") { Get-ChildItem build/linux/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No Linux build found" }
-          Write-Host "=== Files in build/macos ==="
-          if (Test-Path "build/macos") { Get-ChildItem build/macos/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No macOS build found" }
-          Write-Host "=== Files in build/windows ==="
-          if (Test-Path "build/windows") { Get-ChildItem build/windows/ -Recurse -File | Select-Object -First 30 } else { Write-Host "No Windows build found" }
-          Write-Host "=== All files anywhere in build/ ==="
-          if (Test-Path "build") { Get-ChildItem build/ -Recurse -File | Select-Object -First 30 }
-        shell: powershell
-      - name: Verify Desktop artifacts before upload
-        run: |
-          echo "=== Verifying Desktop artifacts exist before upload ==="
-          if [ "${{ runner.os }}" == "Linux" ]; then
-            if [ ! -d "build/linux" ] || [ -z "$(ls -A build/linux 2>/dev/null)" ]; then
-              echo "ERROR: No Linux desktop build found!"
-              exit 1
-            fi
-            echo "Linux desktop build found:"
-            ls -la build/linux/
-          elif [ "${{ runner.os }}" == "macOS" ]; then
-            if [ ! -d "build/macos" ] || [ -z "$(ls -A build/macos 2>/dev/null)" ]; then
-              echo "ERROR: No macOS desktop build found!"
-              exit 1
-            fi
-            echo "macOS desktop build found:"
-            ls -la build/macos/
-          elif [ "${{ runner.os }}" == "Windows" ]; then
-            if [ ! -d "build/windows" ] || [ -z "$(ls -A build/windows 2>/dev/null)" ]; then
-              echo "ERROR: No Windows desktop build found!"
-              exit 1
-            fi
-            echo "Windows desktop build found:"
-            ls -la build/windows/
-          fi
       - name: Upload Desktop artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-desktop-${{ runner.os }}
+          name: release-desktop-${{ matrix.os }}
           path: |
-            build/linux/**/release/bundle/**
+            build/linux/ ** /release/bundle/**
             build/macos/Build/Products/Release/**
             build/windows/**/runner/Release/**
           retention-days: 30
@@ -579,14 +357,7 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Setup GitHub CLI
-        run: |
-          sudo apt-get update && sudo apt-get install -y gh
-      - name: List available artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "=== Available artifacts in this workflow run ==="
-          gh api repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts --jq '.artifacts[] | "\(.name) (\(.size_in_bytes) bytes)"'
+        run: sudo apt-get install -y gh
       - uses: actions/download-artifact@v4
         with:
           name: release-apks
@@ -595,10 +366,6 @@ jobs:
       - name: Verify APK artifacts downloaded
         run: |
           echo "=== Verifying downloaded APK artifacts ==="
-          if [ ! -d "artifacts/apks" ] || [ -z "$(ls -A artifacts/apks)" ]; then
-            echo "ERROR: No APK artifacts found!"
-            exit 1
-          fi
           ls -la artifacts/apks/
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -608,9 +375,6 @@ jobs:
           body: |
             ## Cold Storage Warehouse Management System
 
-            ### Changes
-            - Automated build from tag ${{ github.ref_name }}
-
             ### Downloads
             - **Android APKs** (arm64, arm32, x64): `app-release-*.apk`
             - **Android App Bundle**: `app-release.aab`
@@ -618,7 +382,7 @@ jobs:
             ### Installation
             ```bash
             # Android
-            adb install app-release-arm64-v8a.apk
+            adb install artifacts/apks/app-release-arm64-v8a.apk
             ```
           files: |
             artifacts/apks/*.apk
