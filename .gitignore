@@ -20,3 +20,4 @@ android/local.properties
 android_logs*/
 run_logs*/
 web_logs*/
+android/keystore/debug.keystore
