@@ -49,14 +49,14 @@ android {
 
     signingConfigs {
         create("debug") {
-            storeFile = file("../keystore/debug.keystore")
+            storeFile = file("keystore/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
         create("release") {
             // Release signing is optional - will use debug key if no keystore provided
-            storeFile = file("../keystore/debug.keystore")
+            storeFile = file("keystore/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
