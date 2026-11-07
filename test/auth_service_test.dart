@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import 'package:crypto/crypto.dart';
+import 'package:crypto/pbkdf2.dart';
 import 'package:collection/collection.dart';
 
 import '../lib/services/auth_service.dart';
@@ -78,7 +79,7 @@ void main() {
         Hmac(sha256, utf8.encode(password)),
         base64.decode(salt),
         iterations: iterations,
-        keyLength: 32,
+        outputLength: 32,
       );
       final hashBase64 = base64.encode(expectedHash);
 
@@ -115,7 +116,7 @@ void main() {
         Hmac(sha256, utf8.encode(password)),
         salt,
         iterations: 10000,
-        keyLength: 32,
+        outputLength: 32,
       );
       final hashBase64 = base64.encode(hash);
 
@@ -143,7 +144,7 @@ void main() {
         Hmac(sha256, utf8.encode(password)),
         salt,
         iterations: 10000,
-        keyLength: 32,
+        outputLength: 32,
       );
 
       await db.insert('users', {

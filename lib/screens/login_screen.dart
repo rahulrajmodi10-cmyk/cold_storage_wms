@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
+import 'package:crypto/pbkdf2.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/inventory_service.dart';
@@ -234,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Hmac(sha256, utf8.encode(password)),
       salt,
       iterations: iterations,
-      keyLength: 32,
+      outputLength: 32,
     );
 
     return const DeepCollectionEquality().equals(key, expectedHash);
