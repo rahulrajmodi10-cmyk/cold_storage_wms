@@ -130,6 +130,12 @@ jobs:
         run: |
           echo "ANDROID_HOME: $ANDROID_HOME"
           ls -la $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms dir"
+      - name: Generate debug keystore
+        run: |
+          mkdir -p android/keystore
+          keytool -genkeypair -v -keystore android/keystore/debug.keystore \
+            -alias androiddebugkey -storepass android -keypass android \
+            -keyalg RSA -dname "CN=Android Debug,O=Android,C=US" -validity 10000
       - name: Build APK (release)
         run: |
           echo "=== Flutter version ==="
