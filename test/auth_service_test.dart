@@ -70,14 +70,13 @@ void main() {
       // Create a test user with PBKDF2 hash
       // Format: iterations:salt:hash (base64)
       final password = 'testpassword123';
-      final salt = 'dGVzdHNhbHQ='; // base64 encoded 'testsalt'
+      final salt = base64.decode('dGVzdHNhbHQ='); // base64 encoded 'testsalt'
       final iterations = 10000;
 
-      // Compute expected hash
-      final hmac = Hmac(sha256, utf8.encode('dummy'));
+      // Compute expected hash using crypto 3.x API
       final expectedHash = pbkdf2(
-        Hmac(sha256, utf8.encode(password)),
-        base64.decode(salt),
+        password,
+        salt: salt,
         iterations: iterations,
         outputLength: 32,
       );
@@ -85,11 +84,11 @@ void main() {
 
       await db.insert('users', {
         'username': 'testuser',
-        'password_hash': '$iterations:$salt:$hashBase64',
+        'password_hash': '$iterations:${base64.encode(salt)}:$hashBase64',
         'role': 'OPERATOR',
       });
 
-      final result = await service.verifyPassword(password, '$iterations:$salt:$hashBase64');
+      final result = await service.verifyPassword(password, '$iterations:${base64.encode(salt)}:$hashBase64');
       expect(result, isTrue);
     });
 
@@ -113,8 +112,8 @@ void main() {
       final password = 'testpassword';
       final salt = base64.encode(utf8.encode('randomsalt'));
       final hash = pbkdf2(
-        Hmac(sha256, utf8.encode(password)),
-        salt,
+        password,
+        salt: salt,
         iterations: 10000,
         outputLength: 32,
       );
@@ -141,8 +140,8 @@ void main() {
       final password = 'correctpassword';
       final salt = base64.encode(utf8.encode('randomsalt'));
       final hash = pbkdf2(
-        Hmac(sha256, utf8.encode(password)),
-        salt,
+        password,
+        salt: salt,
         iterations: 10000,
         outputLength: 32,
       );

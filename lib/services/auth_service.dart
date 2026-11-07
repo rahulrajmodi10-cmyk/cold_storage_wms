@@ -34,12 +34,9 @@ class AuthService {
     final salt = base64.decode(parts[1]);
     final expectedHash = base64.decode(parts[2]);
 
-    // Compute hash using the crypto package's pbkdf2 function
-    // In crypto 3.x, use pbkdf2 from crypto/pbkdf2.dart
-    // Create HMAC-SHA256 with empty key for password hashing
-    final hmac = Hmac(sha256, Uint8List(32));
+    // Compute hash using pbkdf2 from crypto 3.x
+    // In crypto 3.x, pbkdf2 uses secretKey parameter
     final key = pbkdf2(
-      hmac,
       password,
       salt: salt,
       iterations: iterations,
