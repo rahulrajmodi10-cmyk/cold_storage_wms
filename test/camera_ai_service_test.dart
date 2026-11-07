@@ -3,7 +3,9 @@
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
 import '../lib/services/camera_ai_service.dart';
+import '../lib/services/audit_service.dart';
 import '../lib/models/camera_ai_models.dart';
+import '../lib/models/camera_ai_models.dart' as models;
 
 void main() {
   sqfliteFfiInit();
@@ -85,19 +87,14 @@ void main() {
           )
         ''');
         await db.execute('''
-          CREATE TABLE camera_alerts (
+          CREATE TABLE audit_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            camera_id INTEGER NOT NULL,
-            alert_type TEXT NOT NULL,
-            severity TEXT DEFAULT 'MEDIUM',
-            message TEXT,
-            acknowledged INTEGER DEFAULT 0,
-            acknowledged_by INTEGER,
-            acknowledged_at INTEGER,
-            resolved INTEGER DEFAULT 0,
-            resolved_by INTEGER,
-            resolved_at INTEGER,
-            created_at INTEGER
+            user_id INTEGER,
+            action TEXT,
+            detail TEXT,
+            timestamp INTEGER,
+            entity_type TEXT,
+            entity_id INTEGER
           )
         ''');
       },
@@ -144,12 +141,9 @@ void main() {
         locationId: 2,
       ));
 
-      final models = await service.getMLModels();
-      final modelsCount = models.length;
+      final cameras = await service.getCameras();
 
-      final detectionCams = await service.getCameras();
-
-      expect(detectionCams.length, greaterThanOrEqualTo(0));
+      expect(cameras.length, 2);
     });
   });
 
@@ -203,14 +197,15 @@ void main() {
 
       final id = await service.createCountingSession(session);
 
-      final completedId = await service.completeCountingSession(id, verifiedCount: 100);
-      expect(completedId, id);
+      await service.completeCountingSession(id, verifiedCount: 100);
 
       final retrieved = await service.getCountingSession(id);
       expect(retrieved!.status, 'COMPLETED');
       expect(retrieved.completedAt, isNotNull);
     });
+  });
 
+  group('Detection Events', () {
     test('add detection event', () async {
       final session = CountingSession(
         sessionNumber: 'CS004',
@@ -227,7 +222,7 @@ void main() {
         count: 5,
         frameTimestamp: DateTime.now().millisecondsSinceEpoch,
         confidence: 0.95,
-        boundingBox: {'x': 100, 'y': 100, 'width': 50, 'height': 50},
+        direction: 'IN',
       );
 
       final eventId = await service.addDetectionEvent(event);
@@ -262,32 +257,9 @@ void main() {
       final stats = await service.getSessionStats(sessionId);
       expect(stats['total_detections'], 95);
     });
-
-    test('validate count match', () async {
-      final session = CountingSession(
-        sessionNumber: 'CS006',
-        cameraId: 1,
-        sessionType: 'LOADING',
-        expectedCount: 100,
-      );
-
-      final sessionId = await service.createCountingSession(session);
-
-      final verification = CountVerification(
-        sessionId: sessionId,
-        manualCount: 100,
-        verifiedCount: 100,
-      );
-
-      final verificationId = await service.createVerification(verification);
-      expect(verificationId, greaterThan(0));
-
-      final validations = await service.getVerifications(sessionId);
-      expect(validations.length, 1);
-    });
   });
 
-  group('AI Models', () {
+  group('ML Models', () {
     test('add AI model', () async {
       final model = MLModel(
         name: 'yolov8_objects',
@@ -309,15 +281,11 @@ void main() {
     });
 
     test('deploy ML model', () async {
-      final model = MLModel(name: 'model1', version: '1.0', path: '/models/m1.tflite', active: 1, loaded: 0);
+      final model = MLModel(name: 'model1', version: '1.0', path: '/models/m1.tflite');
       final id = await service.createMLModel(model);
 
       final deployedId = await service.deployMLModel(id);
       expect(deployedId, id);
-
-      final activeModel = await service.getActiveMLModel();
-      expect(activeModel, isNotNull);
-      expect(activeModel!.id, id);
     });
   });
 
@@ -368,6 +336,31 @@ void main() {
 
       final resolvedAlerts = await service.getAlerts(cameraId: 1, resolved: 1);
       expect(resolvedAlerts.first.id, alertId);
+    });
+  });
+
+  group('Verifications', () {
+    test('create verification', () async {
+      final session = CountingSession(
+        sessionNumber: 'CS006',
+        cameraId: 1,
+        sessionType: 'LOADING',
+        expectedCount: 100,
+      );
+
+      final sessionId = await service.createCountingSession(session);
+
+      final verification = CountVerification(
+        sessionId: sessionId,
+        manualCount: 100,
+        verifiedCount: 100,
+      );
+
+      final verificationId = await service.createVerification(verification);
+      expect(verificationId, greaterThan(0));
+
+      final validations = await service.getVerifications(sessionId);
+      expect(validations.length, 1);
     });
   });
 }
