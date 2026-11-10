@@ -1,6 +1,5 @@
 // lib/services/batch_scan_item_service.dart
 
-import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
@@ -8,12 +7,8 @@ import '../constants/entity_types.dart';
 import 'query_builder.dart';
 
 class BatchScanItemService extends BaseRepository<BatchScanItem> {
-  final Database db;
-  final AuditService auditService;
-
-  BatchScanItemService(this.db, {AuditService? auditService})
-      : auditService = auditService ?? AuditService(db),
-        super(
+  BatchScanItemService(Database db, {AuditService? auditService})
+      : super(
           db: db,
           tableName: 'batch_scan_items',
           entityType: EntityTypes.batchScanItem,

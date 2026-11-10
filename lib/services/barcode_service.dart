@@ -1,6 +1,5 @@
 // lib/services/barcode_service.dart
 
-import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
@@ -8,12 +7,8 @@ import '../constants/entity_types.dart';
 import 'query_builder.dart';
 
 class BarcodeService extends BaseRepository<Barcode> {
-  final Database db;
-  final AuditService auditService;
-
-  BarcodeService(this.db, {AuditService? auditService})
-      : auditService = auditService ?? AuditService(db),
-        super(
+  BarcodeService(Database db, {AuditService? auditService})
+      : super(
           db: db,
           tableName: 'barcodes',
           entityType: EntityTypes.barcode,

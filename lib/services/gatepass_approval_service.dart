@@ -1,6 +1,5 @@
 // lib/services/gatepass_approval_service.dart
 
-import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
@@ -8,12 +7,8 @@ import '../constants/entity_types.dart';
 import 'query_builder.dart';
 
 class GatepassApprovalService extends BaseRepository<GatepassApproval> {
-  final Database db;
-  final AuditService auditService;
-
-  GatepassApprovalService(this.db, {AuditService? auditService})
-      : auditService = auditService ?? AuditService(db),
-        super(
+  GatepassApprovalService(Database db, {AuditService? auditService})
+      : super(
           db: db,
           tableName: 'gatepass_approvals',
           entityType: EntityTypes.gatepassApproval,

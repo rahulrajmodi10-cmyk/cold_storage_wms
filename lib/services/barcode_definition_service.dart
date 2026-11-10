@@ -1,7 +1,5 @@
 // lib/services/barcode_definition_service.dart
 
-import 'dart:convert';
-import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
@@ -9,12 +7,8 @@ import '../constants/entity_types.dart';
 import 'query_builder.dart';
 
 class BarcodeDefinitionService extends BaseRepository<BarcodeDefinition> {
-  final Database db;
-  final AuditService auditService;
-
-  BarcodeDefinitionService(this.db, {AuditService? auditService})
-      : auditService = auditService ?? AuditService(db),
-        super(
+  BarcodeDefinitionService(Database db, {AuditService? auditService})
+      : super(
           db: db,
           tableName: 'barcode_definitions',
           entityType: EntityTypes.barcodeDefinition,
