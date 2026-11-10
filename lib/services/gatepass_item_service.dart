@@ -1,5 +1,6 @@
 // lib/services/gatepass_item_service.dart
 
+import 'package:sqflite/sqflite.dart';
 import '../models/gatepass_barcode_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';

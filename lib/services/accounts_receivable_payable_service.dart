@@ -1,5 +1,6 @@
 // lib/services/accounts_receivable_payable_service.dart
 
+import 'package:sqflite/sqflite.dart';
 import '../models/finance_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
@@ -56,12 +57,8 @@ class AccountsReceivableService extends BaseRepository<AccountReceivable> {
 }
 
 class AccountsPayableService extends BaseRepository<AccountPayable> {
-  final Database db;
-  final AuditService auditService;
-
-  AccountsPayableService(this.db, {AuditService? auditService})
-      : auditService = auditService ?? AuditService(db),
-        super(
+  AccountsPayableService(Database db, {AuditService? auditService})
+      : super(
           db: db,
           tableName: 'accounts_payable',
           entityType: EntityTypes.accountsPayable,

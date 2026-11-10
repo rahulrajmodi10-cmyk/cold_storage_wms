@@ -1,5 +1,6 @@
 // lib/services/party_service.dart
 
+import 'package:sqflite/sqflite.dart';
 import '../models/finance_models.dart';
 import 'base_repository.dart';
 import 'audit_service.dart';
