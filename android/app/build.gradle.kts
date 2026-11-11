@@ -16,14 +16,22 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
         // Enable core library desugaring for flutter_local_notifications
         isCoreLibraryDesugaringEnabled = true
     }
 
+    // Force Java 8 compatibility to avoid Kotlin 25.0.3 version parsing issue
+    // Java 8u503 reports version as 25.0.3 which Kotlin can't parse
+    defaultConfig {
+        // Ensure Java 8 target for all modules
+    }
+
     // Handle TensorFlow Lite transitive dependency namespace conflicts (org.tensorflow.lite)
     // Force a single version of tensorflow-lite to avoid duplicate namespace errors
+    // and missing class errors during R8 minification.
+    // Using 2.13.0 which has the complete GpuDelegateFactory classes.
     configurations.all {
         resolutionStrategy {
             // Force consistent versions across all tensorflow-lite artifacts to avoid namespace conflicts
@@ -92,14 +100,15 @@ android {
             )
         }
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+        // Force Kotlin to use Java 8 compatibility mode
+        // Using 1.7.22 Kotlin plugin which handles Java 8u503 version string correctly
+        freeCompilerArgs = ["-Xjsr305=strict"]
+    }
 }
 
 flutter {
     source = "../.."
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-    }
 }

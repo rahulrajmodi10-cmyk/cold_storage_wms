@@ -126,7 +126,7 @@ class _FinanceDashboardState extends State<FinanceDashboard> {
                       ? Icons.calendar_month
                       : _selectedPeriod == 2
                           ? Icons.view_quilt
-                          : Icons.calendar_year,
+                          : Icons.event,
             ),
             tooltip: 'Select Period',
             itemBuilder: (context) => const [
