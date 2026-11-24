@@ -2,10 +2,8 @@
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
-import '../lib/services/camera_ai_service.dart';
-import '../lib/services/audit_service.dart';
-import '../lib/models/camera_ai_models.dart';
-import '../lib/models/camera_ai_models.dart' as models;
+import 'package:cold_storage_wms/services/camera_ai_service.dart';
+import 'package:cold_storage_wms/models/camera_ai_models.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -22,28 +20,41 @@ void main() {
         await db.execute('''
           CREATE TABLE camera_devices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            code TEXT,
             name TEXT,
-            type TEXT,
-            status TEXT DEFAULT 'ACTIVE',
-            is_active INTEGER DEFAULT 1,
+            code TEXT,
+            device_type TEXT,
             location_id INTEGER,
+            ip_address TEXT,
+            port INTEGER,
+            username TEXT,
+            password_hash TEXT,
+            rtsp_url TEXT,
+            resolution_width INTEGER,
+            resolution_height INTEGER,
+            fps INTEGER,
+            model_path TEXT,
+            model_version TEXT,
+            confidence_threshold REAL,
+            iou_threshold REAL,
+            detection_classes TEXT,
+            count_direction TEXT,
+            roi_coordinates TEXT,
+            calibration_factor REAL,
+            is_active INTEGER DEFAULT 1,
+            last_heartbeat INTEGER,
             created_at INTEGER,
-            updated_at INTEGER,
-            last_heartbeat INTEGER
+            updated_at INTEGER
           )
         ''');
         await db.execute('''
           CREATE TABLE counting_sessions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_number TEXT NOT NULL UNIQUE,
-            session_type TEXT NOT NULL,
+            session_number TEXT,
+            camera_id INTEGER NOT NULL,
             reference_type TEXT,
             reference_id INTEGER,
-            location_id INTEGER,
-            operator_id INTEGER,
-            status TEXT NOT NULL DEFAULT 'IN_PROGRESS',
-            total_expected INTEGER DEFAULT 0,
+            session_type TEXT,
+            status TEXT DEFAULT 'IN_PROGRESS',
             ai_count INTEGER DEFAULT 0,
             manual_count INTEGER,
             verified_count INTEGER,
@@ -52,6 +63,9 @@ void main() {
             start_time INTEGER,
             end_time INTEGER,
             duration_seconds INTEGER,
+            operator_id INTEGER,
+            verified_by INTEGER,
+            verified_at INTEGER,
             notes TEXT,
             created_at INTEGER,
             updated_at INTEGER
@@ -61,27 +75,79 @@ void main() {
           CREATE TABLE detection_events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             session_id INTEGER NOT NULL,
-            object_type TEXT NOT NULL,
-            count INTEGER NOT NULL,
-            frame_timestamp INTEGER,
-            detected_at INTEGER,
+            frame_timestamp INTEGER NOT NULL,
+            track_id INTEGER,
+            class_name TEXT,
             confidence REAL,
+            bbox_x REAL,
+            bbox_y REAL,
+            bbox_width REAL,
+            bbox_height REAL,
+            centroid_x REAL,
+            centroid_y REAL,
             direction TEXT,
             counted INTEGER DEFAULT 0,
             count_timestamp INTEGER,
-            bounding_box TEXT,
-            created_at INTEGER
+            image_path TEXT,
+            created_at INTEGER,
+            updated_at INTEGER
           )
         ''');
         await db.execute('''
-          CREATE TABLE ai_models (
+          CREATE TABLE ml_models (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            version TEXT NOT NULL,
-            path TEXT NOT NULL,
-            active INTEGER DEFAULT 1,
-            loaded INTEGER DEFAULT 0,
+            name TEXT,
+            version TEXT,
+            model_type TEXT,
+            framework TEXT,
+            input_width INTEGER,
+            input_height INTEGER,
+            input_channels INTEGER,
+            classes TEXT,
+            model_file_path TEXT,
+            label_file_path TEXT,
+            metrics_json TEXT,
+            training_data_info TEXT,
+            is_active INTEGER DEFAULT 1,
             deployed_at INTEGER,
+            created_at INTEGER,
+            updated_at INTEGER
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE camera_alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            camera_id INTEGER NOT NULL,
+            alert_type TEXT,
+            severity TEXT,
+            message TEXT,
+            session_id INTEGER,
+            detection_event_id INTEGER,
+            acknowledged INTEGER DEFAULT 0,
+            acknowledged_by INTEGER,
+            acknowledged_at INTEGER,
+            resolved INTEGER DEFAULT 0,
+            resolved_by INTEGER,
+            resolved_at INTEGER,
+            created_at INTEGER,
+            updated_at INTEGER
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE count_verifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER NOT NULL,
+            verification_type TEXT,
+            verifier_id INTEGER NOT NULL,
+            original_count INTEGER NOT NULL,
+            verified_count INTEGER NOT NULL,
+            variance INTEGER NOT NULL,
+            variance_percent REAL NOT NULL,
+            status TEXT DEFAULT 'PENDING',
+            verification_notes TEXT,
+            evidence_images TEXT,
+            started_at INTEGER,
+            completed_at INTEGER,
             created_at INTEGER,
             updated_at INTEGER
           )
@@ -89,12 +155,12 @@ void main() {
         await db.execute('''
           CREATE TABLE audit_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            action TEXT,
+            action TEXT NOT NULL,
             detail TEXT,
-            timestamp INTEGER,
             entity_type TEXT,
-            entity_id INTEGER
+            entity_id INTEGER,
+            user_id INTEGER,
+            timestamp INTEGER NOT NULL
           )
         ''');
       },
@@ -107,164 +173,271 @@ void main() {
   });
 
   group('Camera Devices', () {
-    test('create and get camera', () async {
+    test('create camera device', () async {
       final camera = CameraDevice(
-        code: 'CAM001',
         name: 'Camera-001',
-        type: 'OBJECT_DETECTION',
-        cameraId: 'CAM-001',
+        code: 'CAM-001',
+        deviceType: 'MOBILE',
         locationId: 1,
       );
 
       final id = await service.createCamera(camera);
       expect(id, greaterThan(0));
-
-      final retrieved = await service.getCamera(id);
-      expect(retrieved, isNotNull);
-      expect(retrieved!.code, 'CAM001');
-      expect(retrieved.name, 'Camera-001');
     });
 
-    test('get cameras list', () async {
-      await service.createCamera(CameraDevice(
-        code: 'CAM001',
-        name: 'AI-Cam-1',
-        type: 'OBJECT_DETECTION',
-        cameraId: 'CAM-001',
-        locationId: 1,
-      ));
-      await service.createCamera(CameraDevice(
-        code: 'CAM002',
-        name: 'OCR-Cam-1',
-        type: 'OCR',
-        cameraId: 'CAM-002',
-        locationId: 2,
-      ));
+    test('get camera device by ID', () async {
+      final camera = CameraDevice(
+        name: 'Camera-001',
+        code: 'CAM-001',
+        deviceType: 'MOBILE',
+      );
+      final id = await service.createCamera(camera);
+
+      final fetched = await service.getCamera(id);
+      expect(fetched?.name, 'Camera-001');
+    });
+
+    test('update camera device', () async {
+      final camera = CameraDevice(
+        name: 'Camera-001',
+        code: 'CAM-001',
+        deviceType: 'MOBILE',
+      );
+      final id = await service.createCamera(camera);
+
+      final updated = CameraDevice(
+        id: id,
+        name: 'Camera-001-Updated',
+        code: 'CAM-001',
+        deviceType: 'MOBILE',
+      );
+      await service.updateCamera(updated);
+
+      final fetched = await service.getCamera(id);
+      expect(fetched?.name, 'Camera-001-Updated');
+    });
+
+    test('update camera heartbeat', () async {
+      final camera = CameraDevice(
+        name: 'Camera-001',
+        code: 'CAM-001',
+        deviceType: 'MOBILE',
+      );
+      final id = await service.createCamera(camera);
+
+      await service.updateCameraHeartbeat(id);
+
+      final fetched = await service.getCamera(id);
+      expect(fetched?.lastHeartbeat, greaterThan(0));
+    });
+
+    test('get all cameras', () async {
+      await service.createCamera(CameraDevice(name: 'Cam-1', code: 'C1'));
+      await service.createCamera(CameraDevice(name: 'Cam-2', code: 'C2'));
 
       final cameras = await service.getCameras();
-
       expect(cameras.length, 2);
+    });
+
+    test('get active cameras only', () async {
+      await service.createCamera(CameraDevice(name: 'Cam-1', code: 'C1'));
+      await service.createCamera(CameraDevice(
+        name: 'Cam-2',
+        code: 'C2',
+        isActive: 0,
+      ));
+
+      final activeCameras = await service.getCameras();
+      expect(activeCameras.length, 1);
     });
   });
 
   group('Counting Sessions', () {
     test('create counting session', () async {
       final session = CountingSession(
-        sessionNumber: 'CS001',
+        sessionNumber: 'S001',
         cameraId: 1,
-        sessionType: 'LOADING',
-        referenceType: 'gatepass',
-        referenceId: 100,
-        operatorId: 1,
+        sessionType: 'INVENTORY',
         expectedCount: 100,
       );
 
       final id = await service.createCountingSession(session);
       expect(id, greaterThan(0));
+    });
 
-      final retrieved = await service.getCountingSession(id);
-      expect(retrieved, isNotNull);
-      expect(retrieved!.status, 'IN_PROGRESS');
-      expect(retrieved.expectedCount, 100);
+    test('get counting session by ID', () async {
+      final sessionId = await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      final session = await service.getCountingSession(sessionId);
+      expect(session?.sessionNumber, 'S001');
+    });
+
+    test('get counting session by number', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      final session = await service.getCountingSessionByNumber('S001');
+      expect(session?.sessionNumber, 'S001');
+    });
+
+    test('complete counting session', () async {
+      final sessionId = await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      await service.completeCountingSession(sessionId, manualCount: 95, verifiedBy: 1);
+
+      final session = await service.getCountingSession(sessionId);
+      expect(session?.endTime, greaterThan(0));
+    });
+
+    test('start counting session for camera', () async {
+      await service.createCamera(CameraDevice(name: 'Cam-1', code: 'C1'));
+
+      final session = await service.startCountingSession(
+        camera: CameraDevice(id: 1, name: 'Cam-1', code: 'C1'),
+        sessionType: 'INVENTORY',
+        referenceType: 'GATEPASS',
+        referenceId: 123,
+      );
+
+      expect(session.id, greaterThan(0));
+      expect(session.startTime, greaterThan(0));
+      expect(session.status, 'IN_PROGRESS');
     });
 
     test('get counting sessions by status', () async {
       await service.createCountingSession(CountingSession(
-        sessionNumber: 'CS001',
+        sessionNumber: 'S001',
         cameraId: 1,
-        sessionType: 'LOADING',
-        status: 'IN_PROGRESS',
-      ));
-      await service.createCountingSession(CountingSession(
-        sessionNumber: 'CS002',
-        cameraId: 2,
-        sessionType: 'UNLOADING',
-        status: 'COMPLETED',
-      ));
-
-      final activeSessions = await service.getCountingSessions(status: 'IN_PROGRESS');
-
-      expect(activeSessions.length, greaterThanOrEqualTo(1));
-    });
-
-    test('complete counting session', () async {
-      final session = CountingSession(
-        sessionNumber: 'CS003',
-        cameraId: 1,
-        sessionType: 'LOADING',
+        sessionType: 'INVENTORY',
         expectedCount: 100,
-      );
+      ));
 
-      final id = await service.createCountingSession(session);
+      await service.completeCountingSession(1, manualCount: 95, verifiedBy: 1);
 
-      await service.completeCountingSession(id, verifiedCount: 100);
-
-      final retrieved = await service.getCountingSession(id);
-      expect(retrieved!.status, 'COMPLETED');
-      expect(retrieved.completedAt, isNotNull);
+      final completed = await service.getCountingSessions(status: 'COMPLETED');
+      expect(completed.length, 1);
+      expect(completed.first.status, 'COMPLETED');
     });
   });
 
   group('Detection Events', () {
     test('add detection event', () async {
-      final session = CountingSession(
-        sessionNumber: 'CS004',
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
         cameraId: 1,
-        sessionType: 'LOADING',
-        expectedCount: 50,
-      );
-
-      final sessionId = await service.createCountingSession(session);
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
 
       final event = DetectionEvent(
-        sessionId: sessionId,
-        objectType: 'ITEM',
-        count: 5,
+        sessionId: 1,
         frameTimestamp: DateTime.now().millisecondsSinceEpoch,
+        className: 'person',
         confidence: 0.95,
+        bboxX: 100.0,
+        bboxY: 150.0,
+        bboxWidth: 50.0,
+        bboxHeight: 180.0,
         direction: 'IN',
       );
 
-      final eventId = await service.addDetectionEvent(event);
-      expect(eventId, greaterThan(0));
+      final id = await service.addDetectionEvent(event);
+      expect(id, greaterThan(0));
+    });
 
-      final events = await service.getDetectionEvents(sessionId);
-      expect(events.length, 1);
-      expect(events.first.count, 5);
+    test('get detection events for session', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      await service.addDetectionEvent(DetectionEvent(
+        sessionId: 1,
+        frameTimestamp: 1000,
+        className: 'person',
+        direction: 'IN',
+      ));
+      await service.addDetectionEvent(DetectionEvent(
+        sessionId: 1,
+        frameTimestamp: 2000,
+        className: 'box',
+        direction: 'OUT',
+      ));
+
+      final events = await service.getDetectionEvents(1);
+      expect(events.length, 2);
+    });
+
+    test('add detection events batch', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      final events = [
+        DetectionEvent(sessionId: 1, frameTimestamp: 1000, className: 'person'),
+        DetectionEvent(sessionId: 1, frameTimestamp: 2000, className: 'person'),
+      ];
+
+      await service.addDetectionEventsBatch(events);
+
+      final result = await service.getDetectionEvents(1);
+      expect(result.length, 2);
     });
 
     test('get session stats', () async {
-      final session = CountingSession(
-        sessionNumber: 'CS005',
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
         cameraId: 1,
-        sessionType: 'LOADING',
+        sessionType: 'INVENTORY',
         expectedCount: 100,
-      );
+      ));
 
-      final sessionId = await service.createCountingSession(session);
-
-      final event = DetectionEvent(
-        sessionId: sessionId,
-        objectType: 'ITEM',
-        count: 95,
-        frameTimestamp: DateTime.now().millisecondsSinceEpoch,
-        confidence: 0.90,
+      await service.addDetectionEvent(DetectionEvent(
+        sessionId: 1,
+        frameTimestamp: 1000,
+        className: 'person',
+        confidence: 0.95,
         direction: 'IN',
-      );
+      ));
+      await service.addDetectionEvent(DetectionEvent(
+        sessionId: 1,
+        frameTimestamp: 2000,
+        className: 'box',
+        confidence: 0.85,
+        direction: 'OUT',
+      ));
 
-      await service.addDetectionEvent(event);
-
-      final stats = await service.getSessionStats(sessionId);
-      expect(stats['total_detections'], 95);
+      final stats = await service.getSessionStats(1);
+      expect(stats['total_detections'], 2);
+      expect(stats['avg_confidence'], 0.9);
     });
   });
 
   group('ML Models', () {
-    test('add AI model', () async {
+    test('create ML model', () async {
       final model = MLModel(
         name: 'yolov8_objects',
         version: '1.0.0',
-        path: '/models/yolov8.tflite',
+        modelFilePath: '/models/yolov8.tflite',
       );
 
       final id = await service.createMLModel(model);
@@ -272,8 +445,8 @@ void main() {
     });
 
     test('get ML models', () async {
-      await service.createMLModel(MLModel(name: 'model1', version: '1.0', path: '/models/m1.tflite', active: 1));
-      await service.createMLModel(MLModel(name: 'model2', version: '1.0', path: '/models/m2.tflite', active: 0));
+      await service.createMLModel(MLModel(name: 'model1', version: '1.0', modelFilePath: '/models/m1.tflite'));
+      await service.createMLModel(MLModel(name: 'model2', version: '1.0', modelFilePath: '/models/m2.tflite'));
 
       final models = await service.getMLModels();
 
@@ -281,11 +454,23 @@ void main() {
     });
 
     test('deploy ML model', () async {
-      final model = MLModel(name: 'model1', version: '1.0', path: '/models/m1.tflite');
+      final model = MLModel(name: 'model1', version: '1.0', modelFilePath: '/models/m1.tflite');
       final id = await service.createMLModel(model);
 
-      final deployedId = await service.deployMLModel(id);
-      expect(deployedId, id);
+      await service.deployMLModel(id);
+
+      final models = await service.getMLModels();
+      final deployedModel = models.firstWhere((m) => m.id == id);
+      expect(deployedModel.deployedAt, greaterThan(0));
+    });
+
+    test('get active ML model', () async {
+      await service.createMLModel(MLModel(name: 'model1', version: '1.0', modelFilePath: '/models/m1.tflite'));
+      await service.createMLModel(MLModel(name: 'model2', version: '1.0', modelFilePath: '/models/m2.tflite'));
+
+      final activeModel = await service.getActiveMLModel();
+      expect(activeModel, isNotNull);
+      expect(activeModel?.isActive, 1);
     });
   });
 
@@ -301,7 +486,7 @@ void main() {
       final alertId = await service.createAlert(alert);
       expect(alertId, greaterThan(0));
 
-      final alerts = await service.getAlerts(cameraId: 1, severity: 'HIGH');
+      final alerts = await service.getAlerts(cameraId: 1, acknowledged: 0);
       expect(alerts.length, 1);
       expect(alerts.first.alertType, 'LOW_CONFIDENCE');
     });
@@ -339,28 +524,70 @@ void main() {
     });
   });
 
-  group('Verifications', () {
-    test('create verification', () async {
-      final session = CountingSession(
-        sessionNumber: 'CS006',
+  group('Count Verifications', () {
+    test('create count verification', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
         cameraId: 1,
-        sessionType: 'LOADING',
+        sessionType: 'INVENTORY',
         expectedCount: 100,
-      );
-
-      final sessionId = await service.createCountingSession(session);
+      ));
 
       final verification = CountVerification(
-        sessionId: sessionId,
-        manualCount: 100,
-        verifiedCount: 100,
+        sessionId: 1,
+        verifierId: 1,
+        originalCount: 100,
+        verifiedCount: 95,
+        variance: 5,
+        variancePercent: 5.0,
       );
 
-      final verificationId = await service.createVerification(verification);
-      expect(verificationId, greaterThan(0));
+      final id = await service.createVerification(verification);
+      expect(id, greaterThan(0));
+    });
 
-      final validations = await service.getVerifications(sessionId);
-      expect(validations.length, 1);
+    test('get verifications for session', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      await service.createVerification(CountVerification(
+        sessionId: 1,
+        verifierId: 1,
+        originalCount: 100,
+        verifiedCount: 95,
+        variance: 5,
+        variancePercent: 5.0,
+      ));
+
+      final verifications = await service.getVerifications(1);
+      expect(verifications.length, 1);
+    });
+
+    test('update verification status', () async {
+      await service.createCountingSession(CountingSession(
+        sessionNumber: 'S001',
+        cameraId: 1,
+        sessionType: 'INVENTORY',
+        expectedCount: 100,
+      ));
+
+      final verificationId = await service.createVerification(CountVerification(
+        sessionId: 1,
+        verifierId: 1,
+        originalCount: 100,
+        verifiedCount: 95,
+        variance: 5,
+        variancePercent: 5.0,
+      ));
+
+      await service.updateVerificationStatus(verificationId, 'APPROVED');
+
+      final verification = await service.getVerifications(1);
+      expect(verification.first.status, 'APPROVED');
     });
   });
 }
