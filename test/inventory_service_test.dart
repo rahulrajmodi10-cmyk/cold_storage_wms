@@ -1,10 +1,9 @@
 // test/inventory_service_test.dart
 
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
-import '../lib/services/inventory_service.dart';
-import '../lib/models/inventory_item.dart';
+import 'package:cold_storage_wms/services/inventory_service.dart';
+import 'package:cold_storage_wms/models/inventory_item.dart';
 
 void main() {
   sqfliteFfiInit();

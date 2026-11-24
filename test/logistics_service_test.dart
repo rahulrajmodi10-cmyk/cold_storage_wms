@@ -2,8 +2,8 @@
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
-import '../lib/services/logistics_service.dart';
-import '../lib/models/logistics_models.dart';
+import 'package:cold_storage_wms/services/logistics_service.dart';
+import 'package:cold_storage_wms/models/logistics_models.dart';
 
 void main() {
   sqfliteFfiInit();
@@ -350,7 +350,7 @@ void main() {
         );
         final id = await service.createShipment(shipment);
 
-        final updatedId = await service.updateShipmentStatus(id, 'IN_TRANSIT', loadedAt: now);
+        final updatedId = await service.updateShipmentStatus(id, 'IN_TRANSIT', timestamp: now);
 
         expect(updatedId, id);
 

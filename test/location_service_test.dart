@@ -2,8 +2,8 @@
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
-import '../lib/services/location_service.dart';
-import '../lib/models/storage_location.dart';
+import 'package:cold_storage_wms/services/location_service.dart';
+import 'package:cold_storage_wms/models/storage_location.dart';
 
 void main() {
   sqfliteFfiInit();

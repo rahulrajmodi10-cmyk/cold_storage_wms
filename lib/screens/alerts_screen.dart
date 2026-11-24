@@ -7,9 +7,9 @@ class AlertsScreen extends StatefulWidget {
   final AuditService auditService;
 
   const AlertsScreen({
-    Key? key,
+    super.key,
     required this.auditService,
-  }) : super(key: key);
+  });
 
   @override
   State<AlertsScreen> createState() => _AlertsScreenState();
@@ -81,7 +81,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
             separatorBuilder: (context, index) => const Divider(),
             itemBuilder: (context, index) {
               final alert = alerts[index];
-              final isUnread = alert.acknowledged == 0;
+              final isUnread = !alert.acknowledged;
 
               return ListTile(
                 leading: Icon(

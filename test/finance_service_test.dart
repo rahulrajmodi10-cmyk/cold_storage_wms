@@ -2,8 +2,8 @@
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:test/test.dart';
-import '../lib/services/finance_service.dart';
-import '../lib/models/finance_models.dart';
+import 'package:cold_storage_wms/services/finance_service.dart';
+import 'package:cold_storage_wms/models/finance_models.dart';
 
 void main() {
   sqfliteFfiInit();
