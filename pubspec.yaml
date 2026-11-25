@@ -18,16 +18,16 @@ dependencies:
   # riverpod: ^2.5.1  # Alternative state management
 
   # Camera & AI
-  camera: ^0.10.5+9
+  camera: ^0.11.0
   image: ^4.2.0
-  tflite_flutter: ^0.10.1
+  tflite_flutter: ^0.12.1
   # tflite_flutter_helper: ^0.3.1  # Optional helper
 
   # Barcode & QR Code
   barcode_scan2: ^4.3.0
-  mobile_scanner: ^4.0.0
+  mobile_scanner: ^2.0.0
   qr_flutter: ^4.1.0
-  zxing_lib: ^0.3.1  # For barcode generation
+  zxing_lib: ^1.1.4  # For barcode generation
 
   # PDF & Printing
   pdf: ^3.10.7
@@ -41,40 +41,41 @@ dependencies:
   hive_flutter: ^1.1.0
 
   # Date/Time & Formatting
-  intl: ^0.17.0
-  timezone: ^0.9.3
+  intl: ^0.18.0
+  timezone: ^0.8.0
 
   # Charts & Visualization
-  fl_chart: ^0.68.0
-  syncfusion_flutter_charts: ^21.2.4
+  fl_chart: ^0.63.0
+  syncfusion_flutter_charts: ^24.2.6
 
   # Permissions & Device Info
-  permission_handler: ^11.3.1
+  permission_handler: ^13.0.2
 
   # Utilities
   uuid: ^4.4.0
   crypto: ^3.0.3
   json_annotation: ^4.9.0
-  freezed_annotation: ^3.0.0
+  freezed_annotation: ^2.4.1
   equatable: ^2.0.5
-  get_it: ^7.7.0
-  injectable: ^2.4.2
+  get_it: ^7.0.0
+  injectable: ^2.0.0
+  flutter_riverpod: ^2.5.1
 
   # File Handling
-  file_picker: ^8.0.0+1
-  open_filex: ^4.4.0
-  share_plus: ^12.0.2
+  file_picker: ^5.0.0
+  open_filex: ^5.0.0
+  share_plus: ^8.0.0
 
   # Background Tasks
-  workmanager: ^0.5.2
-  flutter_local_notifications: ^17.2.2
+  workmanager: ^0.5.0
+  flutter_local_notifications: ^10.0.0
 
   # UI Components
-  flutter_slidable: ^3.1.0
+  flutter_slidable: ^3.0.0
   pull_to_refresh: ^2.0.0
-  infinite_scroll_pagination: ^4.0.0
-  dropdown_search: ^5.0.6
-  flutter_typeahead: ^5.2.0
+  infinite_scroll_pagination: ^5.1.1
+  dropdown_search: ^6.0.0
+  # flutter_typeahead: ^7.0.0  # Commented: requires Dart >=3.12.0, incompatible with Dart 3.7.2
 
   # Maps & Location
   google_maps_flutter: ^2.10.1
@@ -82,13 +83,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: ^1.24.0
-  flutter_lints: ^4.0.0
-  build_runner: ^2.4.11
-  json_serializable: ^6.8.0
-  freezed: ^3.0.0
-  injectable_generator: ^2.8.0
-  mocktail: ^1.0.3
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true

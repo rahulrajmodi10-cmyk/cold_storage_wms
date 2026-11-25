@@ -1,8 +1,20 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Using built-in Kotlin support instead of external Kotlin plugin
+    // See: https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers
+    // The Flutter Gradle Plugin must be applied after the Android Gradle plugin.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Release signing credentials. Loaded at script level because the `java` identifier
+// inside the `android {}` block resolves to AGP's Java extension, shadowing the
+// `java.util` package.
+val keyProperties = Properties()
+val keyPropertiesFile = rootProject.file("key.properties")
+if (keyPropertiesFile.exists()) {
+    keyPropertiesFile.inputStream().use { keyProperties.load(it) }
 }
 
 dependencies {
@@ -12,20 +24,17 @@ dependencies {
 
 android {
     namespace = "com.example.cold_storage_wms"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 34
+    // build-tools 33.0.0 works better on this Android environment for ProtoLog compatibility
+    buildToolsVersion = "33.0.0"
+    // Use Flutter default NDK version
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         // Enable core library desugaring for flutter_local_notifications
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    // Force Java 8 compatibility to avoid Kotlin 25.0.3 version parsing issue
-    // Java 8u503 reports version as 25.0.3 which Kotlin can't parse
-    defaultConfig {
-        // Ensure Java 8 target for all modules
     }
 
     // Handle TensorFlow Lite transitive dependency namespace conflicts (org.tensorflow.lite)
@@ -56,18 +65,32 @@ android {
     }
 
     signingConfigs {
-        create("debug") {
+        getByName("debug") {
             storeFile = file("keystore/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
         create("release") {
-            // Release signing is optional - will use debug key if no keystore provided
-            storeFile = file("keystore/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            if (keyPropertiesFile.exists()) {
+                storeFile = rootProject.file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    // Proguard rules
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 
@@ -78,34 +101,21 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // tflite_flutter requires minSdkVersion 26
         minSdk = 26
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 34
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://flutter.dev/to/review-gradle-config.)
         // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
         // flag during build.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Enable Multidex for large Flutter apps with many services
+        multiDexEnabled = true
     }
+}
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-            isMinifyEnabled = false
-            isShrinkResources = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-        // Force Kotlin to use Java 8 compatibility mode
-        // Using 1.7.22 Kotlin plugin which handles Java 8u503 version string correctly
-        freeCompilerArgs = ["-Xjsr305=strict"]
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

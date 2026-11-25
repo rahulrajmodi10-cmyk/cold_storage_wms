@@ -50,6 +50,61 @@
 -keep class **.R$* { *; }
 -keep class com.example.cold_storage_wms.** { *; }
 
+# Keep ProtoLogNative class to avoid "Native registration unable to find class" error
+# This is a known issue with Flutter 3.29.2 and NDK r25+ combinations
+-keep class com.android.internal.protolog.ProtoLogNative { *; }
+-keep class com.android.internal.protolog.ProtoLog { *; }
+-keepclassmembers class com.android.internal.protolog.ProtoLogNative {
+    *;
+}
+-keepclassmembers class com.android.internal.protolog.ProtoLog {
+    *;
+}
+
+# Keep all Android internal classes that Flutter might need
+-keep class android.runtime.** { *; }
+-keep class libcore.** { *; }
+
+# Keep Flutter engine and plugin classes (required for release builds with minifyEnabled)
+-keep class io.flutter.** { *; }
+-keep class io.flutter.plugins.** { *; }
+-keep class io.flutter.embedding.** { *; }
+-keep class io.flutter.embedding.engine.** { *; }
+-keep class io.flutter.embedding.android.** { *; }
+-keep class io.flutter.plugins.** { *; }
+
+# Keep sqflite native Android plugin classes (critical for Android database operations)
+-keep class com.tekartik.sqflite.** { *; }
+-keep class com.tekartik.sqfliteandroid.** { *; }
+-keep class io.flutter.plugins.sqflite.** { *; }
+
+# Keep GeneratedPluginRegistrant and all plugin classes
+-keep class io.flutter.plugins.GeneratedPluginRegistrant { *; }
+-keep class de.mintware.barcode_scan.** { *; }
+-keep class io.flutter.plugins.camera.** { *; }
+-keep class com.mr.flutter.plugin.filepicker.** { *; }
+-keep class com.jrai.flutter_keyboard_visibility.** { *; }
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep class io.flutter.plugins.flutter_plugin_android_lifecycle.** { *; }
+-keep class io.flutter.plugins.googlemaps.** { *; }
+-keep class com.github.dart_lang.jni.** { *; }
+-keep class com.github.dart_lang.jni_flutter.** { *; }
+-keep class dev.steenbakker.mobile_scanner.** { *; }
+-keep class com.crazecutils.** { *; }
+
+# Keep material design and widget classes
+-keep class androidx.appcompat.** { *; }
+-keep class androidx.material.** { *; }
+-keep class androidx.annotation.** { *; }
+
+# Keep java.util and java.lang classes used by Flutter
+-keep class java.util.** { *; }
+-keep class java.lang.** { *; }
+
+# Keep kotlin classes
+-keep class kotlin.** { *; }
+-keep class org.jetbrains.** { *; }
+
 # Prevent warnings from reflection
 -dontwarn io.flutter.**
 -dontwarn io.flutter.plugins.**
