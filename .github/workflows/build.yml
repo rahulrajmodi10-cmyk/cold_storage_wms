@@ -329,9 +329,19 @@ jobs:
           echo "=== Flutter version ==="
           flutter --version
           echo "=== Running flutter build windows --release ==="
-          $output = flutter build windows --release 2>&1
+          # flutter writes non-fatal plugin warnings to stderr. Merging stderr into
+          # stdout with 2>&1 turns them into terminating RemoteExceptions under
+          # GitHub's default $ErrorActionPreference='stop', failing the job even
+          # though the build succeeds. Redirect stderr to a separate file and
+          # restore the original preference so the exit code is what matters.
+          $ErrorActionPreference = 'Continue'
+          $stderrFile = Join-Path $env:RUNNER_TEMP "flutter_build_windows_stderr.log"
+          flutter build windows --release --verbose 2> $stderrFile
           $exitCode = $LASTEXITCODE
-          $output | Write-Host
+          if (Test-Path $stderrFile) {
+            Write-Host "=== flutter stderr (non-fatal warnings) ==="
+            Get-Content $stderrFile | Write-Host
+          }
           echo "=== Build exit code: $exitCode ==="
           if ($exitCode -ne 0) {
             echo "=== BUILD FAILED ==="
