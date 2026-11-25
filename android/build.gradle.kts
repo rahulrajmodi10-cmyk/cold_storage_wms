@@ -22,10 +22,10 @@ subprojects {
             targetCompatibility = JavaVersion.VERSION_17
         }
     }
-    val kotlinExt = project.extensions.findByName("kotlin")
-    if (kotlinExt != null) {
-        (kotlinExt as org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension).compilerOptions.jvmTarget =
-            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
     }
 }
 
